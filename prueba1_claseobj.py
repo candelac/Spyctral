@@ -24,10 +24,6 @@ class SpectralSummary(object):
         self.extention_file = extention_file
 
         try:
-            # Verificamos si existe el archivo
-
-            assert os.path.exists(self.path)
-
             # Leer el archivo
 
             with open(self.path, "r") as file:
@@ -47,8 +43,10 @@ class SpectralSummary(object):
                     )
                     # self.starlight_object = read_starlight(file)
 
-        except AssertionError:
-            raise (AssertionError(f"El archivo {self.file_name} no existe."))
+        except FileNotFoundError:
+            raise (
+                FileNotFoundError(f"El archivo {self.file_name} no existe.")
+            )
 
         except IOError:
             raise (IOError(f"No se pudo abrir el archivo: {self.file_name}."))

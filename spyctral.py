@@ -1,94 +1,119 @@
 import os
-import re
-import astropy.units as u
-from astropy.table import QTable
 
+from astropy.table import Table
+
+
+# Creamos la clase que define el objeto base
 class SpectralSummary:
-    def __init__(self):
-        self.version = None
-        self.date = None
-        self.time = None
-        self.Reddening = None
-        self.original_file = None
-        self.Normalization_point = None
-        self.unreddened_spec = None
-        self.template_spec = None
-        self.observed_spec = None
-        self.residual_spec = None
+    def __init__(self, filename, fisa):
+        self.filename = filename
 
-def read_fisa(path):
+    # def plot(self):
+
+
+# Funciones de lectura
+
+
+def read_fisa(filename):
+    # leer al archivo en formato fisa
+    # saca estadisticos utiles para Sepectral sumary
+    # crea el espectral sumary
+
     """
-    Función que lee archivo FISA.
+    Funcíon que lee archivo FISA.
 
     Parameters
     ----------
-    path : "str"
+    filename : "str"
         Name of file
 
     Return
     ----------
-    fisa : dict
+    out : dict
 
     """
-    assert os.path.exists(path),"File not found"
-    ss_object = SpectralSummary()
-    file = open(path, "r")
-    data_in = [k for k in file.read().splitlines()]
+    assert os.path.exists(filename), "File not found"
+
+    file = open(filename, "r")
+    data_in = [k.split() for k in file.read().splitlines()]
     file.close()
-    Unreddened_spectrum = []
-    Template_spectrum = []
-    Observed_spectrum = []
-    Residual_flux = []
-    index_counter = 0
-    for line in data_in:
-        if re.search(r' #', line) is not None:
-            # FISA Version extraction
-            if re.search(r'FISA v.', line) is not None:
-                ss_object.version = float(re.search('\d+\.\d+', line)[0])
-            # Date extraction 
-            if re.search(r'Date', line) is not None:
-                ss_object.date = re.search(r'(\d+/\d+/\d+)', line)[0]
-            # Time extraction 
-            if re.search(r'time', line) is not None:
-                ss_object.time = re.search(r'(\d+:\d+:\d+)', line)[0]
-            # Reddening value extraction
-            if re.search(r'Reddening', line) is not None:
-                ss_object.Reddening = float(re.search('\d+\.\d+', line)[0])
-            # File extraction 
-            if re.search(r'Templated', line) is not None:
-                ss_object.original_file = re.search(r'\w+.dat$', line)[0]
-            # Normalization point extraction 
-            if (re.search(r'Normalization Point', line)) is not None:
-                ss_object.Normalization_point = float(re.search('\d+\.\d+', line)[0])
 
-        if re.search(r' #', line) is None:
-            values = line.split()
-            if len(values) > 1 and index_counter < 1:  # Salta los dos primeros espacios en blanco
-                values = [float(x) for x in values]
-                Unreddened_spectrum.append(values)
-            elif len(values) > 1 and index_counter < 2 and index_counter >= 1:  # Salta los segundos dos espacios en blanco
-                values = [float(x) for x in values]
-                Template_spectrum.append(values)
-            elif len(values) > 1 and index_counter < 3 and index_counter >= 2:  # salta los terceros dos espacios en blanco
-                values = [float(x) for x in values]
-                Observed_spectrum.append(values)
-            elif len(values) > 1 and index_counter < 4 and index_counter >= 3: 
-                values = [float(x) for x in values]
-                Residual_flux.append(values)
-            else:
-                index_counter = index_counter + 0.5
-            
+    # info del header
+    header = {}
+    fisa = {}
+    fisa["header"] = header
 
-    ss_object.unreddened_spec = QTable(rows=Unreddened_spectrum, names=['Wave_length', 'values'])
-    ss_object.template_spec = QTable(rows=Template_spectrum, names=['Wave_length', 'values'])
-    ss_object.observed_spec = QTable(rows=Observed_spectrum, names=['Wave_length', 'values'])
-    ss_object.residual_spec = QTable(rows=Residual_flux, names=['Wave_length', 'values'])
+    header["FISA_version"] = float(data_in[1][6])
+    header["date"] = data_in[2][2]
+    header["time"] = data_in[2][4]
+    header["redenning"] = float(data_in[3][2])
+    header["template"] = data_in[4][2]
+    header["normalization_point"] = float(data_in[5][3])
 
-    return ss_object
+    # separación entre espectros
+    index = []
+    for idx, elemento in enumerate(data_in):
+        if len(data_in[idx]) == 0:
+            index.append(idx)
 
-path = 'Add_on/case_SC_FISA.fisa' # path for testig the function
+    # unreddened spectrum
+    unreddened_lambda = []
+    unreddened_flambda = []
+    n0 = 11
+    n1 = index[0]
 
-abc = read_fisa(path)
+    for i in range(n0, n1):
+        unreddened_lambda.append(float(data_in[i][0]))
+        unreddened_flambda.append(float(data_in[i][1]))
 
-print(f'La version de FISA utilizada es: V.{abc.version}\n El archivo utilizad: {abc.original_file}\n El Reddening point {abc.Reddening}\n El Normalizatio point es de: {abc.Normalization_point}')
-print(f'Unredended table\n {abc.unreddened_spec}')
+    fisa["unreddened_spec"] = Table()
+    fisa["unreddened_spec"]["lambda"] = unreddened_lambda
+    fisa["unreddened_spec"]["flux"] = unreddened_flambda
+
+    # template spectrum
+    template_lambda = []
+    template_flambda = []
+    n2 = index[2]
+
+    for i in range(n1 + 2, n2):
+        template_lambda.append(float(data_in[i][0]))
+        template_flambda.append(float(data_in[i][1]))
+
+    fisa["template_spec"] = Table()
+    fisa["template_spec"]["lambda"] = template_lambda
+    fisa["template_spec"]["flux"] = template_flambda
+
+    # observed spectrum
+    observed_lambda = []
+    observed_flambda = []
+    n3 = index[4]
+
+    for i in range(n2 + 2, n3):
+        observed_lambda.append(float(data_in[i][0]))
+        observed_flambda.append(float(data_in[i][1]))
+
+    fisa["observed_spec"] = Table()
+    fisa["observed_spec"]["lambda"] = observed_lambda
+    fisa["observed_spec"]["flux"] = observed_flambda
+
+    # residual flux
+    residual_lambda = []
+    residual_flambda = []
+
+    for i in range(n3 + 2, len(data_in)):
+        residual_lambda.append(float(data_in[i][0]))
+        residual_flambda.append(float(data_in[i][1]))
+
+    fisa["residual_spec"] = Table()
+    fisa["residual_spec"]["lambda"] = residual_lambda
+    fisa["residual_spec"]["flux"] = residual_flambda
+
+    return fisa  # SpectralSumary(fisa)
+
+
+# def read_starlight(path, **):
+# leer al archivo en formato starlight
+# saca estadisticos utiles para Sepectral sumary
+# crea el espectral sumary
+
+#   return SpectralSumary(....)

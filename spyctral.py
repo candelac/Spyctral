@@ -1,26 +1,27 @@
 import os
 
-from astropy.table import Table
+import astropy.units as u
+from astropy.table import QTable
 
 
-# Creamos la clase que define el objeto base
 class SpectralSummary:
-    def __init__(self, filename, fisa):
+    def __init__(self, filename, reader):
         self.filename = filename
 
-    # def plot(self):
+        if reader == "fisa":
+            self.fisa = read_fisa(self.filename)
+        elif reader == "starlight":
+            self.starlight = read_starlight(self.filename)
+        else:
+            print("Reader not found")
 
 
 # Funciones de lectura
 
 
 def read_fisa(filename):
-    # leer al archivo en formato fisa
-    # saca estadisticos utiles para Sepectral sumary
-    # crea el espectral sumary
-
     """
-    Funcíon que lee archivo FISA.
+    Función que lee archivo FISA.
 
     Parameters
     ----------
@@ -29,7 +30,7 @@ def read_fisa(filename):
 
     Return
     ----------
-    out : dict
+    fisa : dict
 
     """
     assert os.path.exists(filename), "File not found"
@@ -39,15 +40,15 @@ def read_fisa(filename):
     file.close()
 
     # info del header
-    header = {}
     fisa = {}
+    header = {}
     fisa["header"] = header
 
     header["FISA_version"] = float(data_in[1][6])
     header["date"] = data_in[2][2]
     header["time"] = data_in[2][4]
     header["redenning"] = float(data_in[3][2])
-    header["template"] = data_in[4][2]
+    header["template"] = data_in[4][2].split("/")[-1]
     header["normalization_point"] = float(data_in[5][3])
 
     # separación entre espectros
@@ -66,8 +67,8 @@ def read_fisa(filename):
         unreddened_lambda.append(float(data_in[i][0]))
         unreddened_flambda.append(float(data_in[i][1]))
 
-    fisa["unreddened_spec"] = Table()
-    fisa["unreddened_spec"]["lambda"] = unreddened_lambda
+    fisa["unreddened_spec"] = QTable()
+    fisa["unreddened_spec"]["wavelength"] = unreddened_lambda * u.Angstrom
     fisa["unreddened_spec"]["flux"] = unreddened_flambda
 
     # template spectrum
@@ -79,8 +80,8 @@ def read_fisa(filename):
         template_lambda.append(float(data_in[i][0]))
         template_flambda.append(float(data_in[i][1]))
 
-    fisa["template_spec"] = Table()
-    fisa["template_spec"]["lambda"] = template_lambda
+    fisa["template_spec"] = QTable()
+    fisa["template_spec"]["wavelength"] = template_lambda * u.Angstrom
     fisa["template_spec"]["flux"] = template_flambda
 
     # observed spectrum
@@ -92,8 +93,8 @@ def read_fisa(filename):
         observed_lambda.append(float(data_in[i][0]))
         observed_flambda.append(float(data_in[i][1]))
 
-    fisa["observed_spec"] = Table()
-    fisa["observed_spec"]["lambda"] = observed_lambda
+    fisa["observed_spec"] = QTable()
+    fisa["observed_spec"]["wavelength"] = observed_lambda * u.Angstrom
     fisa["observed_spec"]["flux"] = observed_flambda
 
     # residual flux
@@ -104,8 +105,8 @@ def read_fisa(filename):
         residual_lambda.append(float(data_in[i][0]))
         residual_flambda.append(float(data_in[i][1]))
 
-    fisa["residual_spec"] = Table()
-    fisa["residual_spec"]["lambda"] = residual_lambda
+    fisa["residual_spec"] = QTable()
+    fisa["residual_spec"]["wavelength"] = residual_lambda * u.Angstrom
     fisa["residual_spec"]["flux"] = residual_flambda
 
     return fisa  # SpectralSumary(fisa)

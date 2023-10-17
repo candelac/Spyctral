@@ -4,6 +4,7 @@ import astropy.units as u
 from astropy.table import QTable
 
 
+# esta clase no está terminada - solo es una primera idea
 class SpectralSummary:
     def __init__(self, filename, reader):
         self.filename = filename
@@ -12,11 +13,13 @@ class SpectralSummary:
             self.fisa = read_fisa(self.filename)
         elif reader == "starlight":
             self.starlight = read_starlight(self.filename)
-        else:
+        else:  # no sabemos si esto esta bien
             print("Reader not found")
 
 
 # Funciones de lectura
+
+# Vimos que hay varias lineas que se repiten y podemos llamarlas desde afuera
 
 
 def read_fisa(filename):
@@ -69,7 +72,9 @@ def read_fisa(filename):
 
     fisa["unreddened_spec"] = QTable()
     fisa["unreddened_spec"]["wavelength"] = unreddened_lambda * u.Angstrom
-    fisa["unreddened_spec"]["flux"] = unreddened_flambda
+    fisa["unreddened_spec"][
+        "flux"
+    ] = unreddened_flambda  # faltan unidades del flujo
 
     # template spectrum
     template_lambda = []
@@ -82,7 +87,9 @@ def read_fisa(filename):
 
     fisa["template_spec"] = QTable()
     fisa["template_spec"]["wavelength"] = template_lambda * u.Angstrom
-    fisa["template_spec"]["flux"] = template_flambda
+    fisa["template_spec"][
+        "flux"
+    ] = template_flambda  # faltan unidades del flujo
 
     # observed spectrum
     observed_lambda = []
@@ -95,7 +102,9 @@ def read_fisa(filename):
 
     fisa["observed_spec"] = QTable()
     fisa["observed_spec"]["wavelength"] = observed_lambda * u.Angstrom
-    fisa["observed_spec"]["flux"] = observed_flambda
+    fisa["observed_spec"][
+        "flux"
+    ] = observed_flambda  # faltan unidades del flujo
 
     # residual flux
     residual_lambda = []
@@ -107,7 +116,9 @@ def read_fisa(filename):
 
     fisa["residual_spec"] = QTable()
     fisa["residual_spec"]["wavelength"] = residual_lambda * u.Angstrom
-    fisa["residual_spec"]["flux"] = residual_flambda
+    fisa["residual_spec"][
+        "flux"
+    ] = residual_flambda  # faltan unidades del flujo
 
     return fisa  # SpectralSumary(fisa)
 
@@ -116,5 +127,3 @@ def read_fisa(filename):
 # leer al archivo en formato starlight
 # saca estadisticos utiles para Sepectral sumary
 # crea el espectral sumary
-
-#   return SpectralSumary(....)

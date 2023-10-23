@@ -1,65 +1,83 @@
-import pandas as pd
+import os
+import astropy.units as u
+from astropy.table import QTable
 import re
 
-# path = 'Add_on/case_SC_FISA.fisa' # path for testig the function
+#path = 'Add_on/case_SC_FISA.fisa' # path for testig the function
 def get_fisa_data(path: str):
-    """ This function takes as input the path of the FISA file reads it and
-    returns four dataframes"""
-    f = open(path, 'r')
-    Unreddened_spectrum = list()
-    Template_spectrum = list()
-    Observed_spectrum = list()
-    Residual_flux = list()
+    """
+    Función que lee archivo FISA.
+
+    Parameters
+    ----------
+    path : "str"
+        Name of file
+
+    Return
+    ----------
+    fisa : dict
+
+    """
+    assert os.path.exists(path),"File not found"
+
+    file = open(path, "r")
+    data_in = [k for k in file.read().splitlines()]
+    file.close()
+    Version = None
+    Date = None
+    Time = None
+    original_File = None
+    Reddening = None
+    Version = None
+    Unreddened_spectrum = []
+    Template_spectrum = []
+    Observed_spectrum = []
+    Residual_flux = []
     index_counter = 0
-    for line in f.readlines():
+    for line in data_in:
+        if re.search(r' #', line) is not None:
+            # FISA Version extraction
+            if re.search(r'FISA v.', line) is not None:
+                Version = float(re.search('\d+\.\d+', line)[0])
+            # Date extraction 
+            if re.search(r'Date', line) is not None:
+                Date = re.search(r'(\d+/\d+/\d+)', line)[0]
+            # Time extraction 
+            if re.search(r'time', line) is not None:
+                Time = re.search(r'(\d+:\d+:\d+)', line)[0]
+            # Reddening value extraction
+            if re.search(r'Reddening', line) is not None:
+                Reddening = float(re.search('\d+\.\d+', line)[0])
+            # File extraction 
+            if re.search(r'Templated', line) is not None:
+                original_File = re.search(r'\w+.dat$', line)[0]
+            # Normalization point extraction 
+            if (re.search(r'Normalization Point', line)) is not None:
+                Normalization_point = float(re.search('\d+\.\d+', line)[0])
+
         if re.search(r' #', line) is None:
-            values = str(line).strip().replace('\n', '').strip().split('    ')
-            if ((len(values) > 1) & (index_counter < 1) ): # Salta los dos primeros espacios en blanco
+            values = line.split()
+            if len(values) > 1 and index_counter < 1:  # Salta los dos primeros espacios en blanco
                 values = [float(x) for x in values]
                 Unreddened_spectrum.append(values)
-            elif ((len(values) > 1) & (index_counter < 2) & (index_counter >= 1)):  # Salta los segundos dos espacios en blanco
+            elif len(values) > 1 and index_counter < 2 and index_counter >= 1:  # Salta los segundos dos espacios en blanco
                 values = [float(x) for x in values]
                 Template_spectrum.append(values)
-            elif ((len(values) > 1) & (index_counter < 3) & (index_counter >= 2)):  # salta los terceros dos espacios en blanco
+            elif len(values) > 1 and index_counter < 3 and index_counter >= 2:  # salta los terceros dos espacios en blanco
                 values = [float(x) for x in values]
                 Observed_spectrum.append(values)
-            elif ((len(values) > 1) & (index_counter < 4) & (index_counter >= 3)): 
+            elif len(values) > 1 and index_counter < 4 and index_counter >= 3: 
                 values = [float(x) for x in values]
                 Residual_flux.append(values)
             else:
                 index_counter = index_counter + 0.5
             
 
-    Unreddened_spectrum = pd.DataFrame(Unreddened_spectrum, columns=['wave_len', 'values'])
-    Template_spectrum = pd.DataFrame(Template_spectrum, columns=['wave_len', 'values'])
-    Observed_spectrum = pd.DataFrame(Observed_spectrum, columns=['wave_len', 'values'])
-    Residual_flux = pd.DataFrame(Residual_flux, columns=['wave_len', 'values'])
-    
+    Unreddened_spectrum = QTable(rows=Unreddened_spectrum, names=['Wave_length', 'values'])
+    Template_spectrum = QTable(rows=Template_spectrum, names=['Wave_length', 'values'])
+    Observed_spectrum = QTable(rows=Observed_spectrum, names=['Wave_length', 'values'])
+    Residual_flux = QTable(rows=Residual_flux, names=['Wave_length', 'values'])
+
     return Unreddened_spectrum, Template_spectrum, Observed_spectrum, Residual_flux
 
 
-
-def get_Reddening_fisa(path: str):
-    """ This function takes the path of the FISA file and returns
-    the Reddenging value"""
-    f = open(path, 'r')
-    for line in f.readlines():
-        if (re.search(r'Reddening', line)) is not None:
-            Reddening = re.search('\d+\.\d+', line)[0]
-        else:
-            Reddening = None
-
-    return Reddening
-
-
-def get_NormPoint_fisa(path: str):
-    """ This function takes the path of the FISA file and returns
-    the Normalization point value"""
-    f = open(path, 'r')
-    for line in f.readlines():
-        if (re.search(r'Normalization Point', line)) is not None:
-            Normalization_point = re.search('\d+\.\d+', line)[0]
-        else:
-            Normalization_point = None
-
-        return Normalization_point

@@ -117,6 +117,12 @@ def save_fisa_output_header(input_path, output_path):
         )
 
 
+def make_header(file_path, save=False):
+    read_fisa_output_header_dataframe()
+    if save == True:
+        file_output = save_fisa_output_header(file_path)
+
+
 # Esta funcion separa en bloques el archivo, teniendo en cuenta las lineas
 # vacias
 
@@ -346,3 +352,18 @@ def make_fisa_tables_1(file_path, save=False):
 
     except Exception as e:
         return f"An error occurred while processing the file: {str(e)}"
+
+
+# Esta funcion busca y guarda indices para encontrar
+# la separación entre los bloques del archivo
+
+
+def found_index(data_in):
+    """
+    This function search and save the indexs
+    """
+    index = []
+    for idx, elemento in enumerate(data_in):
+        if len(data_in[idx]) == 0:
+            index.append(idx)
+    return index

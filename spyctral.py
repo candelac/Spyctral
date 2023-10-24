@@ -5,64 +5,32 @@
 
 # import numpy as np
 
-# import re
+import os
 
 
-# Creamos la clase que define el objeto base
-'''
-class SpectralSummary(object):
-    def __init__(self, filepath):
+# Creamos la clase que define el tipo de objeto base
+# La idea esque sea una súper tabla, que tenga la dimension segun cual
+# sea el archivo de entrada
+
+
+class SpectralSummary:
+    def __init__(self, data_in):
         """This is the constructor that lets us create
         objects from this class.
 
         Parameters
         ----------
-        filepath: string
-            file path of the file output
+        data_in: diccionario con tablas adentro
+
 
         Returns
         -------
         ss: SpectralSummary instance #superTabla
 
         """
-        self.path = os.path.join(filepath)
-        file_name, extention_file = os.path.splitext(filepath)
-        self.file_name = file_name
-        self.extention_file = extention_file
 
-        try:
-            # Leer el archivo
+        self.data = data_in
 
-            with open(self.path, "r") as file:
-                lines = file.readlines()
-                print(f"Este archivo tiene: {len(lines)}.")
-
-                # Identifico el archivo para saber cómo leerlo
-
-                if self.extention_file == ".fisa":
-                    self.fisa_object = print(
-                        "Aún estamos preparando el lector, sea paciente :) "
-                    )
-                    # self.fisa_object = read_fisa(file)
-                elif extention_file == ".out":
-                    self.starlight_object = print(
-                        "Aún estamos preparando el lector, sea paciente :) "
-                    )
-                    # self.starlight_object = read_starlight(file)
-
-        except FileNotFoundError:
-            raise (
-                FileNotFoundError(f"El archivo {self.file_name} no existe.")
-            )
-
-        except IOError:
-            raise (IOError(f"No se pudo abrir el archivo: {self.file_name}."))
-
-'''
-
-# Hago una funcion que lea el archivo de Fisa
-# Deberia poder llmar el archivo donde esta todo lo que
-# necesita para funcionar la make (fisa_reader.py)
 
 # import fisa_reader
 
@@ -129,3 +97,93 @@ def make_fisa_tables_1(file_path, save=False):
 
     except Exception as e:
         return f"An error occurred while processing the file: {str(e)}"
+
+
+def read_fisa(filename):
+    """
+    Funcíon que lee archivo FISA.
+
+    Parameters
+    ----------
+    filename : "str"
+        Name of file
+
+    Return
+    ----------
+    out : dict
+
+    """
+    assert os.path.exists(filename), "File not found"
+
+    file = open(filename, "r")
+    data_in = [k.split() for k in file.read().splitlines()]
+    file.close()
+
+    # info del header
+    header = {}
+    fisa = {}
+    fisa["header"] = header
+
+    header["FISA_version"] = float(data_in[1][6])
+    header["date"] = data_in[2][2]
+    header["time"] = data_in[2][4]
+    header["redenning"] = float(data_in[3][2])
+    header["template"] = data_in[4][2].split("/")[-1]
+    header["normalization_point"] = float(data_in[5][3])
+
+    # separación entre espectros
+    index = found_index(data_in)
+
+    # unreddened spectrum
+    unreddened_lambda = []
+    unreddened_flambda = []
+    n0 = 11
+    n1 = index[0]
+
+    for i in range(n0, n1):
+        unreddened_lambda.append(float(data_in[i][0]))
+        unreddened_flambda.append(float(data_in[i][1]))
+
+    fisa["unreddened_spec"] = Table()
+    fisa["unreddened_spec"]["lambda"] = unreddened_lambda
+    fisa["unreddened_spec"]["flux"] = unreddened_flambda
+
+    # template spectrum
+    template_lambda = []
+    template_flambda = []
+    n2 = index[2]
+
+    for i in range(n1 + 2, n2):
+        template_lambda.append(float(data_in[i][0]))
+        template_flambda.append(float(data_in[i][1]))
+
+    fisa["template_spec"] = Table()
+    fisa["template_spec"]["lambda"] = template_lambda
+    fisa["template_spec"]["flux"] = template_flambda
+
+    # observed spectrum
+    observed_lambda = []
+    observed_flambda = []
+    n3 = index[4]
+
+    for i in range(n2 + 2, n3):
+        observed_lambda.append(float(data_in[i][0]))
+        observed_flambda.append(float(data_in[i][1]))
+
+    fisa["observed_spec"] = Table()
+    fisa["observed_spec"]["lambda"] = observed_lambda
+    fisa["observed_spec"]["flux"] = observed_flambda
+
+    # residual flux
+    residual_lambda = []
+    residual_flambda = []
+
+    for i in range(n3 + 2, len(data_in)):
+        residual_lambda.append(float(data_in[i][0]))
+        residual_flambda.append(float(data_in[i][1]))
+
+    fisa["residual_spec"] = Table()
+    fisa["residual_spec"]["lambda"] = residual_lambda
+    fisa["residual_spec"]["flux"] = residual_flambda
+
+    return SpectralSumary(data=fisa)

@@ -3,23 +3,12 @@ import os
 import astropy.units as u
 from astropy.table import QTable
 
+import attrs
 
-# esta clase no está terminada - solo es una primera idea
+
+@attrs.define
 class SpectralSummary:
-    def __init__(self, filename, reader):
-        self.filename = filename
-
-        if reader == "fisa":
-            self.fisa = read_fisa(self.filename)
-        elif reader == "starlight":
-            self.starlight = read_starlight(self.filename)
-        else:  # no sabemos si esto esta bien
-            print("Reader not found")
-
-
-# Funciones de lectura
-
-# Vimos que hay varias lineas que se repiten y podemos llamarlas desde afuera
+    data_in = attrs.field()
 
 
 def read_fisa(filename):
@@ -28,12 +17,12 @@ def read_fisa(filename):
 
     Parameters
     ----------
-    filename : "str"
+    filename: "str"
         Name of file
 
     Return
     ----------
-    fisa : dict
+    out: SpectralSummary
 
     """
     assert os.path.exists(filename), "File not found"
@@ -54,13 +43,13 @@ def read_fisa(filename):
     header["template"] = data_in[4][2].split("/")[-1]
     header["normalization_point"] = float(data_in[5][3])
 
-    # separación entre espectros
+    # Separación entre espectros
     index = []
     for idx, elemento in enumerate(data_in):
         if len(data_in[idx]) == 0:
             index.append(idx)
 
-    # unreddened spectrum
+    # Unreddened spectrum
     unreddened_lambda = []
     unreddened_flambda = []
     n0 = 11
@@ -74,9 +63,9 @@ def read_fisa(filename):
     fisa["unreddened_spec"]["wavelength"] = unreddened_lambda * u.Angstrom
     fisa["unreddened_spec"][
         "flux"
-    ] = unreddened_flambda  # faltan unidades del flujo
+    ] = unreddened_flambda  # Flujo normalizado (sin unidades)
 
-    # template spectrum
+    # Template spectrum
     template_lambda = []
     template_flambda = []
     n2 = index[2]
@@ -87,11 +76,9 @@ def read_fisa(filename):
 
     fisa["template_spec"] = QTable()
     fisa["template_spec"]["wavelength"] = template_lambda * u.Angstrom
-    fisa["template_spec"][
-        "flux"
-    ] = template_flambda  # faltan unidades del flujo
+    fisa["template_spec"]["flux"] = template_flambda
 
-    # observed spectrum
+    # Observed spectrum
     observed_lambda = []
     observed_flambda = []
     n3 = index[4]
@@ -102,11 +89,9 @@ def read_fisa(filename):
 
     fisa["observed_spec"] = QTable()
     fisa["observed_spec"]["wavelength"] = observed_lambda * u.Angstrom
-    fisa["observed_spec"][
-        "flux"
-    ] = observed_flambda  # faltan unidades del flujo
+    fisa["observed_spec"]["flux"] = observed_flambda
 
-    # residual flux
+    # Residual flux
     residual_lambda = []
     residual_flambda = []
 
@@ -116,11 +101,9 @@ def read_fisa(filename):
 
     fisa["residual_spec"] = QTable()
     fisa["residual_spec"]["wavelength"] = residual_lambda * u.Angstrom
-    fisa["residual_spec"][
-        "flux"
-    ] = residual_flambda  # faltan unidades del flujo
+    fisa["residual_spec"]["flux"] = residual_flambda
 
-    return fisa  # SpectralSumary(fisa)
+    return SpectralSummary(data_in=fisa)
 
 
 # def read_starlight(path, **):

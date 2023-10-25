@@ -8,7 +8,7 @@ import attrs
 
 @attrs.define
 class SpectralSummary:
-    reader = attrs.field()
+    data = attrs.field()
 
 
 def read_fisa(filename):
@@ -103,7 +103,7 @@ def read_fisa(filename):
     fisa["residual_spec"]["wavelength"] = residual_lambda * u.Angstrom
     fisa["residual_spec"]["flux"] = residual_flambda
 
-    return SpectralSummary(reader=fisa)
+    return SpectralSummary(data=fisa)
 
 
 # def read_starlight(path, **):

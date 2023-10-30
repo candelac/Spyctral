@@ -14,18 +14,16 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+
 import os
 import pathlib
 
 from setuptools import setup
 
-
-
 # =============================================================================
 # CONSTANTS
 # =============================================================================
 
-#PATH = os.path.abspath(os.path.dirname(__file__))
 PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
 
 REQUIREMENTS = ["attrs", "numpy", "re", "dateutil.parser"]
@@ -41,7 +39,6 @@ with open("README.md") as fp:
     LONG_DESCRIPTION = fp.read()
 
 DESCRIPTION = "Implementation of astronomical objects spectral analisys"
-
 
 # =============================================================================
 # FUNCTIONS

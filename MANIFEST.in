@@ -1,7 +1,6 @@
 include LICENSE
 include README.md
 
-include *.py
 recursive-include spyctral *.py
 recursive-include spyctral *.fisa
 recursive-include spyctral *.out

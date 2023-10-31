@@ -1,6 +1,7 @@
 import pytest
 import os
-from spyctral import read_fisa
+#from spyctral import read_fisa
+from . import io
 
 # Definición de los casos de prueba parametrizados
 

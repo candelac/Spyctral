@@ -1,9 +1,9 @@
  #---------------------------HEADER------------------------------
  # SPECTRUM ANALYZED WITH FISA v. 0.92
- # Date 04/01/2022; time 21:46:19
- # Reddening:  0.280868769    
- # Adopted Templated:/home/federico/FISA/templates/G2.dat
- # Normalization Point:   5299.45020    
+ # Date 08/01/2015; time 20:01:00
+ # Reddening:  0.234868769    
+ # Adopted Templated:/home/test_2/FISA/templates/G2.dat
+ # Normalization Point:   7799.45020    
  # Format: Index 0 = Unreddened spectrum
  #         Index 1 = Template spectrum
  #         Index 2 = Observed spectrum

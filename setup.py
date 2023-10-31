@@ -18,7 +18,7 @@
 import os
 import pathlib
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # =============================================================================
 # CONSTANTS
@@ -26,7 +26,7 @@ from setuptools import setup
 
 PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
 
-REQUIREMENTS = ["attrs", "numpy", "re", "dateutil.parser"]
+REQUIREMENTS = ["attrs", "numpy", "python-dateutil"]
 
 with open(PATH / "spyctral" / "__init__.py") as fp:
     for line in fp.readlines():
@@ -53,9 +53,7 @@ setup(
     author="Tapia-Reina M. I. et al",
     author_email="martina.tapia@mi.unc.edu.ar",
     url="https://github.com/candelac/Spyctral",
-    packages=[
-        "spyctral",
-    ],
+    packages=find_packages(),
     license="The MIT License",
     keywords=["spyctral", "spectra", "spectral-synthesis", "template-fitting"],
     classifiers=[

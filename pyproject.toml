@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Spyctral"
-
+version = "0.0.1"
 authors = [{name = "Tapia Reina et al.", email = "martina.tapia@mi.unc.edu.ar"}]
 license = {text = "The MIT License"}
 readme = "README.md"

@@ -1,7 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# License: MIT
+# Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
+# Tapia-Reina Martina
+# All rights reserved.
+
 import pytest
 import os
-#from spyctral import read_fisa
-from . import io
+from spyctral import io  # read_fisa
+
+
+from pathlib import Path
+
+
+PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+
+TEST_DATA_PATH = PATH / "Add_on"
+
+
+@pytest.fixture(scope="session")
+def data_path():
+    return TEST_DATA_PATH.joinpath
+
 
 # Definición de los casos de prueba parametrizados
 

@@ -1,12 +1,34 @@
-import pytest
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# License: MIT
+# Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
+# Tapia-Reina Martina
+# All rights reserved.
+
+"""Test input data."""
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
 import os
-from spyctral import read_fisa
+from pathlib import Path
+
+import pytest
+
+from spyctral import io  # read_fisa
+
+
+PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+
+TEST_DATA_PATH = PATH / "Add_on"
+
 
 # Definición de los casos de prueba parametrizados
 
 
 @pytest.mark.parametrize(
-    "input_file, exp_version, exp_reddening, exp_NP, exp_template",
+    "input_file, exp_version, exp_reddening, exp_np, exp_template",
     [
         (
             "fisa_1.fisa",
@@ -42,16 +64,17 @@ def test_read_fisa_parametrized(
     input_file,
     exp_version,
     exp_reddening,
-    exp_NP,
+    exp_np,
     exp_template,
 ):
     # Crea un archivo de prueba con contenido específico
-    tmp_path = os.getcwd() + "/Add_on/"
-    test_file = tmp_path + input_file
-    summary = read_fisa(test_file)
+    # tmp_path = os.getcwd() + "/fisa_files/"
+    # test_file = tmp_path + input_file
+    path = TEST_DATA_PATH / input_file
+    summary = io.read_fisa(path)
 
     assert summary.header["fisa_version"] == exp_version
     assert summary.header["reddening"] == exp_reddening
-    assert summary.header["normalization_point"] == exp_NP
+    assert summary.header["normalization_point"] == exp_np
     assert summary.header["adopted_template"] == exp_template
     # Agregar más aserciones según sea necesario

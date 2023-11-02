@@ -34,3 +34,6 @@ __all__ = [
     "SpectralSummary",
     "read_fisa",
 ]
+
+
+# __file__ ?

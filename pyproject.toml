@@ -31,5 +31,4 @@ urls = {Homepage = "https://github.com/candelac/Spyctral"}
 dependencies = ["attrs", "numpy", "python-dateutil"]
 
 [tool.setuptools]
-packages = ["spyctral", "spyctral.*"]
 include-package-data = true

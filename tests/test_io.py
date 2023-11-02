@@ -23,9 +23,6 @@ PATH = Path(os.path.abspath(os.path.dirname(__file__)))
 
 TEST_DATA_PATH = PATH / "Add_on"
 
-# =============================================================================
-# IO TESTS
-# =============================================================================
 
 # Definición de los casos de prueba parametrizados
 

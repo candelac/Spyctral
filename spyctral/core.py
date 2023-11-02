@@ -12,5 +12,5 @@ from .utils.bunch import Bunch
 
 @attrs.define
 class SpectralSummary:
-    data_in = attrs.field()
-    header = attrs.field(converter=lambda v: Bunch("header", v))
+    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
+    data = attrs.field(converter=lambda v: Bunch("data_items:", v))

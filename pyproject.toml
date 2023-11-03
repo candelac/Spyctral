@@ -1,0 +1,34 @@
+[tool.black]
+line-length = 79
+target-version = ['py311']
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Spyctral"
+version = "0.0.1"
+authors = [{name = "Tapia Reina et al.", email = "martina.tapia@mi.unc.edu.ar"}]
+license = {text = "The MIT License"}
+readme = "README.md"
+description = "Implementation of astronomical objects spectral analisys"
+keywords = ["spyctral", "spectra", "spectral-synthesis", "template-fitting"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+urls = {Homepage = "https://github.com/candelac/Spyctral"}
+dependencies = ["attrs", "numpy", "python-dateutil"]
+
+[tool.setuptools]
+include-package-data = true

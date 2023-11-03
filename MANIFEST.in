@@ -1,5 +1,6 @@
+include *.md
+include *.py
 include LICENSE
-include README.md
 
 recursive-include spyctral *.fisa
 recursive-include spyctral *.out
@@ -9,3 +10,10 @@ exclude pyproject.toml
 exclude .header-template
 
 recursive-exclude tests *
+recursive-exclude old *.fisa
+recursive-exclude old *.ipynb
+recursive-exclude old *.md
+recursive-exclude old *.out
+recursive-exclude old *.pdf
+recursive-exclude old *.py
+recursive-exclude old *.txt

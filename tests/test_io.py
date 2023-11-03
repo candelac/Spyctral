@@ -14,9 +14,11 @@
 import os
 from pathlib import Path
 
+from astropy.table import QTable
+
 import pytest
 
-from spyctral import io  # read_fisa
+from spyctral import io
 
 
 PATH = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -68,8 +70,6 @@ def test_process_header(
     exp_template,
 ):
     # Crea un archivo de prueba con contenido específico
-    # tmp_path = os.getcwd() + "/fisa_files/"
-    # test_file = tmp_path + input_file
     path = TEST_DATA_PATH / input_file
     summary = io.read_fisa(path)
 
@@ -78,3 +78,28 @@ def test_process_header(
     assert summary.header["normalization_point"] == exp_np
     assert summary.header["adopted_template"] == exp_template
     # Agregar más aserciones según sea necesario
+
+
+def test_fisa_spectra_names():
+    # Creo los datos para las QTables
+
+    data = [
+        [[1, 2], [3, 4], [5, 6]],
+        [[7, 8], [9, 10], [11, 12]],
+        [[13, 14], [15, 16], [17, 18]],
+        [[19, 20], [21, 22], [23, 24]],
+    ]
+    spectra = [
+        QTable(rows=d, names=("Wavelength", "Normalizated_flux")) for d in data
+    ]
+
+    exp_results = {
+        "Unreddened_spectrum": spectra[0],
+        "Template_spectrum": spectra[1],
+        "Observed_spectrum": spectra[2],
+        "Residual_flux": spectra[3],
+    }
+
+    renamed_spectra = io._fisa_spectra_names(spectra)
+
+    assert renamed_spectra == exp_results

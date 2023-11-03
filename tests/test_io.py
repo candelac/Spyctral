@@ -60,7 +60,7 @@ TEST_DATA_PATH = PATH / "Add_on"
         ),
     ],
 )
-def test_read_fisa_parametrized(
+def test_process_header(
     input_file,
     exp_version,
     exp_reddening,

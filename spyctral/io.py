@@ -7,9 +7,10 @@
 
 import re
 
-import dateutil.parser
+import astropy.units as u
+from astropy.table import QTable
 
-import numpy as np
+import dateutil.parser
 
 from . import core
 
@@ -66,6 +67,42 @@ def _process_header(lines):
     return header
 
 
+def _fisa_spectra_names(spectra):
+    table_names = [
+        "Unreddened_spectrum",
+        "Template_spectrum",
+        "Observed_spectrum",
+        "Residual_flux",
+    ]
+    renamed_spectra = {
+        table_name: table for table_name, table in zip(table_names, spectra)
+    }
+    return renamed_spectra
+
+
+def _process_blocks(spectra_blocks):
+    spectra = []
+
+    for block in spectra_blocks:
+        block_data = []
+        column_names = [
+            "Wavelength",
+            "Normalizated_flux",
+        ]
+        for line in block:
+            elements = list(map(float, line.strip().split()))
+            block_data.append(elements)
+
+        if column_names and block_data:
+            table = QTable(rows=block_data, names=column_names)
+            table["Wavelength"].unit = u.Angstrom
+            spectra.append(table)
+
+    spectra_tables = _fisa_spectra_names(spectra)
+
+    return spectra_tables
+
+
 def read_fisa(path_or_buffer):
     """
     This function reads FISA file.
@@ -80,23 +117,23 @@ def read_fisa(path_or_buffer):
     out: SpectralSummary
 
     """
-    header_lines, spectra_lines = [], []
+    header_lines, spectra_blocks = [], []
     current_spectrum = []
     with open(path_or_buffer, "r") as fp:
         for line in fp:
             if line.startswith(" #"):
                 header_lines.append(line.strip())
             elif line.strip():
-                lamb, flux = map(float, line.split())
-                current_spectrum.append([lamb, flux])
+                current_spectrum.append(line)
             elif current_spectrum and not line.strip():
-                spectra_lines.append(np.array(current_spectrum, dtype=float))
+                spectra_blocks.append(current_spectrum)
                 current_spectrum = []
 
     if current_spectrum:
-        spectra_lines.append(np.array(current_spectrum, dtype=float))
+        spectra_blocks.append(current_spectrum)
         del current_spectrum
 
     header = _process_header(header_lines)
+    spectra = _process_blocks(spectra_blocks)
 
-    return core.SpectralSummary(None, header=header)
+    return core.SpectralSummary(header=header, data=spectra)

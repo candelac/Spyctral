@@ -53,7 +53,9 @@ def _process_header(lines):
         idx = int(match.group("index"))
         name = match.group("value")
         spectra_names[idx] = name
-    spectra_names = tuple(name for _, name in sorted(spectra_names.items()))
+    spectra_names = tuple(
+        name.replace(" ", "_") for _, name in sorted(spectra_names.items())
+    )
 
     header = {
         "fisa_version": fisa_version,
@@ -67,20 +69,14 @@ def _process_header(lines):
     return header
 
 
-def _fisa_spectra_names(spectra):
-    table_names = [
-        "Unreddened_spectrum",
-        "Template_spectrum",
-        "Observed_spectrum",
-        "Residual_flux",
-    ]
+def _fisa_spectra_names(spectra, table_names):
     renamed_spectra = {
         table_name: table for table_name, table in zip(table_names, spectra)
     }
     return renamed_spectra
 
 
-def _process_blocks(spectra_blocks):
+def _process_blocks(spectra_blocks, tab_names):
     spectra = []
 
     for block in spectra_blocks:
@@ -98,7 +94,7 @@ def _process_blocks(spectra_blocks):
             table["Wavelength"].unit = u.Angstrom
             spectra.append(table)
 
-    spectra_tables = _fisa_spectra_names(spectra)
+    spectra_tables = _fisa_spectra_names(spectra, tab_names)
 
     return spectra_tables
 
@@ -134,6 +130,7 @@ def read_fisa(path_or_buffer):
         del current_spectrum
 
     header = _process_header(header_lines)
-    spectra = _process_blocks(spectra_blocks)
+
+    spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
     return core.SpectralSummary(header=header, data=spectra)

@@ -10,6 +10,8 @@ import re
 import astropy.units as u
 from astropy.table import QTable
 
+import pandas as pd
+
 import dateutil.parser
 
 from . import core
@@ -134,3 +136,49 @@ def read_fisa(path_or_buffer):
     spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
     return core.SpectralSummary(header=header, data=spectra)
+
+
+RM_SCHAR = r"[\]\(\)]"
+
+
+def read_starlight(path_or_buffer):
+    header_lines, spectra_blocks = [], []
+    current_spectrum = []
+    with open(path_or_buffer, "r") as fp:
+        for line in fp:
+            if line.startswith("## ") or line.startswith("# "):
+                header_lines.append(line.replace("#", "").strip())
+            elif line.strip() and not line.startswith("##"):
+                current_spectrum.append(
+                    re.sub(RM_SCHAR, "", line.replace("\n", ""))
+                )
+            elif current_spectrum and not line.strip():
+                spectra_blocks.append(current_spectrum)
+                current_spectrum = []
+
+    header_index = header_lines.index("Synthesis Results - Best model")
+
+    star_light_header = _starlight_header(
+        header_lines[:header_index], spectra_blocks[: header_index - 1]
+    )
+
+    return core.SpectralSummary(header=star_light_header)
+
+
+def _starlight_header(header_title, header_blocks):
+    sl_info = {}
+    # print(len(header_title))
+    sl_info["version"], sl_info["date"] = (
+        str(header_title[0]).replace("#", "").strip().split("[")
+    )
+    print(sl_info)
+
+    for ind, block in enumerate(header_blocks):
+        to_data_frame = []
+        for line in block:
+            to_data_frame.append(line.split("["))
+        sl_info[
+            header_title[ind + 1].replace(" ", "_").replace(".", "")
+        ] = pd.DataFrame(to_data_frame, columns=["Values", "Characteristics"])
+
+    return sl_info

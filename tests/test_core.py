@@ -5,17 +5,11 @@
 # Tapia-Reina Martina
 # All rights reserved.
 import os
-import sys
-# import unittest
-# import pytest
 from pathlib import Path
-
-sys.path.append("/home/joseluis/Proyectos/")
-from Spyctral.spyctral import core
-from Spyctral.spyctral import io
 
 from astropy.table import QTable
 
+from spyctral import core, io
 
 PATH = Path(os.path.abspath(os.path.dirname(__file__)))
 
@@ -30,7 +24,7 @@ print("tipo de objeto", type(ss))
 print(type(ss.header.date_time))
 
 
-class Test_SpectralSummary():  # (unittest.TestCase):
+class Test_SpectralSummary:  # (unittest.TestCase):
     def test_header(self):
         # Verificar que el campo 'header' sea igual al valor proporcionado
         # self.assertIn("fisa_version", ss.header)

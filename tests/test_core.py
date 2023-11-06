@@ -16,6 +16,7 @@ from Spyctral.spyctral import io
 
 from astropy.table import QTable
 
+
 PATH = Path(os.path.abspath(os.path.dirname(__file__)))
 
 TEST_DATA_PATH = PATH / "Add_on"

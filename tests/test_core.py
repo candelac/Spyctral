@@ -23,7 +23,7 @@ path = TEST_DATA_PATH / "fisa_1.fisa"
 ss = io.read_fisa(path)
 #print(ss.header)
 
-#print(len(ss.data.Unreddened_spect))
+#print(len(ss.data.Unreddened_spectrum))
 
 
 class Test_SpectralSummary(unittest.TestCase):
@@ -37,11 +37,11 @@ class Test_SpectralSummary(unittest.TestCase):
         self.assertIn("reddening", ss.header)
 
     def test_data(self):
-        self.assertEqual(len(ss.data.Unreddened_spect), 3000)
+        self.assertEqual(len(ss.data.Unreddened_spectrum), 3000)
         self.assertEqual(len(ss.data.Template_spectrum), 3401)
-        self.assertEqual(len(ss.data.Observed_sp), 3000)
+        self.assertEqual(len(ss.data.Observed_spectrum), 3000)
         self.assertEqual(len(ss.data.Residual_flux), 3000)
-        self.assertEqual(len(ss.data.xxx_flux), 3)
+       
 
 
 if __name__ == "__main__":

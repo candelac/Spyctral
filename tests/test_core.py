@@ -10,7 +10,6 @@ import sys
 # import pytest
 from pathlib import Path
 
-
 sys.path.append("/home/joseluis/Proyectos/")
 from Spyctral.spyctral import core
 from Spyctral.spyctral import io
@@ -28,6 +27,7 @@ ss = io.read_fisa(path)
 # print(ss.header)
 
 print("tipo de objeto", type(ss))
+print(type(ss.header.date_time))
 
 
 class Test_SpectralSummary():  # (unittest.TestCase):
@@ -62,5 +62,7 @@ class Test_SpectralSummary():  # (unittest.TestCase):
         assert isinstance(ss.data.Template_spectrum, QTable)
         assert isinstance(ss.data.Observed_spectrum, QTable)
         assert isinstance(ss.data.Residual_flux, QTable)
+        assert isinstance(ss.header.normalization_point, float)
+        assert isinstance(ss.header.reddening, float)
         assert any("SpectralSummary")
         assert type(ss).__name__ == "SpectralSummary"

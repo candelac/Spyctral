@@ -21,9 +21,9 @@ TEST_DATA_PATH = PATH / "Add_on"
 path = TEST_DATA_PATH / "fisa_1.fisa"
 
 ss = io.read_fisa(path)
-print(ss.header)
+#print(ss.header)
 
-print(len(ss.data.Unreddened_spect))
+#print(len(ss.data.Unreddened_spect))
 
 
 class Test_SpectralSummary(unittest.TestCase):

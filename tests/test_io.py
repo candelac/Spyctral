@@ -11,8 +11,7 @@
 # IMPORTS
 # =============================================================================
 
-import os
-from pathlib import Path
+import datetime as dt
 
 from astropy.table import QTable
 
@@ -20,38 +19,29 @@ from spyctral import core, io
 from spyctral.utils.bunch import Bunch
 
 
-PATH = Path(os.path.abspath(os.path.dirname(__file__)))
+def test_read_fisa_type(file_path):
+    path = file_path("case_SC_FISA.fisa")
 
-TEST_DATA_PATH = PATH / "Add_on"
+    summary = io.read_fisa(path)
 
-path = TEST_DATA_PATH / "case_SC_FISA.fisa"
+    assert isinstance(summary, core.SpectralSummary)
 
-summary = io.read_fisa(path)
+    assert isinstance(summary.header, Bunch)
+    assert isinstance(summary.header.fisa_version, str)
+    assert isinstance(summary.header.reddening, float)
+    assert isinstance(summary.header.date_time, dt.datetime) is True
+    assert isinstance(summary.header.adopted_template, str)
+    assert isinstance(summary.header.normalization_point, float)
+    assert isinstance(summary.header.spectra_names, tuple)
 
+    assert isinstance(summary.data, Bunch)
+    assert isinstance(summary.data.Unreddened_spectrum, QTable)
+    assert isinstance(summary.data.Template_spectrum, QTable)
+    assert isinstance(summary.data.Observed_spectrum, QTable)
+    assert isinstance(summary.data.Residual_flux, QTable)
 
-def test_read_fisa_type():
-    assert isinstance(summary, core.SpectralSummary) is True
-
-    assert isinstance(summary.header, Bunch) is True
-    assert isinstance(summary.header.fisa_version, str) is True
-    assert isinstance(summary.header.reddening, float) is True
-    # assert isinstance(summary.header.date_time, datetime) is True
-    assert isinstance(summary.header.adopted_template, str) is True
-    assert isinstance(summary.header.normalization_point, float) is True
-    assert isinstance(summary.header.spectra_names, tuple) is True
-
-    assert isinstance(summary.data, Bunch) is True
-    assert isinstance(summary.data.Unreddened_spectrum, QTable) is True
-    assert isinstance(summary.data.Template_spectrum, QTable) is True
-    assert isinstance(summary.data.Observed_spectrum, QTable) is True
-    assert isinstance(summary.data.Residual_flux, QTable) is True
-
-
-def test_read_fisa_header():
     assert summary.header.fisa_version == "0.92"
-    # assert summary.header.date_time == datetime.datetime(
-    #    2022, 4, 1, 21, 46, 19
-    # )
+    assert summary.header.date_time == dt.datetime(2022, 4, 1, 21, 46, 19)
     assert summary.header.reddening == 0.280868769
     assert (
         summary.header.adopted_template
@@ -65,8 +55,6 @@ def test_read_fisa_header():
         "Residual_flux",
     )
 
-
-def test_read_fisa_len_data():
     assert len(summary.data.Unreddened_spectrum) == 3000
     assert len(summary.data.Template_spectrum) == 3401
     assert len(summary.data.Observed_spectrum) == 3000

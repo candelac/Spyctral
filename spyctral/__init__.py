@@ -27,7 +27,7 @@ __version__ = "0.0.1"
 # =============================================================================
 
 from .core import SpectralSummary
-from .io import read_fisa
+from .io.fisa import read_fisa
 
 
 __all__ = [

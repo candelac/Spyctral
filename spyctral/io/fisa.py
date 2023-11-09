@@ -12,7 +12,7 @@ from astropy.table import QTable
 
 import dateutil.parser
 
-from . import core
+from spyctral import core
 
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"

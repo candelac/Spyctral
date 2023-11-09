@@ -15,14 +15,15 @@ import datetime as dt
 
 from astropy.table import QTable
 
-from spyctral import core, io
+from spyctral import core
+from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 
 
 def test_read_fisa_type(file_path):
     path = file_path("case_SC_FISA.fisa")
 
-    summary = io.read_fisa(path)
+    summary = fisa.read_fisa(path)
 
     assert isinstance(summary, core.SpectralSummary)
 

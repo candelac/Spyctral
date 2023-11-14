@@ -9,8 +9,9 @@ import attrs
 
 from .utils.bunch import Bunch
 
+# Esta clase habría que re diseñarla/sacarla
 
-@attrs.define
-class SpectralSummary:
-    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
-    data = attrs.field(converter=lambda v: Bunch("data_items:", v))
+# @attrs.define
+# class SpectralSummary:
+#    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
+#    data = attrs.field(converter=lambda v: Bunch("data_items:", v))

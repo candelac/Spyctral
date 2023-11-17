@@ -1,0 +1,94 @@
+Aquí se detallan cuáles son los datos (data) que necesito guardar de cada archivo 
+y en algunos casos agregaré para qué es que los voy a usar(features)
+
+
+-----------------------------------------------------------------------------------------
+FISA 
+-----------------------------------------------------------------------------------------
+
+HEADER
+
+
+SPECTRUM ANALYZED WITH FISA v. 0.92  ---> "fisa_version" ---> con esto no hago cuentas, solo necesito poder verlo
+Date 04/01/2022; time 21:46:19       --->  "date_time"   ---> no hago cuentas, solo verlo
+*Reddening:  0.280868769              ---> "reddening"    ---> lo voy a comparar con el de starlight
+*Adopted Templated:/home/federico/FISA/templates/G2.dat   ---> "adopted_template" ---> me da la edad del objeto
+Normalization Point:   5299.45020    ---> "normalization_point" ---> no hago cuentas, solo verlo
+
+SPECTRA 
+
+cada uno es una qtable o un objeto tipo espectro
+
+1° bloque ---> "unreddened_spectrum" ---> para graficar 
+2° bloque ---> "template_spectrum"   ---> para graficar 
+3° bloque ---> "observed_spectrum"   ---> para graficar 
+*4° bloque ---> "residual_flux"       ---> para graficar y comparar con el de starlight
+
+-----------------------------------------------------------------------------------------
+STARLIGHT
+-----------------------------------------------------------------------------------------
+
+HEADER
+
+'# Some input info':  info del header
+
+
+'# (Re)Sampling Parameters' :  info del header
+
+
+'# Normalization info':  info del header
+
+
+' # S/N':  info del header
+
+
+' # etc...': la info de aquí no se usa para calcular nada 
+
+
+DATA 
+
+'# Synthesis Results - Best model' necesito guardar todo
+
+['chi2_Nl_eff']  --->  
+['adev']  --->  
+['sum_of_x']  --->  
+['Flux_tot']  --->  
+['Mini_tot']  --->  para calcular la masa
+['Mcor_tot']  --->  para calcular la masa
+['v0_min']  --->  para calcular redshift
+['vd_min']  --->  para calcular redshift
+['AV_min']  --->  para el reddening 
+['YAV_min']  --->  
+
+Primera tabla del archivo: guardar toda la info 
+
+# j  x_j(%)  Mini_j(%)  Mcor_j(%)  age_j(yr) Z_j  (L/M)_j  YAV? Mstars  component_j  a/Fe... SSP_chi2r SSP_adev(%) SSP_AV  SSP_x(%)
+
+con la columna 'age_j' ---> calculo la edad 
+con la columna 'Z_j'   ---> calculo el Z (abundancia quimica) ---> metalicidad
+columna 'SSP_AV'       ---> calculo el AV --> y con eso el reddening
+....
+
+
+La tabla que empieza en: '## Synthesis Results - Average & Chains ##' --> no se usa para calcular  
+
+La tabla: '# j      m_j: min, <> & last-chain-values for 1 ...  7 chains' --> no se usa para calcular
+
+La info en: ' AV, chi2 & Mass for <> & i_chain = 1 ...  7 solutions' --> no se usa para calcular
+
+La última tabla: ## Synthetic spectrum (Best Model) ##l_obs f_obs f_syn wei --> la necesito guardar 
+
+1° columna: 'l_obs'  ---> para graficar, es longitud de onda del espectro observado
+2° columna: 'f_obs'   ---> para graficar, es el flujo normalizado del espectro observado
+3° columna: 'f_syn'  ---> para graficar, es el flujo normalizado del espectro sintetizado por starlight
+4° columna: 'wei'    ---> es el peso que se le da a cada region del espectro
+
+[Nl_obs]: cantidad de lineas que tiene la tabla 
+
+
+
+
+
+
+
+

@@ -4,10 +4,11 @@
  # Reddening:  0.123868769    
  # Adopted Templated:/home/juan_test_1/FISA/templates/G1.dat
  # Normalization Point:   3299.45020    
- # Format: Index 0 = Unreddened spectrum
+ # Format: Index 0 = Unreddened spect
  #         Index 1 = Template spectrum
- #         Index 2 = Observed spectrum
+ #         Index 2 = Observed sp
  #         Index 3 = Residual flux
+ #         Index 4 = xxx flux
  #---------------------------------------------------------------
    3800.44995      0.521096945    
    3801.44995      0.479614496    
@@ -12413,6 +12414,10 @@
    6794.45020       5.84971765E-03
    6795.45020      -1.35460608E-02
    6796.45020      -3.19246091E-02
+   6797.45020      -4.60131578E-02
+   6798.45020      -5.77758700E-02
+   6799.45020      -6.91120476E-02
+
    6797.45020      -4.60131578E-02
    6798.45020      -5.77758700E-02
    6799.45020      -6.91120476E-02

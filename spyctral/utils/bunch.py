@@ -5,6 +5,15 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
+# This code was ripped of from scikit-criteria on 07-nov-2023.
+# https://github.com/quatrope/scikit-criteria/blob/ec63c/skcriteria/utils/bunch.py
+# Util this point the copyright is
+# License: BSD-3 (https://tldrlegal.com/license/bsd-3-clause-license-(revised))
+# Copyright (c) 2016-2021, Cabral, Juan; Luczywo, Nadia
+# Copyright (c) 2022, QuatroPe
+# All rights reserved.
+
+
 # =============================================================================
 # DOCS
 # =============================================================================

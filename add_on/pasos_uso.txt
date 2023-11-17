@@ -1,0 +1,73 @@
+Cómo uso FISA y STARLIGHT con mis datos: 
+
+Lo primero que tengo es un archivo.dat con el espectro observado
+
+1° --> objeto.dat : dos columnas: 'longitud de onda', 'flujo' 
+
+
+Luego debo normalizar la columna 'flujo' según el archivo vaya a entrar a FISA o a STARLIGHT:
+
+
+2° normalización: se divide la columna 'flujo' por el valor de flujo que tenga la longitud de onda particular
+
+FISA : se normaliza, en gral en 5500A 
+
+STARLIGHT: se normaliza en 4020 A (manual)
+
+
+Una vez normalizados, se ejecuta cada programa con su 'objeto_normalizado.dat'
+
+3° se ejecuta FISA con el archivo 'objeto_n5500.dat'      ---> 'objeto.fisa'
+4° se ejecuta STARLIGHT con el archivo 'objeto_n4020.dat' ---> 'objeto.out'
+
+A esta altura, se tienen dos archivos, uno por cada programa ejecutado,
+ahora debo determinar los parámetros y comparar en los casos que corresponda,
+esto es lo que busco hacer con spyctral
+
+Del archivo que sale de FISA tengo info para obtener: (serian los extractors estos)
+
+-edad 
+-reddening E(B-V)
+-flujo residual
+-plots  
+
+Del archivo que sale de STARLIGHT tengo info para obtener: 
+
+-edad
+-AV --> relacionado con E(B-V)
+-flujo residual 
+-metalicidad 
+-plots
+-masa 
+-luminosidad 
+-redshift 
+
+Una vez que tengo las propiedades del objeto determinadas, hago una tabla con todo 
+
+--------------------------------------------------------------------------------------
+
+spyctral steps 
+
+leer el archivo ---> funciones read_fisa, read_starlight ---> algo como el SpyctralSummery?
+
+>>> import spyctral as spy
+>>> ss = spy.io.read_fisa('objeto.fisa')
+
+FeatureSpace seria la clase que determina cuales son los features que se pueden calcular,
+segun el archivo es tipo fisa o starlight
+
+>>> fs = spy.FeatureSpace(data=['fisa'])
+
+Luego para ejecutar efectivamente los extractors que ya seleccionó el FeatureSpace
+deberia usar un método como extract
+
+>>> features, values = fs.extract(data_in_extractor)
+>>> as_dic(features, values)
+ {"Age": 1000 Myr
+ "Z": 0.0004}
+
+Lo que no se es como conectar lo que leí con el read con lo que entra los extractors, 
+porque este fs.extract es un método que ejecuta los extractores
+
+osea, me falta data_in_extractor, que de alguna manera, el ss debe procesarse para quedar de la manera
+que necesitan los extractors 

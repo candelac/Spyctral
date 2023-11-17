@@ -5,35 +5,42 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
-# =============================================================================
-# DOCS
-# =============================================================================
-
-"""
-Spyctral.
-
-Implementation of astronomical objects spectral analisys.
-"""
+# Copiado de feets, y comentado lo que creo que hace cada funcion
+# saque lo que creo que no iria en nuestro caso
 
 # =============================================================================
-# META
+# DOC
 # =============================================================================
 
-__version__ = "0.0.1"
+""""""
 
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
-from .core import SpectralSummary
-from .io.fisa import read_fisa
+from .core import Extractor
 
 
-__all__ = [
-    "SpectralSummary",
-    "read_fisa",
-]
+# =============================================================================
+# EXTRACTOR CLASS
+# =============================================================================
 
 
-# __file__ ?
+class AgeFisa(Extractor):
+    """
+    **Age**
+
+    explicacion de lo que calcula y como
+
+    """
+
+    data = ["fisa"]
+
+    features = ["Age"]
+
+    def fit(self, fisa):
+        template = fisa.header.adopted_template
+        age = template.split("/")[-1]
+
+        return {"Age": age}

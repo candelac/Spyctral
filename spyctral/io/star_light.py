@@ -1,106 +1,86 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# License: MIT
-# Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
-# Tapia-Reina Martina
-# All rights reserved.
-
 import re
-
 import pandas as pd
 import numpy as np
 from spyctral import core
-
 from astropy.table import QTable
 import astropy.units as u
 
-
-RM_SCHAR_R = re.compile(r"[\[]")
-RX_SRBM = re.compile(r".*Synthesis Results - Best model.*")
-RX_SS = re.compile(r".*Synthetic spectrum.*")
-RX_MATCH_VALUES = re.compile(r"[\w.+,-]+")
-RX_EXTRACT_TITLES = re.compile(r"[\w%)/(]+")
-
+SL_GET_TITLE_VALUE = re.compile(r"\[")
+SL_REPLACE_AND = re.compile(r"&")
+SL_GET_MULTIPLE_VALUES = re.compile(r',')
+SL_GET_DATE = re.compile(r'\b\d{2}/[a-zA-Z]{3}/\d{4}\b')
+PATRON = re.compile(r'#(.*?)(?:(?=\n)|$)')
 
 def read_star_light(path):
-    """Recives a path to a .out file from star light software divides it in to tree categories
-    and returns a summaryfunction object"""
-    title_summary, title_spectrum = [], []
-    best_summary, best_spectrum = [], []
-    start_app_summary = None
-    start_app_spectrum = None
-
-    input_info_dict = {}
-    summary_block = []
     with open(path) as starfile:
-        for starline in starfile:
+        summary_dict = {}
+        blocks = []
+        tab = []
+        block_titles=[]
+        for d ,starline in enumerate(starfile):
+            # Gets all the lines that contains '[' that means: all the summarized information.
+            if re.findall(SL_GET_TITLE_VALUE, starline) :
+                #Cleaning of the string.
+                if re.findall(SL_GET_DATE,starline):
+                    summary_dict['Date']  = re.findall(SL_GET_DATE,starline)[0]
+                starline = re.sub(r'\s{2,}',' ',starline.replace("&", ',').replace(']\n','')).replace('/','_')
 
-            start_append_summary = re.match(RX_SRBM, starline)
-            start_append_spectrum = re.match(RX_SS, starline)
+                #Handles string with multiple values on the same line.
+                if  re.findall(SL_GET_MULTIPLE_VALUES, starline) :
+                    starline_list = starline.split('[')
+                    try:
+                        temp_dict = dict(zip(starline_list[1].strip().replace(' ','').split(','),float(starline_list[0].strip().split(' '))))
+                    except:
+                        temp_dict = dict(zip(starline_list[1].strip().replace(' ','').split(','),starline_list[0].strip().split(' ')))
+                    summary_dict = { **summary_dict, **temp_dict}
 
-            if (
-                start_append_summary is not None
-                and start_append_summary[0] != " "
-            ):
-                start_app_summary = start_append_summary[0]
-            if (
-                start_append_spectrum is not None
-                and start_append_spectrum[0] != " "
-            ):
-                start_app_spectrum = start_append_spectrum[0]
+                #Handles string with SN titles that repeats and overlaps if not handled.
+                elif re.findall(r'\[S_N', starline): 
+                    starline_list = starline.split('[')
+                    try:
+                        summary_dict[starline_list[1].split(' ')[0]+str(d)] = float(starline_list[0])
+                    except:
+                        summary_dict[starline_list[1].split(' ')[0]+str(d)] = starline_list[0]
 
-            if start_app_summary is not None and start_app_spectrum is None:
-                if RM_SCHAR_R.search(starline) is None:
-                    if starline.startswith("#"):
-                        title_summary.append(
-                            RX_EXTRACT_TITLES.findall(
-                                starline.replace("\n", "").replace("#", "")
-                            )
-                        )
-                    else:
-                        if starline.startswith("\n") is not True:
-                            summary_block.append(
-                                RX_MATCH_VALUES.findall(starline)
-                            )
-                        else:
-                            if len(summary_block) > 1:
-                                best_summary.append(summary_block)
-                                summary_block = []
+                ##Adds all the other normal values that do not contain any exeption 
+                else:
+                    starline_list= starline.replace('-','_').replace('#','').split('[')
+                    try:
+                        summary_dict[starline_list[1].split(' ')[0]] = float(starline_list[0].strip())
+                    except:
+                        summary_dict[starline_list[1].split(' ')[0]] = starline_list[0].strip()
 
-            if (
-                start_app_summary is not None
-                and start_app_spectrum is not None
-            ):
-                if RM_SCHAR_R.search(starline) is None:
-                    if starline.startswith("#"):
-                        title_spectrum.append(starline)
-                    else:
-                        best_spectrum.append(
-                            starline.replace("\n", "").split("   ")
-                        )
+            ## This part procces the tables 
+            if re.search(SL_GET_TITLE_VALUE, starline) is None and re.match('##', starline) is None  :
+               starline = starline.replace('\n','')
+               # Filters the titles of the tables 
+               if re.search(r'# ', starline):
+                   block_titles.append(starline) 
+               # Filters the empty spaces 
+               elif  starline != '':
+                    starline= re.sub('\s{2,}',' ',starline.strip())
+                    tab.append(starline.split(' '))
+                # Generates a block for each empty line that founds and if the block is larger it appends it 
+               else:
+                    if len(tab)>1:
+                        blocks.append(tab)
+                        tab=[]
 
-            if starline.startswith("#") is not True:
-                starline = (
-                    starline.replace("]", "").replace("\n", "").split("[")
-                )
-                if len(starline) > 1:
-                    input_info_dict[starline[1]] = starline[0].strip()
-
-    spectra_table = QTable(
-        rows=best_spectrum, names=["l_obs", "f_obs", "f_syn", "weights"]
-    )
-    spectra_table["l_obs"].unit = u.Angstrom
-
-    acm_title = np.array(best_summary[3]).T[0]
-    acm_body = np.array(best_summary[3]).T[1:]
-
+        blocks.append(tab)
+        tab=[]
+    first_title = re.sub('\s{2,}',' ',block_titles[0][1:]).replace('.','').replace('?','').strip()
     spectra_dict = {
-        "synthetic_spectrum": spectra_table,
-        "synt_results": QTable(rows=best_summary[0], names=title_summary[1]),
-        "qtable_1": QTable(rows=best_summary[1]),
-        "qtable_2": QTable(rows=best_summary[2]),
-        "qtable_3": QTable(rows=acm_body, names=acm_title),
+        "synthetic_spectrum": QTable(
+            rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
+        ),
+        "synt_results": QTable(rows=blocks[0],names= first_title.split(' ')),
+        "qtable_1": QTable(rows=blocks[1]),
+        "qtable_2": QTable(rows=blocks[2]),
+        "qtable_3": QTable(
+            rows=np.array(blocks[3]).T[1:],
+            names=np.array(blocks[3]).T[0],
+        ),
     }
 
-    return input_info_dict, spectra_dict
+    return summary_dict, spectra_dict
 

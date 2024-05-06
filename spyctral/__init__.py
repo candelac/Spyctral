@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # License: MIT
 # Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
@@ -28,11 +28,13 @@ __version__ = "0.0.1"
 
 from .core import SpectralSummary
 from .io.fisa import read_fisa
+from .io.star_light import read_star_light
 
 
 __all__ = [
     "SpectralSummary",
     "read_fisa",
+    "star_light"
 ]
 
 

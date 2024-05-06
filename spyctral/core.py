@@ -1,22 +1,22 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # License: MIT
 # Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
 # Tapia-Reina Martina
 # All rights reserved.
 
-# import attrs
+import attrs
 
-# from .utils.bunch import Bunch
+from .utils.bunch import Bunch
 
 # Esta clase habría que re diseñarla/sacarla
 
-# @attrs.define
-# class SpectralSummary:
-#    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
-#    data = attrs.field(converter=lambda v: Bunch("data_items:", v))
+@attrs.define
+class SpectralSummary:
+    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
+    data = attrs.field(converter=lambda v: Bunch("data_items:", v))
 
-
+'''
 # -----------------------------------------------------------------------------
 # clases adaptadas de feets:
 
@@ -376,3 +376,4 @@ class FeatureSpace:
     @property
     def required_data_(self):
         return self._required_data
+'''

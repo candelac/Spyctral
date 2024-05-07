@@ -6,10 +6,14 @@
 # All rights reserved.
 
 import re
-import pandas as pd
-import numpy as np
-from spyctral import core
+
 from astropy.table import QTable
+
+import numpy as np
+
+import pandas as pd
+
+from spyctral import core
 
 
 SL_GET_TITLE_VALUE = re.compile(r"\[")
@@ -19,14 +23,14 @@ SL_GET_DATE = re.compile(r"\b\d{2}/[a-zA-Z]{3}/\d{4}\b")
 PATRON = re.compile(r"#(.*?)(?:(?=\n)|$)")
 
 
-def read_star_light(path):
+def read_starlight(path):
     with open(path) as starfile:
         summary_info = {}
         blocks = []
         tab = []
         block_titles = []
         for d, starline in enumerate(starfile):
-            # Gets all the lines that contains '[' that means: 
+            # Gets all the lines that contains '[' that means:
             # all the summarized information.
             if re.findall(SL_GET_TITLE_VALUE, starline):
                 # Cleaning of the string.
@@ -63,7 +67,7 @@ def read_star_light(path):
                         )
                     summary_info = {**summary_info, **temp_dict}
 
-                # Handles string with SN titles that repeats and 
+                # Handles string with SN titles that repeats and
                 # overlaps if not handled.
                 elif re.findall(r"\[S_N", starline):
                     starline_list = starline.split("[")
@@ -87,9 +91,9 @@ def read_star_light(path):
                             starline_list[0].strip()
                         )
                     except:
-                        summary_info[starline_list[1].split(" ")[0]] = (
-                            starline_list[0].strip()
-                        )
+                        summary_info[
+                            starline_list[1].split(" ")[0]
+                        ] = starline_list[0].strip()
 
             # This part procces the tables
             if (
@@ -102,9 +106,9 @@ def read_star_light(path):
                     block_titles.append(starline)
                 # Filters the empty spaces
                 elif starline != "":
-                    starline = re.sub("\s{2,}", " ", starline.strip())
+                    starline = re.sub(r"\s{2,}", " ", starline.strip())
                     tab.append(starline.split(" "))
-                # Generates a block for each empty line that founds and if 
+                # Generates a block for each empty line that founds and if
                 # the block is larger it appends it
                 else:
                     if len(tab) > 1:
@@ -114,15 +118,14 @@ def read_star_light(path):
         blocks.append(tab)
         tab = []
     first_title = (
-        re.sub("\s{2,}", " ", block_titles[0][1:])
+        re.sub(r"\s{2,}", " ", block_titles[0][1:])
         .replace(".", "")
         .replace("?", "")
         .strip()
     )
     spectra_dict = {
         "synthetic_spectrum": QTable(
-            rows=blocks[4], names=["l_obs", "f_obs",
-                                   "f_syn", "weights"]
+            rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
         ),
         "synthesis_results": QTable(
             rows=blocks[0], names=first_title.split(" ")
@@ -141,9 +144,8 @@ def read_star_light(path):
 
 
 def _make_dframe(dic):
-
     """
-    Quiero que esta funcion convierta 
+    Quiero que esta funcion convierta
     un diccionario en un dataframe
     """
 

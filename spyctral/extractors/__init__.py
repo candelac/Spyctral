@@ -27,6 +27,8 @@ __all__ = [
     "ExtractorContractError",
     "ExtractorWarning",
     "Extractor",
+    "AgeFisa",
+    "AgeStl",
 ]
 
 # =============================================================================
@@ -42,6 +44,9 @@ from .core import (
     ExtractorContractError,
     ExtractorWarning,
 )
+from .ext_fisa_age import AgeFisa  # movido de la linea 154
+from .ext_stl_age import AgeStl
+
 
 # =============================================================================
 # REGISTER UTILITY
@@ -151,8 +156,8 @@ def sort_by_dependencies(exts, retry=None):
 
 # Aquí importamos los ext_caracteristica.py que estan en la carpeta extractors
 
-from .ext_fisa_age import *
-from .ext_stl_age import *
+# from .ext_fisa_age import *
+# from .ext_stl_age import *
 
 
 # Aqui se itera sobre las subclases de Extractor,

@@ -6,7 +6,6 @@
 # All rights reserved.
 
 
-
 # Copiado de feets, y comentado lo que creo que hace cada funcion
 # saque lo que creo que no iria en nuestro caso
 

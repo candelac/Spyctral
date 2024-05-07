@@ -138,19 +138,5 @@ def read_starlight(path):
         ),
     }
 
-    # summary_info = _make_dframe(summary_info)
     # return summary_info, spectra_dict
     return core.SpectralSummary(header=summary_info, data=spectra_dict)
-
-
-# def _make_dframe(dic):
-#    """
-#    Quiero que esta funcion convierta
-#    un diccionario en un dataframe
-#    """
-
-#    data_dic = {item: dic.get(item, None) for item in dic}
-
-#    df = pd.DataFrame.from_dict(data_dic, orient="index", columns=["Value"])
-
-#    return df

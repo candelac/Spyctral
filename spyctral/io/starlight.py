@@ -11,7 +11,7 @@ from astropy.table import QTable
 
 import numpy as np
 
-import pandas as pd
+# import pandas as pd
 
 from spyctral import core
 
@@ -143,14 +143,14 @@ def read_starlight(path):
     return core.SpectralSummary(header=summary_info, data=spectra_dict)
 
 
-def _make_dframe(dic):
-    """
-    Quiero que esta funcion convierta
-    un diccionario en un dataframe
-    """
+# def _make_dframe(dic):
+#    """
+#    Quiero que esta funcion convierta
+#    un diccionario en un dataframe
+#    """
 
-    data_dic = {item: dic.get(item, None) for item in dic}
+#    data_dic = {item: dic.get(item, None) for item in dic}
 
-    df = pd.DataFrame.from_dict(data_dic, orient="index", columns=["Value"])
+#    df = pd.DataFrame.from_dict(data_dic, orient="index", columns=["Value"])
 
-    return df
+#    return df

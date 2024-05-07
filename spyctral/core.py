@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # License: MIT
 # Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
@@ -9,14 +9,15 @@ import attrs
 
 from .utils.bunch import Bunch
 
+# Esta clase habría que re diseñarla/sacarla
 
 @attrs.define
 class SpectralSummary:
     header = attrs.field(converter=lambda v: Bunch("header_items:", v))
     data = attrs.field(converter=lambda v: Bunch("data_items:", v))
 
-
-
+'''
+# -----------------------------------------------------------------------------
 # clases adaptadas de feets:
 
 # =============================================================================
@@ -27,25 +28,22 @@ import copy
 import itertools as it
 from collections import Counter
 from collections.abc import Mapping
-# 
+
 import attr
-# 
-# import matplotlib.pyplot as plt
-# 
+
 import numpy as np
-# 
-# import pandas as pd
-# 
+
 from . import extractors
 from .extractors.core import (
     DATAS,
-    DATA_FISA,   # esto preguntar a marti
+    DATA_FISA,  # esto preguntar a marti
     DATA_STL,
 )
 
 # =============================================================================
 # EXCEPTIONS
 # =============================================================================
+
 
 class FeatureNotFound(ValueError):
     """Raises when a non-available feature are requested.
@@ -69,6 +67,7 @@ class FeatureSpaceError(ValueError):
 # =============================================================================
 # RESULTSET
 # =============================================================================
+
 
 class _Map(Mapping):
     """Internal representation of a immutable dict"""
@@ -147,12 +146,13 @@ class FeatureSet:
 # FEATURE EXTRACTORS
 # =============================================================================
 
+
 class FeatureSpace:
-    """Clase que permite seleccionar los features (edad, enrojecimiento, 
+    """Clase que permite seleccionar los features (edad, enrojecimiento,
     metalicidad, etc) que se pueden calcular basado en los datos que se tienen
     disponibles (fisa, starlight).
     Los features que da son los que satisfacen todos los filtros.
-    
+
     Parameters
     ----------
 
@@ -227,9 +227,9 @@ class FeatureSpace:
         # initialize the extractors and determine the required data only
         features_extractors, features_extractors_names = set(), set()
         required_data = set()
-        for fcls in set(exts.values()): # exts=extractores
-            if fcls.get_features().intersection(self._features): 
-                #if: solo los features que necesito sg data
+        for fcls in set(exts.values()):  # exts=extractores
+            if fcls.get_features().intersection(self._features):
+                # if: solo los features que necesito sg data
 
                 params = self._kwargs.get(fcls.__name__, {})
                 fext = fcls(**params)
@@ -273,7 +273,7 @@ class FeatureSpace:
             self.__str = "<FeatureSpace: {}>".format(space)
         return self.__str
 
-    def preprocess_timeserie(self, d): #esto es necesario?
+    def preprocess_timeserie(self, d):  # esto es necesario?
         """Validate if the required values of the time-serie exist with
         non ``None`` values in the dict ``d``. Finally returns a
         new dictionary whose non-null values have been converted to
@@ -285,7 +285,6 @@ class FeatureSpace:
                 raise DataRequiredError(k)
             array_data[k] = v if v is None else np.asarray(v)
         return array_data
-
 
     def extract(
         self,
@@ -307,16 +306,16 @@ class FeatureSpace:
             Container of a calculated features.
 
         """
-        timeserie = self.preprocess_timeserie( # ver
+        timeserie = self.preprocess_timeserie(  # ver
             {
                 DATA_FISA: fisa,
-                DATA_STL: satrlight,
+                DATA_STL: starlight,
             }
         )
 
         # ejecuta los extractors:
         features, extractors = {}, {}
-        for fextractor in self._execution_plan: 
+        for fextractor in self._execution_plan:
             # .extract de la clase Extractor: extrae los parametros necesarios
             # para ejecutar la extracción del feature y lo ejecuta
             result = fextractor.extract(features=features, **timeserie)
@@ -337,7 +336,6 @@ class FeatureSpace:
             timeserie=timeserie,
         )
         return rs
-
 
     @property
     def extractors_conf(self):
@@ -378,3 +376,4 @@ class FeatureSpace:
     @property
     def required_data_(self):
         return self._required_data
+'''

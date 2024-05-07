@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # License: MIT
 # Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
@@ -9,6 +9,8 @@ import attrs
 
 from .utils.bunch import Bunch
 
+# Esta clase habría que re diseñarla/sacarla
+
 
 @attrs.define
 class SpectralSummary:
@@ -16,6 +18,8 @@ class SpectralSummary:
     data = attrs.field(converter=lambda v: Bunch("data_items:", v))
 
 
+'''
+# -----------------------------------------------------------------------------
 # clases adaptadas de feets:
 
 # =============================================================================
@@ -374,3 +378,4 @@ class FeatureSpace:
     @property
     def required_data_(self):
         return self._required_data
+'''

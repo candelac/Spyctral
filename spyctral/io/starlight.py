@@ -13,9 +13,12 @@ import numpy as np
 
 # import pandas as pd
 
-from spyctral import core
+# from spyctral import core
+
+import dateutil.parser
 
 
+SL_GET_HEADER = re.compile(r"\[")
 SL_GET_TITLE_VALUE = re.compile(r"\[")
 SL_REPLACE_AND = re.compile(r"&")
 SL_GET_MULTIPLE_VALUES = re.compile(r",")
@@ -23,100 +26,97 @@ SL_GET_DATE = re.compile(r"\b\d{2}/[a-zA-Z]{3}/\d{4}\b")
 PATRON = re.compile(r"#(.*?)(?:(?=\n)|$)")
 
 
-def read_starlight(path):
-    with open(path) as starfile:
-        summary_info = {}
-        blocks = []
-        tab = []
-        block_titles = []
-        for d, starline in enumerate(starfile):
-            # Gets all the lines that contains '[' that means:
-            # all the summarized information.
-            if re.findall(SL_GET_TITLE_VALUE, starline):
-                # Cleaning of the string.
-                if re.findall(SL_GET_DATE, starline):
-                    summary_info["Date"] = re.findall(SL_GET_DATE, starline)[0]
-                starline = re.sub(
-                    r"\s{2,}",
-                    " ",
-                    starline.replace("&", ",").replace("]\n", ""),
-                ).replace("/", "_")
+def _proces_header(header_ln):
+    """Recives as input a list with the lines of the header and returns a
+    dictionary with the parameters and values"""
 
-                # Handles string with multiple values on the same line.
-                if re.findall(SL_GET_MULTIPLE_VALUES, starline):
-                    starline_list = starline.split("[")
-                    try:
-                        temp_dict = dict(
-                            zip(
-                                starline_list[1]
-                                .strip()
-                                .replace(" ", "")
-                                .split(","),
-                                float(starline_list[0].strip().split(" ")),
-                            )
-                        )
-                    except:
-                        temp_dict = dict(
-                            zip(
-                                starline_list[1]
-                                .strip()
-                                .replace(" ", "")
-                                .split(","),
-                                starline_list[0].strip().split(" "),
-                            )
-                        )
-                    summary_info = {**summary_info, **temp_dict}
+    head_dict = {}
+    for sl in header_ln:
+        if re.findall(SL_GET_DATE, sl):
+            head_dict["Date"] = dateutil.parser.parse(
+                re.findall(SL_GET_DATE, sl)[0]
+            )
+            head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
-                # Handles string with SN titles that repeats and
-                # overlaps if not handled.
-                elif re.findall(r"\[S_N", starline):
-                    starline_list = starline.split("[")
-                    try:
-                        summary_info[
-                            starline_list[1].split(" ")[0] + str(d)
-                        ] = float(starline_list[0])
-                    except:
-                        summary_info[
-                            starline_list[1].split(" ")[0] + str(d)
-                        ] = starline_list[0]
+        sl = re.sub(
+            r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
+        ).replace("/", "_")
 
-                # Adds all the other normal values that do
-                # not contain any exeption
-                else:
-                    starline_list = (
-                        starline.replace("-", "_").replace("#", "").split("[")
+# Handles string with multiple values on the same line. 
+#They are idenfied by havin a ','
+        if re.findall(SL_GET_MULTIPLE_VALUES, sl):
+            starline_values = (
+                sl.split("[")[0].strip().split(" ")
+            )  ## keeps the values
+            starline_var = sl.split("[")[1].split(
+                ","
+            )  ## keeps the names of the variables
+
+            for pos, val in enumerate(starline_values):
+                if bool(
+                    re.search(r"[0-9]", val)
+                ):  ## filters for numeric values
+                    head_dict[starline_var[pos].strip().split(" ")[0]] = float(
+                        val
                     )
-                    try:
-                        summary_info[starline_list[1].split(" ")[0]] = float(
-                            starline_list[0].strip()
-                        )
-                    except:
-                        summary_info[
-                            starline_list[1].split(" ")[0]
-                        ] = starline_list[0].strip()
-
-            # This part procces the tables
-            if (
-                re.search(SL_GET_TITLE_VALUE, starline) is None
-                and re.match("##", starline) is None
-            ):
-                starline = starline.replace("\n", "")
-                # Filters the titles of the tables
-                if re.search(r"# ", starline):
-                    block_titles.append(starline)
-                # Filters the empty spaces
-                elif starline != "":
-                    starline = re.sub(r"\s{2,}", " ", starline.strip())
-                    tab.append(starline.split(" "))
-                # Generates a block for each empty line that founds and if
-                # the block is larger it appends it
                 else:
-                    if len(tab) > 1:
-                        blocks.append(tab)
-                        tab = []
+                    head_dict[starline_var[pos].strip().split(" ")[0]] = val
 
-        blocks.append(tab)
-        tab = []
+# Handles string with S/N titles that repeats
+# overlaps if not handled.
+        elif re.findall(r"\[S_N", sl):
+            starline_list = sl.split("[")
+            head_dict[
+                starline_list[1].replace(" ", "_").replace(".", "").strip()
+            ] = float(starline_list[0])
+
+# saves all the other values 
+# that not contain any special exception
+        else:
+            starline_list = sl.replace("-", "_").replace("#", "").split("[")
+            if bool(re.search(r"[0-9]", starline_list[0])) and not bool(
+                re.search(r"[a-z]", starline_list[0])
+            ):  ## filters for numeric values
+                head_dict[starline_list[1].split(" ")[0]] = float(
+                    starline_list[0].replace("_", "-").strip()
+                )
+            else:
+                head_dict[starline_list[1].split(" ")[0]] = starline_list[
+                    0
+                ].strip()
+
+    return head_dict
+
+
+def _proces_tables(block_lines):
+    """Recives a list that contains the lines of the tables and
+    return a dictionary with 4 tables as values"""
+    block_titles = []
+    blocks = []
+    tab = []
+    for sl in block_lines:
+        # This part procces the tables
+        if (
+            re.search(SL_GET_TITLE_VALUE, sl) is None
+            and re.match("##", sl) is None
+        ):
+            # Filters the titles of the tables
+            if re.search(r"# ", sl):
+                block_titles.append(sl)
+            # Filters the empty spaces
+            elif len(sl) > 1:
+                # print(sl)
+                sl = re.sub(r"\s{2,}", " ", sl.strip())
+                tab.append(sl.split(" "))
+
+# Generates a block for each empty line that founds 
+# and if the block is larger it appends it
+            else:
+                if len(tab) > 1:
+                    blocks.append(tab)
+                    tab = []
+    blocks.append(tab)
+    tab = []
     first_title = (
         re.sub(r"\s{2,}", " ", block_titles[0][1:])
         .replace(".", "")
@@ -127,16 +127,32 @@ def read_starlight(path):
         "synthetic_spectrum": QTable(
             rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
         ),
-        "synthesis_results": QTable(
-            rows=blocks[0], names=first_title.split(" ")
-        ),
-        "chains_info_xj": QTable(rows=blocks[1]),
-        "chains_info_mj": QTable(rows=blocks[2]),
-        "AV_chi2_Mass_ichain": QTable(
+        "synt_results": QTable(rows=blocks[0], names=first_title.split(" ")),
+        "qtable_1": QTable(rows=blocks[1]),
+        "qtable_2": QTable(rows=blocks[2]),
+        "qtable_3": QTable(
             rows=np.array(blocks[3]).T[1:],
             names=np.array(blocks[3]).T[0],
         ),
     }
+    return spectra_dict
 
-    # return summary_info, spectra_dict
-    return core.SpectralSummary(header=summary_info, data=spectra_dict)
+
+def read_starlight(path):
+    """Recives as input a path from the location of the starlight file and
+    returns a two dicctionaries the first is the header information and the
+    second is the tables information"""
+
+    header_lines, block_lines = [], []
+    with open(path) as starfile:
+        for d, starline in enumerate(starfile):
+            if re.findall(SL_GET_TITLE_VALUE, starline):
+                header_lines.append(starline)
+            else:
+                block_lines.append(starline)
+
+    header_info = _proces_header(header_lines)
+
+    tables_dict = _proces_tables(block_lines)
+
+    return header_info, tables_dict

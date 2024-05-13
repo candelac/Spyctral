@@ -7,6 +7,8 @@
 
 import attrs
 
+import pandas as pd
+
 from .utils.bunch import Bunch
 
 # Esta clase habría que re diseñarla/sacarla
@@ -16,6 +18,16 @@ from .utils.bunch import Bunch
 class SpectralSummary:
     header = attrs.field(converter=lambda v: Bunch("header_items:", v))
     data = attrs.field(converter=lambda v: Bunch("data_items:", v))
+
+    def header_to_dataframe(self):
+        """Convert the header into a ``pandas.DataFrame``."""
+
+        keys = list(self.header.keys())
+        values = list(self.header.values())
+
+        df = pd.DataFrame(values, index=keys)
+
+        return df
 
 
 '''

@@ -11,11 +11,34 @@ from .utils.bunch import Bunch
 
 # Esta clase habría que re diseñarla/sacarla
 
-
 @attrs.define
 class SpectralSummary:
     header = attrs.field(converter=lambda v: Bunch("header_items:", v))
     data = attrs.field(converter=lambda v: Bunch("data_items:", v))
+
+    def header_to_dataframe(self):
+        """Convert the header into a ``pandas.DataFrame``."""
+
+        keys = list(self.header.keys())
+        values = list(self.header.values())
+
+        df = pd.DataFrame(values, index=keys)
+
+        return df
+    def make_spectrum(self):
+        """Create spectrum from data"""
+        # Usando el specutils crear los espectros 
+        # para poder usarlos con las facilidades de la libreria
+
+        return spectra
+
+    def make_plots(self):
+        """Hay plots que se pueden hacer directo con la info 
+           de input, esto deberia funcionar directo con los spectrum
+           creados con make_spectrum 
+        """
+
+        
 
 
 '''

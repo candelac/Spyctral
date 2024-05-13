@@ -9,13 +9,13 @@ import re
 
 from astropy.table import QTable
 
+import dateutil.parser
+
 import numpy as np
 
 # import pandas as pd
 
-# from spyctral import core
-
-import dateutil.parser
+from spyctral import core
 
 
 SL_GET_HEADER = re.compile(r"\[")
@@ -42,41 +42,41 @@ def _proces_header(header_ln):
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
         ).replace("/", "_")
 
-# Handles string with multiple values on the same line. 
-#They are idenfied by havin a ','
+        # Handles string with multiple values on the same line.
+        # They are idenfied by havin a ','
         if re.findall(SL_GET_MULTIPLE_VALUES, sl):
             starline_values = (
                 sl.split("[")[0].strip().split(" ")
-            )  ## keeps the values
+            )  # keeps the values
             starline_var = sl.split("[")[1].split(
                 ","
-            )  ## keeps the names of the variables
+            )  # keeps the names of the variables
 
             for pos, val in enumerate(starline_values):
                 if bool(
                     re.search(r"[0-9]", val)
-                ):  ## filters for numeric values
+                ):  # filters for numeric values
                     head_dict[starline_var[pos].strip().split(" ")[0]] = float(
                         val
                     )
                 else:
                     head_dict[starline_var[pos].strip().split(" ")[0]] = val
 
-# Handles string with S/N titles that repeats
-# overlaps if not handled.
+        # Handles string with S/N titles that repeats
+        # overlaps if not handled.
         elif re.findall(r"\[S_N", sl):
             starline_list = sl.split("[")
             head_dict[
                 starline_list[1].replace(" ", "_").replace(".", "").strip()
             ] = float(starline_list[0])
 
-# saves all the other values 
-# that not contain any special exception
+        # saves all the other values
+        # that not contain any special exception
         else:
             starline_list = sl.replace("-", "_").replace("#", "").split("[")
             if bool(re.search(r"[0-9]", starline_list[0])) and not bool(
                 re.search(r"[a-z]", starline_list[0])
-            ):  ## filters for numeric values
+            ):  # filters for numeric values
                 head_dict[starline_list[1].split(" ")[0]] = float(
                     starline_list[0].replace("_", "-").strip()
                 )
@@ -109,8 +109,8 @@ def _proces_tables(block_lines):
                 sl = re.sub(r"\s{2,}", " ", sl.strip())
                 tab.append(sl.split(" "))
 
-# Generates a block for each empty line that founds 
-# and if the block is larger it appends it
+            # Generates a block for each empty line that founds
+            # and if the block is larger it appends it
             else:
                 if len(tab) > 1:
                     blocks.append(tab)
@@ -155,4 +155,5 @@ def read_starlight(path):
 
     tables_dict = _proces_tables(block_lines)
 
-    return header_info, tables_dict
+    # return header_info, tables_dict
+    return core.SpectralSummary(header=header_info, data=tables_dict)

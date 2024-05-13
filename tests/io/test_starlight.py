@@ -11,6 +11,8 @@
 # IMPORTS
 # =============================================================================
 
+import datetime as dt
+
 from astropy.table import QTable
 
 from spyctral import core
@@ -26,7 +28,7 @@ def test_read_starlight_type(file_path):
     assert isinstance(summary, core.SpectralSummary)
 
     assert isinstance(summary.header, Bunch)
-    # assert isinstance(summary.header.Date, dt.datetime) # lo lee como str
+    assert isinstance(summary.header.Date, dt.datetime)
     # assert isinstance(summary.header.Cid@UFSC, ? ) # ?
     assert isinstance(summary.header.arq_obs, str)
     assert isinstance(summary.header.arq_base, str)
@@ -35,7 +37,7 @@ def test_read_starlight_type(file_path):
     assert isinstance(summary.header.N_base, float)
     assert isinstance(summary.header.N_YAV_components, float)
     assert isinstance(summary.header.i_FitPowerLaw, float)
-    # assert isinstance(summary.header.alpha_PowerLaw, float) # lo lee como str
+    assert isinstance(summary.header.alpha_PowerLaw, float)
     assert isinstance(summary.header.red_law_option, str)
     assert isinstance(summary.header.q_norm, float)
     assert isinstance(summary.header.l_ini, float)
@@ -47,27 +49,28 @@ def test_read_starlight_type(file_path):
     assert isinstance(summary.header.fobs_norm, float)
     assert isinstance(summary.header.llow_SN, float)
     assert isinstance(summary.header.lupp_SN, float)
-    assert isinstance(summary.header.S_N30, float)  # ver nombre
-    assert isinstance(summary.header.S_N31, float)  # ver nombre
-    assert isinstance(summary.header.S_N_err32, float)  # ver nombre
-    assert isinstance(summary.header.S_N_err33, float)  # ver nombre
+    assert isinstance(summary.header.S_N_in_S_N_window, float)
+    assert isinstance(summary.header.S_N_in_norm_window, float)
+    assert isinstance(summary.header.S_N_err_in_S_N_window, float)
+    assert isinstance(summary.header.S_N_err_in_norm_window, float)
     assert isinstance(summary.header.fscale_chi2, float)
-    # assert isinstance(summary.header.idum_orig, float) # lo lee como str
+    assert isinstance(summary.header.idum_orig, float)
     assert isinstance(summary.header.NOl_eff, float)
     assert isinstance(summary.header.Nl_eff, float)
-    # assert isinstance(summary.header.Ntot_cliped, float) # lo lee como str
+    assert isinstance(summary.header.Ntot_cliped, float)
+    assert isinstance(summary.header.clip_method, str)
     assert isinstance(summary.header.N_chains, float)
     assert isinstance(summary.header.NEX0s_base, float)
     # assert isinstance(summary.header.Clip-Bug, float) # lee mal el -
     # assert isinstance(summary.header.RC-Crash, float) # lee mal el -
     # assert isinstance(summary.header.Burn-Inwarning-flags, float) # lee mal
-    # assert isinstance(summary.header.n_censored_weights, float) # lee str
-    # assert isinstance(summary.header.wei_nsig_threshold, float) # lee str
-    # assert isinstance(summary.header.wei_limit, float) # lo lee como str
-    # assert isinstance(summary.header.idt_all, float) # lo lee como str
-    # assert isinstance(summary.header.wdt_TotTime, float) # lo lee como str
-    # assert isinstance(summary.header.wdt_UsrTime, float) # lo lee como str
-    # assert isinstance(summary.header.wdt_SysTime(sec), float) # lo lee mal
+    assert isinstance(summary.header.n_censored_weights, float)
+    assert isinstance(summary.header.wei_nsig_threshold, float)
+    assert isinstance(summary.header.wei_limit, float)
+    assert isinstance(summary.header.idt_all, float)
+    assert isinstance(summary.header.wdt_TotTime, float)
+    assert isinstance(summary.header.wdt_UsrTime, float)
+    assert isinstance(summary.header.wdt_SysTime, float)
     assert isinstance(summary.header.chi2_Nl_eff, float)
     assert isinstance(summary.header.adev, float)
     assert isinstance(summary.header.sum_of_x, float)
@@ -80,24 +83,20 @@ def test_read_starlight_type(file_path):
     assert isinstance(summary.header.YAV_min, float)
 
     assert isinstance(summary.data, Bunch)
+    assert isinstance(summary.data.synt_results, QTable)  # faltan unidades
     assert isinstance(
-        summary.data.synthesis_results, QTable
-    )  # faltan unidades
-    assert isinstance(
-        summary.data.chains_info_xj, QTable
+        summary.data.qtable_1, QTable
     )  # faltan unidades y nombre de columnas
     assert isinstance(
-        summary.data.chains_info_mj, QTable
+        summary.data.qtable_2, QTable
     )  # faltan unidades y nombre de columnas
-    assert isinstance(
-        summary.data.AV_chi2_Mass_ichain, QTable
-    )  # faltan unidades
+    assert isinstance(summary.data.qtable_3, QTable)  # faltan unidades
     assert isinstance(
         summary.data.synthetic_spectrum, QTable
     )  # faltan unidades
 
-    assert len(summary.data.synthesis_results) == 69
-    assert len(summary.data.chains_info_xj) == 69
-    assert len(summary.data.chains_info_mj) == 69
-    assert len(summary.data.AV_chi2_Mass_ichain) == 9
+    assert len(summary.data.synt_results) == 69
+    assert len(summary.data.qtable_1) == 69
+    assert len(summary.data.qtable_2) == 69
+    assert len(summary.data.qtable_3) == 9
     assert len(summary.data.synthetic_spectrum) == 1524

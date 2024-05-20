@@ -90,7 +90,9 @@ def test_read_starlight_type(file_path):
     assert isinstance(
         summary.data.results_average_chains_mj, QTable
     )  # faltan unidades y nombre de columnas
-    assert isinstance(summary.data.results_average_chains_Av_chi2_mass, QTable)  # faltan unidades
+    assert isinstance(
+        summary.data.results_average_chains_Av_chi2_mass, QTable
+    )  # faltan unidades
     assert isinstance(
         summary.data.synthetic_spectrum, QTable
     )  # faltan unidades

@@ -127,10 +127,12 @@ def _proces_tables(block_lines):
         "synthetic_spectrum": QTable(
             rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
         ),
-        "synt_results": QTable(rows=blocks[0], names=first_title.split(" ")),
-        "qtable_1": QTable(rows=blocks[1]),
-        "qtable_2": QTable(rows=blocks[2]),
-        "qtable_3": QTable(
+        "synthetic_results": QTable(
+            rows=blocks[0], names=first_title.split(" ")
+        ),
+        "results_average_chains_xj": QTable(rows=blocks[1]),
+        "results_average_chains_mj": QTable(rows=blocks[2]),
+        "results_average_chains_Av_chi2_mass": QTable(
             rows=np.array(blocks[3]).T[1:],
             names=np.array(blocks[3]).T[0],
         ),

@@ -26,12 +26,14 @@ from .utils.bunch import Bunch
 # Useful functions
 # =============================================================================
 
+
 def header_to_dataframe(header):
     """Convert the header into a ``pandas.DataFrame``."""
     keys = list(header.keys())
     values = list(header.values())
     df = pd.DataFrame(values, index=keys)
     return df
+
 
 def make_spectrum(obj):
     """Create spectra from data"""
@@ -42,24 +44,24 @@ def make_spectrum(obj):
                 try:
                     wavelength = value.columns[0]
                     flux = value.columns[1]
-                    
+
                     # Convertir a Quantity si no lo es
                     if not isinstance(wavelength, Quantity):
                         wavelength = wavelength.quantity
                     if not isinstance(flux, Quantity):
                         flux = flux.quantity
-                    
-                    spectra[key] = Spectrum1D(flux=flux, spectral_axis=wavelength)
-                except IndexError as e:
-                    print(f"Error creating spectrum for {key}: {e}")
-                except TypeError as e:
+
+                    spectra[key] = Spectrum1D(
+                        flux=flux, spectral_axis=wavelength
+                    )
+                except (IndexError, TypeError) as e:
                     print(f"Error creating spectrum for {key}: {e}")
             elif len(value.columns) == 3:
                 try:
                     wavelength = value.columns[0]
                     flux_obs = value.columns[1]
                     flux_syn = value.columns[2]
-                    
+
                     # Convertir a Quantity si no lo es
                     if not isinstance(wavelength, Quantity):
                         wavelength = wavelength.quantity
@@ -67,24 +69,33 @@ def make_spectrum(obj):
                         flux_obs = flux_obs.quantity
                     if not isinstance(flux_syn, Quantity):
                         flux_syn = flux_syn.quantity
-                    
+
                     residual_flux = (flux_obs - flux_syn) / flux_obs
-                    spectra["synthetic_spectrum"] = Spectrum1D(flux=flux_syn, spectral_axis=wavelength)
-                    spectra["observed_spectrum"] = Spectrum1D(flux=flux_obs, spectral_axis=wavelength)
-                    spectra["residual_spectrum"] = Spectrum1D(flux=residual_flux, spectral_axis=wavelength)
-                except IndexError as e:
-                    print(f"Error creating spectrum for {key}: {e}")
-                except TypeError as e:
+                    spectra["synthetic_spectrum"] = Spectrum1D(
+                        flux=flux_syn, spectral_axis=wavelength
+                    )
+                    spectra["observed_spectrum"] = Spectrum1D(
+                        flux=flux_obs, spectral_axis=wavelength
+                    )
+                    spectra["residual_spectrum"] = Spectrum1D(
+                        flux=residual_flux, spectral_axis=wavelength
+                    )
+                except (IndexError, TypeError) as e:
                     print(f"Error creating spectrum for {key}: {e}")
             else:
-                print(f"Data item {key} is a QTable but does not have two or three columns")
+                print(
+                    "Data item {key} is a QTable "
+                    "but does not have two or three columns"
+                )
         else:
             print(f"Data item {key} is not a QTable")
     return spectra
 
+
 # =============================================================================
-# CLASSES 
+# CLASSES
 # =============================================================================
+
 
 @attrs.define
 class SpectralSummary:
@@ -92,7 +103,7 @@ class SpectralSummary:
 
     Attributes
     ----------
-    header : dict-like 
+    header : dict-like
         header info from inputfile
     data : dict-like
         spectra information in Qtables
@@ -109,20 +120,34 @@ class SpectralSummary:
     def spectra(self) -> dict:
         return make_spectrum(self)
 
+    def get_spectrum(self, name):
+        """Get the spectrum by name."""
+        try:
+            return self.spectra[name]
+        except KeyError:
+            print(f"Spectrum '{name}' not found.")
+            return None
+
     def __getitem__(self, k):
-        # Permite el acceso a los atributos de la instancia como si fuera un diccionario.
+        # Permite el acceso a los atributos de la
+        # instancia como si fuera un diccionario.
         try:
             return getattr(self, k)
         except AttributeError:
             raise KeyError(k)
 
     def __len__(self):
-        # Devuelve la cantidad de atributos definidos en la clase SpectralSummary.
+        # Devuelve la cantidad de atributos
+        # definidos en la clase SpectralSummary.
         return len(attrs.fields(SpectralSummary))
 
     def __repr__(self):
-        # Devuelve una representación en cadena de la instancia.
-        return f"SpectralSummary(header={str(self.header)}, data={str(self.data)})"
+        # Devuelve una representación en
+        # cadena de la instancia.
+        return (
+            f"SpectralSummary(header={str(self.header)}, "
+            f"data={str(self.data)})"
+        )
 
     def make_plots(self):
         """Generate plots from spectra created with make_spectrum."""

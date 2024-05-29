@@ -32,15 +32,8 @@ def header_to_dataframe(header):
     df = pd.DataFrame(values, index=keys)
     return df
 
-def data_to_separate_sets(obj):
-    """Create separate objects for each item in the data dictionary."""
-    for key, value in obj.data.items():
-        setattr(obj, key, value)
-
 def make_spectrum(obj):
     """Create spectra from data"""
-    # Ejecuta la función data_to_separate_sets
-    data_to_separate_sets(obj)
     spectra = {}
     for key, value in obj.data.items():
         if isinstance(value, QTable):
@@ -86,10 +79,6 @@ class SpectralSummary:
         header info from inputfile
     data : dict-like
         spectra information in Qtables
-    header_info_df: DataFrame 
-        header info like DataFrame
-    spectra: dict
-        spectrum set created from data
     """
 
     header: dict = attrs.field(converter=lambda v: Bunch("header_items:", v))

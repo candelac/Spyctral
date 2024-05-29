@@ -35,6 +35,7 @@ def header_to_dataframe(header):
     return df
 
 
+'''
 def make_spectrum(obj):
     """Create spectra from data"""
     spectra = {}
@@ -89,6 +90,72 @@ def make_spectrum(obj):
                 )
         else:
             print(f"Data item {key} is not a QTable")
+    return spectra
+'''
+
+
+def make_spectrum(obj):
+    """Create spectra from data"""
+    spectra = {}
+
+    # Check the number of QTables in the data dictionary
+    num_tables = len(obj.data)
+
+    if num_tables == 3:
+        # Case where data contains only 4 QTables
+        for key, value in obj.data.items():
+            if isinstance(value, QTable) and len(value.columns) == 2:
+                try:
+                    wavelength = value.columns[0]
+                    flux = value.columns[1]
+
+                    # Convert to Quantity if not already
+                    if not isinstance(wavelength, Quantity):
+                        wavelength = wavelength.quantity
+                    if not isinstance(flux, Quantity):
+                        flux = flux.quantity
+
+                    spectra[key] = Spectrum1D(
+                        flux=flux, spectral_axis=wavelength
+                    )
+                except (IndexError, TypeError) as e:
+                    print(f"Error creating spectrum for {key}: {e}")
+            else:
+                print(f"Data item {key} is not a QTable with two columns")
+    elif num_tables == 5:
+        # Case where data contains 6 QTables
+        synthetic_table = obj.data.get("synthetic_spectrum")
+        if synthetic_table:
+            try:
+                wavelength = synthetic_table.columns[0]
+                flux_obs = synthetic_table.columns[1]
+                flux_syn = synthetic_table.columns[2]
+
+                # Convert to Quantity if not already
+                if not isinstance(wavelength, Quantity):
+                    wavelength = wavelength.quantity
+                if not isinstance(flux_obs, Quantity):
+                    flux_obs = flux_obs.quantity
+                if not isinstance(flux_syn, Quantity):
+                    flux_syn = flux_syn.quantity
+
+                residual_flux = (flux_obs - flux_syn) / flux_obs
+                spectra["synthetic_spectrum"] = Spectrum1D(
+                    flux=flux_syn, spectral_axis=wavelength
+                )
+                spectra["observed_spectrum"] = Spectrum1D(
+                    flux=flux_obs, spectral_axis=wavelength
+                )
+                spectra["residual_spectrum"] = Spectrum1D(
+                    flux=residual_flux, spectral_axis=wavelength
+                )
+            except (IndexError, TypeError) as e:
+                print(f"Error creating spectrum for synthetic_spectrum: {e}")
+        else:
+            print("Data does not contain synthetic_spectrum")
+    else:
+        print("Data does not contain the expected number of QTables")
+
     return spectra
 
 

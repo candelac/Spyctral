@@ -10,6 +10,7 @@
 # =============================================================================
 
 from astropy.table import QTable
+from astropy.units import Quantity
 
 import attrs
 

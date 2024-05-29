@@ -42,6 +42,13 @@ def make_spectrum(obj):
                 try:
                     wavelength = value.columns[0]
                     flux = value.columns[1]
+                    
+                    # Convertir a Quantity si no lo es
+                    if not isinstance(wavelength, Quantity):
+                        wavelength = wavelength.quantity
+                    if not isinstance(flux, Quantity):
+                        flux = flux.quantity
+                    
                     spectra[key] = Spectrum1D(flux=flux, spectral_axis=wavelength)
                 except IndexError as e:
                     print(f"Error creating spectrum for {key}: {e}")
@@ -52,6 +59,15 @@ def make_spectrum(obj):
                     wavelength = value.columns[0]
                     flux_obs = value.columns[1]
                     flux_syn = value.columns[2]
+                    
+                    # Convertir a Quantity si no lo es
+                    if not isinstance(wavelength, Quantity):
+                        wavelength = wavelength.quantity
+                    if not isinstance(flux_obs, Quantity):
+                        flux_obs = flux_obs.quantity
+                    if not isinstance(flux_syn, Quantity):
+                        flux_syn = flux_syn.quantity
+                    
                     residual_flux = (flux_obs - flux_syn) / flux_obs
                     spectra["synthetic_spectrum"] = Spectrum1D(flux=flux_syn, spectral_axis=wavelength)
                     spectra["observed_spectrum"] = Spectrum1D(flux=flux_obs, spectral_axis=wavelength)

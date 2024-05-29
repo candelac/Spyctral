@@ -39,8 +39,8 @@ def make_spectrum(obj):
         if isinstance(value, QTable):
             if len(value.columns) == 2:
                 try:
-                    wavelength = value.columns[0]
-                    flux = value.columns[1]
+                    wavelength = value.columns[0].quantity if isinstance(value.columns[0], Quantity) else value.columns[0]
+                    flux = value.columns[1].quantity if isinstance(value.columns[1], Quantity) else value.columns[1]
                     spectra[key] = Spectrum1D(flux=flux, spectral_axis=wavelength)
                 except IndexError as e:
                     print(f"Error creating spectrum for {key}: {e}")
@@ -48,9 +48,9 @@ def make_spectrum(obj):
                     print(f"Error creating spectrum for {key}: {e}")
             elif len(value.columns) == 3:
                 try:
-                    wavelength = value.columns[0]
-                    flux_obs = value.columns[1]
-                    flux_syn = value.columns[2]
+                    wavelength = value.columns[0].quantity if isinstance(value.columns[0], Quantity) else value.columns[0]
+                    flux_obs = value.columns[1].quantity if isinstance(value.columns[1], Quantity) else value.columns[1]
+                    flux_syn = value.columns[2].quantity if isinstance(value.columns[2], Quantity) else value.columns[2]
                     residual_flux = (flux_obs - flux_syn) / flux_obs
                     spectra["synthetic_spectrum"] = Spectrum1D(flux=flux_syn, spectral_axis=wavelength)
                     spectra["observed_spectrum"] = Spectrum1D(flux=flux_obs, spectral_axis=wavelength)

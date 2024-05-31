@@ -100,7 +100,8 @@ def make_spectrum(obj):
                         wavelength.dtype, np.number
                     ) and np.issubdtype(flux.dtype, np.number):
                         spectra[key] = Spectrum1D(
-                            flux=flux, spectral_axis=wavelength
+                            flux=flux * u.dimensionless_unscaled,
+                            spectral_axis=wavelength,
                         )
                     else:
                         raise TypeError(

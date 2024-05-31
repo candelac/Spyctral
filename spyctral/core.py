@@ -52,7 +52,7 @@ def _make_spectrum1d_from_qtable(qtable):
     """
 
     # Verify that the required columns are present in the QTable
-    required_columns = ["l_obs", "f_obs", "f_syn"]
+    required_columns = ["l_obs", "f_obs", "f_syn", "weights"]
     for col in required_columns:
         if col not in qtable.colnames:
             raise ValueError(
@@ -114,7 +114,7 @@ def make_spectrum(obj):
                     raise ValueError(
                         f"Error al crear el espectro para {key}: {e}"
                     )
-            elif key == "synthetic_spectrum":
+            elif key == "synthetic_spectrum" and len(value.columns) == 3:
                 try:
                     spectra.update(_make_spectrum1d_from_qtable(value))
                 except (IndexError, TypeError) as e:

@@ -60,7 +60,7 @@ def _make_spectrum1d_from_qtable(qtable):
             )
 
     # Extract the necessary columns
-    wavelength = qtable["l_obs"].quantity  # Use the existing units
+    wavelength = qtable["l_obs"]
     flux_obs = qtable["f_obs"].data  # Extract data without units
     flux_syn = qtable["f_syn"].data  # Extract data without units
 

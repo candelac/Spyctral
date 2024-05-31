@@ -123,10 +123,7 @@ def make_spectrum(obj):
                     raise ValueError(
                         f"Error al crear el espectro para {key}: {e}"
                     )
-            else:
-                raise ValueError(
-                    f"El elemento de datos kakakakakakaks"
-                )
+            
     return spectra
 
 

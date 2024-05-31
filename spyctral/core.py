@@ -63,6 +63,7 @@ def _make_spectrum1d_from_qtable(qtable):
     wavelength = qtable["l_obs"]
     flux_obs = qtable["f_obs"].data  # Extract data without units
     flux_syn = qtable["f_syn"].data  # Extract data without units
+    weights = qtable["weights"].data
 
     # Calculate the residual flux
     residual_flux = (flux_obs - flux_syn) / flux_obs
@@ -113,7 +114,7 @@ def make_spectrum(obj):
                     raise ValueError(
                         f"Error al crear el espectro para {key}: {e}"
                     )
-            elif key == "synthetic_spectrum"  and len(value.columns) == 3:
+            elif key == "synthetic_spectrum" and len(value.columns) == 3:
                 try:
                     spectra.update(_make_spectrum1d_from_qtable(value))
                 except (IndexError, TypeError) as e:

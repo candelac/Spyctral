@@ -124,7 +124,7 @@ def make_spectrum(obj):
             else:
                 raise ValueError(
                     f"El elemento de datos {key} es un QTable"
-                    " pero no tiene dos o cuatro columnas"
+                    "pero no tiene dos o cuatro columnas"
                 )
         else:
             raise TypeError(f"El elemento de datos {key} no es un QTable")

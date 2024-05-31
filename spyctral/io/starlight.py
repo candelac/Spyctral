@@ -7,6 +7,7 @@
 
 import re
 
+import astropy.units as u
 from astropy.table import QTable
 
 import dateutil.parser
@@ -123,10 +124,35 @@ def _proces_tables(block_lines):
         .replace("?", "")
         .strip()
     )
+
+    # Verificar que los elementos sean números
+    for i, row in enumerate(blocks[4]):
+        converted_row = []
+        for item in row:
+            try:
+                # Intentar convertir el elemento en un número
+                converted_item = float(item)
+            except ValueError:
+                # Si no se puede convertir a número, levantar una excepción
+                raise ValueError(
+                    f"Element at position ({i})"
+                    " in 'synthetic_spectrum' table cannot "
+                    "  be converted to a number."
+                )
+            converted_row.append(converted_item)
+        blocks[4][i] = converted_row
+
+    # Crear la tabla synthetic_spectrum con unidades
+    synthetic_spectrum_table = QTable(
+        rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
+    )
+
+    # Cambio: Agregar unidades a la columna 'l_obs'
+    synthetic_spectrum_table["l_obs"].unit = u.AA
+
     spectra_dict = {
-        "synthetic_spectrum": QTable(
-            rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
-        ),
+        # Cambio: Usar la tabla con unidades
+        "synthetic_spectrum": synthetic_spectrum_table,
         "synthetic_results": QTable(
             rows=blocks[0], names=first_title.split(" ")
         ),
@@ -137,6 +163,7 @@ def _proces_tables(block_lines):
             names=np.array(blocks[3]).T[0],
         ),
     }
+
     return spectra_dict
 
 

@@ -9,9 +9,8 @@
 # IMPORTS
 # =============================================================================
 
+import astropy.units as u
 from astropy.table import QTable
-
-# from astropy.units import Quantity
 
 import attrs
 
@@ -60,10 +59,10 @@ def _make_spectrum1d_from_qtable(qtable):
                 f"The column '{col}' is not present in the QTable."
             )
 
-    # Extract the necessary columns as quantities with units
-    wavelength = qtable["l_obs"].quantity
-    flux_obs = qtable["f_obs"].quantity
-    flux_syn = qtable["f_syn"].quantity
+    # Extract the necessary columns
+    wavelength = qtable["l_obs"].quantity  # Use the existing units
+    flux_obs = qtable["f_obs"].data  # Extract data without units
+    flux_syn = qtable["f_syn"].data  # Extract data without units
 
     # Calculate the residual flux
     residual_flux = (flux_obs - flux_syn) / flux_obs
@@ -71,13 +70,14 @@ def _make_spectrum1d_from_qtable(qtable):
     # Create the Spectrum1D objects
     spectra = {
         "synthetic_spectrum": Spectrum1D(
-            flux=flux_syn, spectral_axis=wavelength
+            flux=flux_syn * u.dimensionless_unscaled, spectral_axis=wavelength
         ),
         "observed_spectrum": Spectrum1D(
-            flux=flux_obs, spectral_axis=wavelength
+            flux=flux_obs * u.dimensionless_unscaled, spectral_axis=wavelength
         ),
         "residual_spectrum": Spectrum1D(
-            flux=residual_flux, spectral_axis=wavelength
+            flux=residual_flux * u.dimensionless_unscaled,
+            spectral_axis=wavelength,
         ),
     }
 
@@ -92,8 +92,8 @@ def make_spectrum(obj):
             if len(value.columns) == 2:
                 try:
                     # Extraer datos de las columnas
-                    wavelength = value[value.colnames[0]].quantity
-                    flux = value[value.colnames[1]].quantity
+                    wavelength = value[value.colnames[0]]
+                    flux = value[value.colnames[1]]
 
                     # Validar que los datos sean tipos numéricos
                     if np.issubdtype(

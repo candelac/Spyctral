@@ -116,9 +116,8 @@ def make_spectrum(obj):
                     )
             elif len(value.columns) == 4 and key == 'synthetic_spectrum':
                 try:
-                    print("Value:", value)
                     spectra.update(_make_spectrum1d_from_qtable(value))
-                    print(spectra)
+                    
                 except (IndexError, TypeError) as e:
                     raise ValueError(
                         f"Error al crear el espectro para {key}: {e}"

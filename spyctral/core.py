@@ -11,7 +11,11 @@
 
 from astropy.table import QTable
 
+# from astropy.units import Quantity
+
 import attrs
+
+import numpy as np
 
 import pandas as pd
 
@@ -26,7 +30,7 @@ from .utils.bunch import Bunch
 # =============================================================================
 
 
-def header_to_dataframe(header):
+def _header_to_dataframe(header):
     """Convert the header into a ``pandas.DataFrame``."""
     keys = list(header.keys())
     values = list(header.values())
@@ -34,108 +38,135 @@ def header_to_dataframe(header):
     return df
 
 
-'''
-def make_spectrum(obj):
-    """Create spectra from data"""
-    spectra = {}
-    for key, value in obj.data.items():
-        if isinstance(value, QTable):
-            if len(value.columns) == 2:
-                try:
-                    wavelength = value.columns[0]
-                    flux = value.columns[1]
+def _make_spectrum1d_from_qtable(qtable):
+    """
+    Creates a Spectrum1D object from a QTable.
 
-                    # Convertir a Quantity si no lo es
-                    if not isinstance(wavelength, Quantity):
-                        wavelength = wavelength.quantity
-                    if not isinstance(flux, Quantity):
-                        flux = flux.quantity
+    Parameters:
+    - qtable (QTable): The table containing the data.
 
-                    spectra[key] = Spectrum1D(
-                        flux=flux, spectral_axis=wavelength
-                    )
-                except (IndexError, TypeError) as e:
-                    print(f"Error creating spectrum for {key}: {e}")
-            elif len(value.columns) == 3:
-                try:
-                    wavelength = value.columns[0]
-                    flux_obs = value.columns[1]
-                    flux_syn = value.columns[2]
+    Returns:
+    - dict: A dictionary with the Spectrum1D objects created
+            from the QTable data.
+            The keys are 'synthetic_spectrum', 'observed_spectrum',
+            and 'residual_spectrum'.
+    """
 
-                    # Convertir a Quantity si no lo es
-                    if not isinstance(wavelength, Quantity):
-                        wavelength = wavelength.quantity
-                    if not isinstance(flux_obs, Quantity):
-                        flux_obs = flux_obs.quantity
-                    if not isinstance(flux_syn, Quantity):
-                        flux_syn = flux_syn.quantity
+    # Verify that the required columns are present in the QTable
+    required_columns = ["l_obs", "f_obs", "f_syn"]
+    for col in required_columns:
+        if col not in qtable.colnames:
+            raise ValueError(
+                f"The column '{col}' is not present in the QTable."
+            )
 
-                    residual_flux = (flux_obs - flux_syn) / flux_obs
-                    spectra["synthetic_spectrum"] = Spectrum1D(
-                        flux=flux_syn, spectral_axis=wavelength
-                    )
-                    spectra["observed_spectrum"] = Spectrum1D(
-                        flux=flux_obs, spectral_axis=wavelength
-                    )
-                    spectra["residual_spectrum"] = Spectrum1D(
-                        flux=residual_flux, spectral_axis=wavelength
-                    )
-                except (IndexError, TypeError) as e:
-                    print(f"Error creating spectrum for {key}: {e}")
-            else:
-                print(
-                    "Data item {key} is a QTable "
-                    "but does not have two or three columns"
-                )
-        else:
-            print(f"Data item {key} is not a QTable")
+    # Extract the necessary columns as quantities with units
+    wavelength = qtable["l_obs"].quantity
+    flux_obs = qtable["f_obs"].quantity
+    flux_syn = qtable["f_syn"].quantity
+
+    # Calculate the residual flux
+    residual_flux = (flux_obs - flux_syn) / flux_obs
+
+    # Create the Spectrum1D objects
+    spectra = {
+        "synthetic_spectrum": Spectrum1D(
+            flux=flux_syn, spectral_axis=wavelength
+        ),
+        "observed_spectrum": Spectrum1D(
+            flux=flux_obs, spectral_axis=wavelength
+        ),
+        "residual_spectrum": Spectrum1D(
+            flux=residual_flux, spectral_axis=wavelength
+        ),
+    }
+
     return spectra
-'''
 
 
 def make_spectrum(obj):
-    """Create spectra from data"""
+    """Crear espectros a partir de datos"""
     spectra = {}
     for key, value in obj.data.items():
         if isinstance(value, QTable):
             if len(value.columns) == 2:
                 try:
-                    wavelength = value.columns[0]
-                    flux = value.columns[1]
+                    # Extraer datos de las columnas
+                    wavelength = value[value.colnames[0]].quantity
+                    flux = value[value.colnames[1]].quantity
 
-                    # Verificar si los valores son numéricos
-                    if all(
-                        isinstance(val, (int, float)) for val in wavelength
-                    ) and all(isinstance(val, (int, float)) for val in flux):
+                    # Validar que los datos sean tipos numéricos
+                    if np.issubdtype(
+                        wavelength.dtype, np.number
+                    ) and np.issubdtype(flux.dtype, np.number):
                         spectra[key] = Spectrum1D(
                             flux=flux, spectral_axis=wavelength
                         )
                     else:
-                        print(
-                            f"Error creating spectrum for {key}:"
-                            " Non-numeric value found in QTable"
+                        raise TypeError(
+                            f"Error al crear el espectro para {key}:"
+                            "la longitud de onda y el flujo deben ser"
+                            " tipos numéricos"
                         )
                 except (IndexError, TypeError) as e:
-                    print(f"Error creating spectrum for {key}: {e}")
-            elif len(value.columns) == 3 and "synthetic_spectrum" in key:
+                    raise ValueError(
+                        f"Error al crear el espectro para {key}: {e}"
+                    )
+            elif key == "synthetic_spectrum" and len(value.columns) == 4:
+                try:
+                    spectra.update(_make_spectrum1d_from_qtable(value))
+                except (IndexError, TypeError) as e:
+                    raise ValueError(
+                        f"Error al crear el espectro para {key}: {e}"
+                    )
+            else:
+                raise ValueError(
+                    f"El elemento de datos {key} es un QTable"
+                    " pero no tiene dos o cuatro columnas"
+                )
+        else:
+            raise TypeError(f"El elemento de datos {key} no es un QTable")
+    return spectra
+
+
+"""
+def make_spectrum(obj):
+    spectra = {}
+    for key, value in obj.data.items():
+        if isinstance(value, QTable):
+            if len(value.columns) == 2:
+                try:
+                    wavelength = value.columns[0]
+                    flux = value.columns[1]
+
+                    # Verificar que los datos sean tipos numéricos válidos
+                    if isinstance(
+                        wavelength, (int, float, np.number)
+                    ) and isinstance(flux, (int, float, np.number)):
+                        spectra[key] = Spectrum1D(
+                            flux=flux, spectral_axis=wavelength
+                        )
+                    else:
+                        raise TypeError(
+                            f"Error creating spectrum for {key}:"
+                            " wavelength and flux must be numeric types"
+                        )
+                except (IndexError, TypeError) as e:
+                    raise ValueError(f"Error creating spectrum for {key}: {e}")
+            elif key == "synthetic_spectrum" and len(value.columns) == 4:
                 try:
                     wavelength = value.columns[0]
                     flux_obs = value.columns[1]
                     flux_syn = value.columns[2]
 
-                    # Verificar si los valores son numéricos
+                    # Verificar que los datos sean tipos numéricos válidos
                     if (
-                        all(
-                            isinstance(val, (int, float)) for val in wavelength
-                        )
-                        and all(
-                            isinstance(val, (int, float)) for val in flux_obs
-                        )
-                        and all(
-                            isinstance(val, (int, float)) for val in flux_syn
-                        )
+                        isinstance(wavelength, (int, float, np.number))
+                        and isinstance(flux_obs, (int, float, np.number))
+                        and isinstance(flux_syn, (int, float, np.number))
                     ):
                         residual_flux = (flux_obs - flux_syn) / flux_obs
+
                         spectra["synthetic_spectrum"] = Spectrum1D(
                             flux=flux_syn, spectral_axis=wavelength
                         )
@@ -146,21 +177,22 @@ def make_spectrum(obj):
                             flux=residual_flux, spectral_axis=wavelength
                         )
                     else:
-                        print(
-                            f"Error creating spectrum for {key}: "
-                            "Non-numeric value found in QTable"
+                        raise TypeError(
+                            f"Error creating spectrum for {key}:"
+                            " wavelength, flux_obs, and flux_syn"
+                            " must be numeric types"
                         )
                 except (IndexError, TypeError) as e:
-                    print(f"Error creating spectrum for {key}: {e}")
+                    raise ValueError(f"Error creating spectrum for {key}: {e}")
             else:
-                print(
-                    f"Data item {key} is a "
-                    "QTable but does not have two or three columns"
+                raise ValueError(
+                    f"Data item {key} is a QTable but "
+                    "does not have two or three columns"
                 )
         else:
-            print(f"Data item {key} is not a QTable")
+            raise TypeError(f"Data item {key} is not a QTable")
     return spectra
-
+"""
 
 # =============================================================================
 # CLASSES
@@ -184,7 +216,7 @@ class SpectralSummary:
 
     @property
     def header_info_df(self) -> pd.DataFrame:
-        return header_to_dataframe(self.header)
+        return _header_to_dataframe(self.header)
 
     @property
     def spectra(self) -> dict:

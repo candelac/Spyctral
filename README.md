@@ -1,2 +1,36 @@
-# Spyctral
-Spyctral is a python library that allows you to determine fundamental parameters of astronomical objects from the analysis of their spectral synthesis and/or templates fitting.
+# Spyctral: Astronomical spectral data analyser
+
+Spyctral is a python package that allows to determine fundamental parameters of astronomical objects from the analysis of their spectral synthesis and/or templates fitting. 
+
+## Description 
+
+Spyctral is a set of tools to representing, loading, manipulating and analyzing astronomical spectroscopic data from spectral synthesis code results and templates fitting ones. The package provide a python toolbox to organize the outputs files and calculate astronomical  object parameters in a fast and accurate way giving to the astronomical community the spectra analysis more available.
+
+## Motivation
+
+Star clusters stand as a pivotal yardstick in modern astrophysics. They are excellent targets to determine stellar ages and metallicities pro-
+viding rich information on the star formation and chemical histories of their host galaxies (e.g., Greggio & Renzini 2011; Adamo et al.
+2020; Berek et al. 2023). Ages, metallicities, radial velocities and reddening of star clusters can be obtained using the integrated spec-
+trum fitting technique both in the Local Group and in more distant galaxies (e.g., Asa’d et al. 2013; Ahumada et al. 2016; Clariá et al. 2017; Colucci et al. 2017; Chilingarian & Asa’d 2018; Ahumada et al. 2019; Bastian et al. 2019; Moura et al. 2019; Sakari et al. 2021;
+Simondi-Romero et al. 2022). Several automated tools have been developed to apply this powerful technique and they are widely used in the literature. STARLIGHT (Cid Fernandes et al. 2005), NBursts (Chilingarian et al. 2007), EZ_age (Graves & Schiavon 2008), FISA (Benítez-Llambay et al. 2012), and Analyzer of Spectra for Age Determination (A.S.A.D) (Asa’d 2014) are some examples.
+
+STARLIGHT apply the integrated spectrum of the star clusters to estimate the age, reddening and radial velocity, however the two tools use different approaches. STARLIGHT provides the results of the best simple stellar populations (SSP) mixture that match the observed integrated spectrum along with the final synthetic spectrum which represents the combined contributions of the different SSP population mixtures. However, the outputfile does not give the final object parameters so Spyctral was developed to could explore the results and finally 
+obtain the age, reddening, radial velocity and abundances. 
+
+FISA: “Fast Integrated Spectra Analyzer” permits fast and reasonably accurate age and reddening determinations for clusters by using their integrated spectra and currently available template spectrum libraries. This algorithm and its implementation gives a results file with the astrophysical information in differents blocks. To could look at the parameters in shorter times than look case by case or file by file, Spyctral take the FISA outfile and give you the object parameters in a easy way. 
+
+The Spyctral code allows you to save processing time and help to achieve astrophysical results in shorter times than from other methods. In this way the focus of analysis can be quickly redirected to the astrophysical results in a timely manner. 
+
+## Features
+Spyctral needs a minimum of one text file and you need to know the source code of the file to be analysed to could use the library correctly. 
+
+## Requeriments
+## Basic install
+## Tutorial
+## Authors
+
+* Tapia-Reina Martina (martina.tapia@mi.unc.edu.ar)
+* Cerdosino Candela (mail)
+* Fiore J.Manuel (mail)
+* Martinez J.Luis (mail)
+* Cabral Juan (mail)

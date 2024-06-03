@@ -19,7 +19,7 @@ obtain the age, reddening, radial velocity and abundances.
 
 FISA: “Fast Integrated Spectra Analyzer” permits fast and reasonably accurate age and reddening determinations for clusters by using their integrated spectra and currently available template spectrum libraries. This algorithm and its implementation gives a results file with the astrophysical information in differents blocks. To could look at the parameters in shorter times than look case by case or file by file, Spyctral take the FISA outfile and give you the object parameters in a easy way. 
 
-The Spyctral code allows you to save processing time and help to achieve astrophysical results in shorter times than from other methods. In this way the focus of analysis can be quickly redirected to the astrophysical results in a timely manner. 
+The Spyctral code receives files (text files with all the spectroscopic info) related to the observed object, extracts the necessary information and offers the necessary methods to determine the astrophysical parameters of the object. This approach will save processing time and help to achieve astrophysical results in shorter times than from other methods. In this way the focus of analysis can be quickly redirected to the astrophysical results in a timely manner. 
 
 ## Features
 Spyctral needs a minimum of one text file and you need to know the source code of the file to be analysed to could use the library correctly. 

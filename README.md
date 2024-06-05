@@ -1,6 +1,6 @@
 # Spyctral: Astronomical spectral data analyser
 
-Spyctral is a python package that allows to determine fundamental parameters of astronomical objects from the analysis of their spectral synthesis and/or templates fitting. 
+Spyctral is a python package that allows to determine fundamental parameters of compact stellar systems from the analysis of their spectral synthesis and/or templates fitting. 
 
 ## Description 
 

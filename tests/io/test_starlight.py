@@ -83,7 +83,9 @@ def test_read_starlight_type(file_path):
     assert isinstance(summary.header.YAV_min, float)
 
     assert isinstance(summary.data, Bunch)
-    assert isinstance(summary.data.synt_results, QTable)  # faltan unidades
+    assert isinstance(
+        summary.data.synthetic_spectrum, QTable
+    )  # faltan unidades
     assert isinstance(
         summary.data.results_average_chains_xj, QTable
     )  # faltan unidades y nombre de columnas
@@ -94,11 +96,11 @@ def test_read_starlight_type(file_path):
         summary.data.results_average_chains_Av_chi2_mass, QTable
     )  # faltan unidades
     assert isinstance(
-        summary.data.synthetic_spectrum, QTable
+        summary.data.synthetic_results, QTable
     )  # faltan unidades
 
     assert len(summary.data.synthetic_results) == 69
     assert len(summary.data.results_average_chains_xj) == 69
-    assert len(summary.data.qresults_average_chains_mj) == 69
+    assert len(summary.data.results_average_chains_mj) == 69
     assert len(summary.data.results_average_chains_Av_chi2_mass) == 9
     assert len(summary.data.synthetic_spectrum) == 1524

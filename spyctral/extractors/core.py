@@ -107,8 +107,8 @@ ExtractorConf = namedtuple(
 
 
 class ExtractorMeta(type):
-    def __new__(mcls, name, bases, namespace):
-        cls = super(ExtractorMeta, mcls).__new__(mcls, name, bases, namespace)
+    def __new__(cls, name, bases, namespace):
+        cls = super(ExtractorMeta, cls).__new__(cls, name, bases, namespace)
 
         try:
             cls != Extractor

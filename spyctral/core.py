@@ -143,9 +143,10 @@ class SpectralSummary:
     data : dict-like
         spectra information in Qtables
     """
-
-    header: dict = attrs.field(converter=lambda v: Bunch("header_items:", v))
-    data: dict = attrs.field(converter=lambda v: Bunch("data_items:", v))
+    age: float = attrs.field(converter=float)
+    header: dict = attrs.field(converter=lambda v: Bunch("header", v))
+    data: dict = attrs.field(converter=lambda v: Bunch("data", v))
+    extra: dict = attrs.field(converter=lambda v: Bunch("extra", v))
 
     @property
     def header_info_df(self) -> pd.DataFrame:
@@ -157,11 +158,7 @@ class SpectralSummary:
 
     def get_spectrum(self, name):
         """Get the spectrum by name."""
-        try:
-            return self.spectra[name]
-        except KeyError:
-            print(f"Spectrum '{name}' not found.")
-            return None
+        return self.spectra[name]
 
     def __getitem__(self, k):
         # Permite el acceso a los atributos de la

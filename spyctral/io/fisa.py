@@ -32,6 +32,7 @@ FISA_RX_NORMALIZATION_POINT = re.compile(
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
+FISA_DEFAULT_AGE_MAP = {'G2': 1e9, 'G3':2e9} 
 
 def _process_header(lines):
     """
@@ -98,8 +99,14 @@ def _process_blocks(spectra_blocks, tab_names):
 
     return spectra_tables
 
+def _get_age(header, age_map):
+    template = header.adopted_template
+    str_age = template.split("/")[-1]
+    age = age_map[str_age]
 
-def read_fisa(path_or_buffer):
+    return age, str_age
+
+def read_fisa(path_or_buffer, *, age_map=None):
     """
     This function reads FISA file.
 
@@ -113,6 +120,7 @@ def read_fisa(path_or_buffer):
     out: SpectralSummary
 
     """
+    age_map = FISA_DEFAULT_AGE_MAP if age_map is None
     header_lines, spectra_blocks = [], []
     current_spectrum = []
     with open(path_or_buffer, "r") as fp:
@@ -133,4 +141,6 @@ def read_fisa(path_or_buffer):
 
     spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
-    return core.SpectralSummary(header=header, data=spectra)
+    age, str_age = _get_age(header, age_map)
+    extra = {'str_age': str_age}
+    return core.SpectralSummary(age=age, extra=extra, header=header, data=spectra)

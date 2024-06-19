@@ -166,8 +166,24 @@ def _proces_tables(block_lines):
 
     return spectra_dict
 
+def _get_age(tables_dict, x_j_gt, decimals):
+    
+    df = starlight.tabla_synthesis_results
+    df = df[df["x_j(%)"] > x_j_gt]
 
-def read_starlight(path):
+    age = int(
+        10
+        ** (
+            ((df["x_j(%)"] * np.log10(df["age_j(yr)"]))).sum()
+            / df["x_j(%)"].sum()
+        )
+    )
+    age = np.log10(age)
+    age = round(age, decimals)
+
+    return age
+
+def read_starlight(path, *, x_j_gt=5, decimals=2):
     """Recives as input a path from the location of the starlight file and
     returns a two dicctionaries the first is the header information and the
     second is the tables information"""
@@ -185,4 +201,6 @@ def read_starlight(path):
     tables_dict = _proces_tables(block_lines)
 
     # return header_info, tables_dict
-    return core.SpectralSummary(header=header_info, data=tables_dict)
+    age= _get_age(tables_dict, x_j_gt, decimals)
+    extra = {'x_j_gt':x_j_gt, 'decimals': decimals}
+    return core.SpectralSummary(age=age, extra=extra, header=header_info, data=tables_dict)

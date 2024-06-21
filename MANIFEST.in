@@ -1,13 +1,9 @@
 include LICENSE
 include README.md
 
-recursive-include spyctral *.py
-recursive-include spyctral *.fisa
-recursive-include spyctral *.out
-
 exclude tox.ini
 exclude pyproject.toml
-exclude header-template
+exclude .header-template
 
 recursive-exclude tests *
-recursive-exclude Add_on *
+recursive-exclude add_on *

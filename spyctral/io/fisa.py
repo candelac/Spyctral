@@ -1,10 +1,18 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+# License: MIT
+# Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
+# Tapia-Reina Martina
+# All rights reserved.
+
 import re
+
+import astropy.units as u
+from astropy.table import QTable
 
 import dateutil.parser
 
-import numpy as np
-
-from . import core
+from spyctral import core
 
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"
@@ -45,7 +53,9 @@ def _process_header(lines):
         idx = int(match.group("index"))
         name = match.group("value")
         spectra_names[idx] = name
-    spectra_names = tuple(name for _, name in sorted(spectra_names.items()))
+    spectra_names = tuple(
+        name.replace(" ", "_") for _, name in sorted(spectra_names.items())
+    )
 
     header = {
         "fisa_version": fisa_version,
@@ -57,6 +67,36 @@ def _process_header(lines):
     }
 
     return header
+
+
+def _fisa_spectra_names(spectra, table_names):
+    renamed_spectra = {
+        table_name: table for table_name, table in zip(table_names, spectra)
+    }
+    return renamed_spectra
+
+
+def _process_blocks(spectra_blocks, tab_names):
+    spectra = []
+
+    for block in spectra_blocks:
+        block_data = []
+        column_names = [
+            "Wavelength",
+            "Normalizated_flux",
+        ]
+        for line in block:
+            elements = list(map(float, line.strip().split()))
+            block_data.append(elements)
+
+        if column_names and block_data:
+            table = QTable(rows=block_data, names=column_names)
+            table["Wavelength"].unit = u.Angstrom
+            spectra.append(table)
+
+    spectra_tables = _fisa_spectra_names(spectra, tab_names)
+
+    return spectra_tables
 
 
 def read_fisa(path_or_buffer):
@@ -73,23 +113,24 @@ def read_fisa(path_or_buffer):
     out: SpectralSummary
 
     """
-    header_lines, spectra_lines = [], []
+    header_lines, spectra_blocks = [], []
     current_spectrum = []
     with open(path_or_buffer, "r") as fp:
         for line in fp:
             if line.startswith(" #"):
                 header_lines.append(line.strip())
             elif line.strip():
-                lamb, flux = map(float, line.split())
-                current_spectrum.append([lamb, flux])
+                current_spectrum.append(line)
             elif current_spectrum and not line.strip():
-                spectra_lines.append(np.array(current_spectrum, dtype=float))
+                spectra_blocks.append(current_spectrum)
                 current_spectrum = []
 
     if current_spectrum:
-        spectra_lines.append(np.array(current_spectrum, dtype=float))
+        spectra_blocks.append(current_spectrum)
         del current_spectrum
 
     header = _process_header(header_lines)
 
-    return core.SpectralSummary(None, header=header)
+    spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
+
+    return core.SpectralSummary(header=header, data=spectra)

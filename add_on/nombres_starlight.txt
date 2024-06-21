@@ -1,0 +1,28 @@
+
+En el header:
+
+- No guardar en el header 'Cid@UFSC' porque no es necesario y rombe el test
+
+- Cambiar los nombres de estos casos para que no se rompa el test:
+
+Clip-Bug   ---> Clip_Bug, 
+RC-Crash  --> RC_Crash
+Burn-In warning-flags --> Burn_In_warning_flags
+wdt_SysTime (sec) --> wdt_SysTime_[sec]
+
+
+- Cambiar estas cositas en las tablas:
+
+En "synthetic_spectrum" agragar las unidades a cada columna
+
+                        --> l_obs: en Angstroms '[Å]'
+                            f_obs y f_syn: en '[fobs_norm units]'
+                            wei: no hace falta ponerle unidades 
+
+A "synt_results" cambiar el nombre por "synthetic_results' 
+
+A "qtable_1" cambiar el nombre por "results_average_chains_xj"
+  "qtable_2" cambiar el nombre por "results_average_chains_mj"
+  "qtable_3" cambiar el nombre por "results_average_chains_Av_chi2_mass"
+
+! No hace falta ponerle unidades a estos tres bloques ! 

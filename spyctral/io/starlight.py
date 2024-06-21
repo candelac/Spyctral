@@ -14,7 +14,7 @@ import dateutil.parser
 
 import numpy as np
 
-# import pandas as pd
+import pandas as pd
 
 from spyctral import core
 
@@ -166,24 +166,73 @@ def _proces_tables(block_lines):
 
     return spectra_dict
 
-def _get_age(tables_dict, x_j_gt, decimals):
-    
-    df = starlight.tabla_synthesis_results
-    df = df[df["x_j(%)"] > x_j_gt]
+
+def _get_ssp_contributions(tables_dict, xj_percent):
+    ssps_vector = tables_dict["synthetic_results"]
+    ssps_vector = (
+        ssps_vector.to_pandas()
+    )  # Convertir QTable a DataFrame de Pandas
+
+    # Convertir todas las columnas a números flotantes
+    ssps_vector = ssps_vector.apply(pd.to_numeric, errors="coerce")
+
+    ssps_vector = ssps_vector[ssps_vector["x_j(%)"] > xj_percent].reset_index(
+        drop=True
+    )
+    ssps_vector["x_j(%)"] = (
+        ssps_vector["x_j(%)"] * 100 / ssps_vector["x_j(%)"].sum()
+    )
+
+    return ssps_vector
+
+
+def _get_age(ssps_vector, age_decimals):
+    """
+    This function get age from input file.
+    """
 
     age = int(
         10
         ** (
-            ((df["x_j(%)"] * np.log10(df["age_j(yr)"]))).sum()
-            / df["x_j(%)"].sum()
+            (
+                (ssps_vector["x_j(%)"] * np.log10(ssps_vector["age_j(yr)"]))
+            ).sum()
+            / ssps_vector["x_j(%)"].sum()
         )
     )
     age = np.log10(age)
-    age = round(age, decimals)
+    age = round(age, age_decimals)
 
     return age
 
-def read_starlight(path, *, x_j_gt=5, decimals=2):
+
+def _get_reddening(header_info, rv):
+    """
+    This function determinate reddening value from input file.
+    """
+
+    av_value = header_info["AV_min"]
+    reddening_value = av_value / rv
+
+    return reddening_value, av_value
+
+
+def _get_metallicity(ssps_vector, z_decimals):
+    """
+    This function calculate metallicity value from input file.
+    """
+
+    z_value = (
+        (ssps_vector["x_j(%)"] * ssps_vector["Z_j"])
+    ).sum() / ssps_vector["x_j(%)"].sum()
+    z_value = round(z_value, z_decimals)
+
+    return z_value
+
+
+def read_starlight(
+    path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
+):
     """Recives as input a path from the location of the starlight file and
     returns a two dicctionaries the first is the header information and the
     second is the tables information"""
@@ -200,7 +249,31 @@ def read_starlight(path, *, x_j_gt=5, decimals=2):
 
     tables_dict = _proces_tables(block_lines)
 
-    # return header_info, tables_dict
-    age= _get_age(tables_dict, x_j_gt, decimals)
-    extra = {'x_j_gt':x_j_gt, 'decimals': decimals}
-    return core.SpectralSummary(age=age, extra=extra, header=header_info, data=tables_dict)
+    ssps_vector = _get_ssp_contributions(tables_dict, xj_percent)
+
+    age = _get_age(ssps_vector, age_decimals)
+
+    reddening_value, av_value = _get_reddening(header_info, rv)
+
+    normalization_point = header_info["l_norm"]
+
+    z_value = _get_metallicity(ssps_vector, z_decimals)
+
+    extra = {
+        "xj_percent": xj_percent,
+        "age_decimals": age_decimals,
+        "rv": rv,
+        "z_decimals": z_decimals,
+    }
+
+    return core.SpectralSummary(
+        header=header_info,
+        data=tables_dict,
+        age=age,
+        reddening=reddening_value,
+        av_value=av_value,
+        normalization_point=normalization_point,
+        z_value=z_value,
+        ssps_vector=ssps_vector,
+        extra=extra,
+    )

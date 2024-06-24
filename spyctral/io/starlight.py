@@ -230,6 +230,57 @@ def _get_metallicity(ssps_vector, z_decimals):
     return z_value
 
 
+def _get_z_values(ssps_vector):
+    max_xj_index = ssps_vector["x_j(%)"].idxmax()
+    min_xj_index = ssps_vector["x_j(%)"].idxmin()
+
+    z_ssp_max = float(ssps_vector.loc[max_xj_index, "Z_j"])
+    z_ssp_min = float(ssps_vector.loc[min_xj_index, "Z_j"])
+
+    z_values = {"z_ssp_max": z_ssp_max, "z_ssp_min": z_ssp_min}
+
+    return z_values
+
+
+def _get_vel_values(header_info):
+    v0_min = float(header_info["v0_min"])
+    vd_min = float(header_info["vd_min"])
+
+    vel_values = {"v0_min": v0_min, "vd_min": vd_min}
+
+    return vel_values
+
+
+def _get_quality_fit_values(header_info):
+    chi2_nl_eff = float(header_info["chi2_Nl_eff"])
+    adev = float(header_info["adev"])
+
+    quality_fit = {"chi2_nl_eff": chi2_nl_eff, "adev": adev}
+
+    return quality_fit
+
+
+def _get_starlight_extra_info(ssps_vector, header_info):
+    z_values = _get_z_values(ssps_vector)
+    vel_values = _get_vel_values(header_info)
+    quality_fit = _get_quality_fit_values(header_info)
+
+    keys = (
+        list(z_values.keys())
+        + list(vel_values.keys())
+        + list(quality_fit.keys())
+    )
+    values = (
+        list(z_values.values())
+        + list(vel_values.values())
+        + list(quality_fit.values())
+    )
+
+    starlight_particular_info = pd.DataFrame(values, index=keys)
+
+    return starlight_particular_info
+
+
 def read_starlight(
     path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
 ):
@@ -259,11 +310,15 @@ def read_starlight(
 
     z_value = _get_metallicity(ssps_vector, z_decimals)
 
-    extra = {
+    synthesis_info = _get_starlight_extra_info(ssps_vector, header_info)
+
+    extra_info = {
         "xj_percent": xj_percent,
         "age_decimals": age_decimals,
         "rv": rv,
         "z_decimals": z_decimals,
+        "ssps_vector": ssps_vector,
+        "synthesis_info": synthesis_info,
     }
 
     return core.SpectralSummary(
@@ -274,6 +329,5 @@ def read_starlight(
         av_value=av_value,
         normalization_point=normalization_point,
         z_value=z_value,
-        ssps_vector=ssps_vector,
-        extra=extra,
+        extra_info=extra_info,
     )

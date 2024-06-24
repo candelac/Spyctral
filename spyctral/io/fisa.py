@@ -212,7 +212,7 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
             "in z_map."
         )
 
-    extra = {"str_template": str_template}
+    extra_info = {"str_template": str_template}
 
     return core.SpectralSummary(
         header=header,
@@ -222,6 +222,5 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
         av_value=av_value,
         normalization_point=normalization_point,
         z_value=z_value,
-        ssps_vector=None,
-        extra=extra,
+        extra_info=extra_info,
     )

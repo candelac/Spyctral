@@ -127,69 +127,6 @@ def make_spectrum(obj):
     return spectra
 
 
-def _get_z_values(ssps_vector):
-    max_xj_index = ssps_vector["x_j(%)"].idxmax()
-    min_xj_index = ssps_vector["x_j(%)"].idxmin()
-
-    z_ssp_max = float(ssps_vector.loc[max_xj_index, "Z_j"])
-    z_ssp_min = float(ssps_vector.loc[min_xj_index, "Z_j"])
-
-    z_values = {"z_ssp_max": z_ssp_max, "z_ssp_min": z_ssp_min}
-
-    return z_values
-
-
-def _get_vel_values(header):
-    v0_min = float(header["v0_min"])
-    vd_min = float(header["vd_min"])
-
-    vel_values = {"v0_min": v0_min, "vd_min": vd_min}
-
-    return vel_values
-
-
-def _get_quality_fit_values(header):
-    chi2_nl_eff = float(header["chi2_Nl_eff"])
-    adev = float(header["adev"])
-
-    quality_fit = {"chi2_nl_eff": chi2_nl_eff, "adev": adev}
-
-    return quality_fit
-
-
-def _get_starlight_info(ssps_vector, header):
-    z_values = _get_z_values(ssps_vector)
-    vel_values = _get_vel_values(header)
-    quality_fit = _get_quality_fit_values(header)
-
-    keys = (
-        list(z_values.keys())
-        + list(vel_values.keys())
-        + list(quality_fit.keys())
-    )
-    values = (
-        list(z_values.values())
-        + list(vel_values.values())
-        + list(quality_fit.values())
-    )
-
-    starlight_particular_info = pd.DataFrame(values, index=keys)
-
-    return starlight_particular_info
-
-
-def _convert_to_dataframe(v):
-    """Convert input to a pandas DataFrame, or return
-    an empty DataFrame if input is None."""
-
-    if v is None:
-        return pd.DataFrame()
-    elif isinstance(v, pd.DataFrame):
-        return v
-    else:
-        return pd.DataFrame(v)
-
-
 # =============================================================================
 # CLASSES
 # =============================================================================
@@ -213,11 +150,9 @@ class SpectralSummary:
         Av value.
     normalization_point : float
         Normalization point value.
-    Z_value : float
+    z_value : float
         Metallicity value.
-    ssps_vector : pandas.DataFrame
-        Spectral Synthesis Population vector as a pandas DataFrame.
-    extra : dict-like
+    extra_info : dict-like
         Additional info.
     """
 
@@ -228,8 +163,7 @@ class SpectralSummary:
     av_value: float = attrs.field(converter=float)
     normalization_point: float = attrs.field(converter=float)
     z_value: float = attrs.field(converter=float)
-    ssps_vector: pd.DataFrame = attrs.field(converter=_convert_to_dataframe)
-    extra: dict = attrs.field(converter=lambda v: Bunch("extra", v))
+    extra_info: dict = attrs.field(converter=lambda v: Bunch("extra", v))
 
     @property
     def header_info_df(self) -> pd.DataFrame:
@@ -328,31 +262,6 @@ class SpectralSummary:
         metallicity_info = {"Z_value": self.z_value, "[Fe/H]": feh_ratio}
 
         return metallicity_info
-
-    def get_starlight_info(self):
-        """Retrieve starlight information as a DataFrame.
-
-        Returns
-        -------
-        pd.DataFrame
-            Starlight information.
-
-        Raises
-        ------
-        ValueError
-            If SSPs vector is empty, indicating that the
-            method is only available for Starlight files.
-        """
-        if self.ssps_vector.empty:
-            raise ValueError(
-                """This method is only available
-                      for Starlight files. SSPs vector is empty."""
-            )
-
-        try:
-            return _get_starlight_info(self.ssps_vector, self.header)
-        except Exception as e:
-            raise e
 
     def make_plots(self):
         """Generate plots from spectra created with make_spectrum.

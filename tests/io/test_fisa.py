@@ -5,7 +5,7 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
-"""Test input data."""
+"""FISA test input data."""
 
 # =============================================================================
 # IMPORTS
@@ -20,7 +20,7 @@ from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 
 
-def test_read_fisa_type(file_path):
+def test_read_fisa(file_path):
     path = file_path("case_SC_FISA.fisa")
 
     summary = fisa.read_fisa(path)
@@ -60,3 +60,12 @@ def test_read_fisa_type(file_path):
     assert len(summary.data.Template_spectrum) == 3401
     assert len(summary.data.Observed_spectrum) == 3000
     assert len(summary.data.Residual_flux) == 3000
+
+    assert isinstance(summary.age, float)
+    assert summary.age == 1e9
+
+    assert isinstance(summary.reddening, float)
+    assert isinstance(summary.av_value, float)
+    assert isinstance(summary.normalization_point, float)
+    assert isinstance(summary.z_value, float)
+    assert isinstance(summary.extra_info, Bunch)

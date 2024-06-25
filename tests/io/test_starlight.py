@@ -5,7 +5,7 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
-"""Test input data."""
+"""STARLIGHT test input data."""
 
 # =============================================================================
 # IMPORTS
@@ -20,7 +20,7 @@ from spyctral.io import starlight
 from spyctral.utils.bunch import Bunch
 
 
-def test_read_starlight_type(file_path):
+def test_read_starlight(file_path):
     path = file_path("case_SC_Starlight.out")
 
     summary = starlight.read_starlight(path)
@@ -104,3 +104,10 @@ def test_read_starlight_type(file_path):
     assert len(summary.data.results_average_chains_mj) == 69
     assert len(summary.data.results_average_chains_Av_chi2_mass) == 9
     assert len(summary.data.synthetic_spectrum) == 1524
+
+    assert isinstance(summary.age, float)
+    assert isinstance(summary.reddening, float)
+    assert isinstance(summary.av_value, float)
+    assert isinstance(summary.normalization_point, float)
+    assert isinstance(summary.z_value, float)
+    assert isinstance(summary.extra_info, Bunch)

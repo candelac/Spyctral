@@ -32,9 +32,9 @@ FISA_RX_NORMALIZATION_POINT = re.compile(
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
-FISA_DEFAULT_AGE_MAP = {"G2.dat": 1e9, "G3": 2e9}
+FISA_DEFAULT_AGE_MAP = {"G2": 1e9, "G3": 2e9}
 
-FISA_DEFAULT_Z_MAP = {"G2.dat": 0.4}
+FISA_DEFAULT_Z_MAP = {"G2": 0.4, "G3": 0.5}
 
 
 def _process_header(lines):
@@ -110,12 +110,19 @@ def _get_str_template(header):
     return str_template
 
 
-def _get_age(age_map, str_template):
+def _get_name_template(header):
+    template = header["adopted_template"]
+    name_template = (template.split("/")[-1]).split(".")[0]
+
+    return name_template
+
+
+def _get_age(age_map, name_template):
     """
     This function get age from input file.
     """
 
-    age = age_map[str_template]
+    age = age_map[name_template]
 
     return age
 
@@ -193,26 +200,33 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
     spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
     str_template = _get_str_template(header)
+    name_template = _get_name_template(header)
 
     try:
-        age = age_map[str_template]
+        age = age_map[name_template]
     except KeyError:
         raise ValueError(
-            f"Missing age mapping for template '{str_template}' " "in age_map."
+            f"Missing age mapping for template '{name_template}' "
+            "in age_map."
         )
 
     reddening_value, av_value = _get_reddening(header, rv)
     normalization_point = header["normalization_point"]
 
     try:
-        z_value = z_map[str_template]
+        z_value = z_map[name_template]
     except KeyError:
         raise ValueError(
-            f"Missing metallicity mapping for template '{str_template}' "
+            f"Missing metallicity mapping for template '{name_template}' "
             "in z_map."
         )
 
-    extra_info = {"str_template": str_template}
+    extra_info = {
+        "str_template": str_template,
+        "name_template": name_template,
+        "age_map": age_map,
+        "z_map": z_map,
+    }
 
     return core.SpectralSummary(
         header=header,

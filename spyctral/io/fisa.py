@@ -32,7 +32,7 @@ FISA_RX_NORMALIZATION_POINT = re.compile(
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
-FISA_DEFAULT_AGE_MAP = {"G2": 1e9, "G3": 2e9}
+FISA_DEFAULT_AGE_MAP = {"G2": 9, "G3": 9.1}
 
 FISA_DEFAULT_Z_MAP = {"G2": 0.4, "G3": 0.5}
 

@@ -101,7 +101,7 @@ def _convert_to_float(block_table):
                 raise ValueError(
                     # "The table can't be converted to float"
                     f"Element at position ({i}) in {row} table cannot "
-                     "be converted to a number."
+                    "be converted to a number."
                 )
             converted_row.append(converted_item)
         block_table[i] = converted_row

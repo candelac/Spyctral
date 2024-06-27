@@ -10,7 +10,8 @@
 # =============================================================================
 
 import astropy.units as u
-from astropy.table import QTable
+
+# from astropy.table import QTable
 
 import attrs
 
@@ -24,6 +25,10 @@ from .utils.bunch import Bunch
 
 # from plot_utils import make_plot_base
 
+# CONSTANTS
+#: Z sun (cite)
+Z_SUN = 0.019
+
 # =============================================================================
 # Useful functions
 # =============================================================================
@@ -34,6 +39,7 @@ def _header_to_dataframe(header):
     keys = list(header.keys())
     values = list(header.values())
     df = pd.DataFrame(values, index=keys)
+    df.columns = ["value"]
     return df
 
 
@@ -50,14 +56,6 @@ def _make_spectrum1d_from_qtable(qtable):
             The keys are 'synthetic_spectrum', 'observed_spectrum',
             and 'residual_spectrum'.
     """
-
-    # Verify that the required columns are present in the QTable
-    required_columns = ["l_obs", "f_obs", "f_syn", "weights"]
-    for col in required_columns:
-        if col not in qtable.colnames:
-            raise ValueError(
-                f"The column '{col}' is not present in the QTable."
-            )
 
     # Extract the necessary columns
     wavelength = qtable["l_obs"]
@@ -85,45 +83,20 @@ def _make_spectrum1d_from_qtable(qtable):
     return spectra
 
 
-def make_spectrum(obj):
-    """Crear espectros a partir de datos"""
+def _make_spectrum(obj):
+    """Make spectra from data"""
     spectra = {}
     for key, value in obj.data.items():
-        if isinstance(value, QTable):
-            if len(value.columns) == 2:
-                try:
-                    # Extraer datos de las columnas
-                    wavelength = value[value.colnames[0]]
-                    flux = value[value.colnames[1]]
+        if len(value.columns) == 2:
+            wavelength = value[value.colnames[0]]
+            flux = value[value.colnames[1]]
+            spectra[key] = Spectrum1D(
+                flux=flux * u.dimensionless_unscaled, spectral_axis=wavelength
+            )
 
-                    # Validar que los datos sean tipos numéricos
-                    if np.issubdtype(
-                        wavelength.dtype, np.number
-                    ) and np.issubdtype(flux.dtype, np.number):
-                        spectra[key] = Spectrum1D(
-                            flux=flux * u.dimensionless_unscaled,
-                            spectral_axis=wavelength,
-                        )
-                    else:
-                        raise TypeError(
-                            f"Error al crear el espectro para {key}:"
-                            "la longitud de onda y el flujo deben ser"
-                            " tipos numéricos"
-                        )
-                except (IndexError, TypeError) as e:
-                    raise ValueError(
-                        f"Error al crear el espectro para {key}: {e}"
-                    )
-            elif len(value.columns) == 4 and key == "synthetic_spectrum":
-                try:
-                    spectra.update(_make_spectrum1d_from_qtable(value))
+        elif len(value.columns) == 4 and key == "synthetic_spectrum":
+            spectra.update(_make_spectrum1d_from_qtable(value))
 
-                except (IndexError, TypeError) as e:
-                    raise ValueError(
-                        f"Error al crear el espectro para {key}: {e}"
-                    )
-            else:
-                None
     return spectra
 
 
@@ -185,7 +158,8 @@ class SpectralSummary:
         dict
             Dictionary containing the spectra information.
         """
-        return make_spectrum(self)
+
+        return _make_spectrum(self)
 
     def get_spectrum(self, name: str):
         """Get the spectrum by name.
@@ -248,20 +222,19 @@ class SpectralSummary:
             f"data={str(self.data)})"
         )
 
-    def get_metallicity(self) -> dict:
+    @property
+    def feh_ratio(self):
         """Calculate metallicity value from Z value.
 
         Returns
         -------
-        dict
-            Dictionary with z_value and [Fe/H] ratio.
+        Class
+            Metallicity with z_value and [Fe/H] ratio.
         """
-        z_sun = 0.019
-        feh_ratio = np.log10(self.z_value / z_sun)
 
-        metallicity_info = {"Z_value": self.z_value, "[Fe/H]": feh_ratio}
+        feh_ratio = np.log10(self.z_value / Z_SUN)
 
-        return metallicity_info
+        return feh_ratio
 
     def make_plots(self):
         """Generate plots from spectra created with make_spectrum.

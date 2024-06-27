@@ -32,7 +32,10 @@ FISA_RX_NORMALIZATION_POINT = re.compile(
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
-FISA_DEFAULT_AGE_MAP = {'G2': 1e9, 'G3':2e9} 
+FISA_DEFAULT_AGE_MAP = {"G2": 1e9, "G3": 2e9}
+
+FISA_DEFAULT_Z_MAP = {"G2": 0.4, "G3": 0.5}
+
 
 def _process_header(lines):
     """
@@ -99,30 +102,77 @@ def _process_blocks(spectra_blocks, tab_names):
 
     return spectra_tables
 
-def _get_age(header, age_map):
-    template = header.adopted_template
-    str_age = template.split("/")[-1]
-    age = age_map[str_age]
 
-    return age, str_age
+def _get_str_template(header):
+    template = header["adopted_template"]
+    str_template = template.split("/")[-1]
 
-def read_fisa(path_or_buffer, *, age_map=None):
+    return str_template
+
+
+def _get_name_template(header):
+    template = header["adopted_template"]
+    name_template = (template.split("/")[-1]).split(".")[0]
+
+    return name_template
+
+
+def _get_reddening(header, rv):
     """
-    This function reads FISA file.
+    This function get reddening value from input file.
+    """
+    reddening_value = header["reddening"]
+    av_value = reddening_value * rv
+
+    return reddening_value, av_value
+
+
+def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
+    """
+    Reads a FISA file and extracts relevant
+    information to create a SpectralSummary object.
 
     Parameters
     ----------
-    filename: "str"
-        Name of file
+    path_or_buffer : str or file-like object
+        File path or buffer containing the FISA file data.
 
-    Return
-    ----------
-    out: SpectralSummary
+    age_map : dict or None, optional
+        Mapping dictionary for age values.
+        If None, defaults to FISA_DEFAULT_AGE_MAP.
+        (default is None)
+
+    rv : float, optional
+        Reddening value to use for calculations.
+        (default is 3.1)
+
+    z_map : dict or None, optional
+        Mapping dictionary for metallicity values.
+        If None, defaults to FISA_DEFAULT_Z_MAP.
+        (default is None)
+
+    Returns
+    -------
+    SpectralSummary
+        Object containing encapsulated data
+        extracted from the FISA file.
+
+    Notes
+    -----
+    This function processes a FISA file, extracting header
+    information and spectra blocks.
+    It computes age, reddening, AV value, normalization point,
+    and metallicity values based on the
+    provided or default mappings.
 
     """
-    age_map = FISA_DEFAULT_AGE_MAP if age_map is None
+    # Use default mappings if None provided
+    age_map = FISA_DEFAULT_AGE_MAP if age_map is None else age_map
+    z_map = FISA_DEFAULT_Z_MAP if z_map is None else z_map
+
     header_lines, spectra_blocks = [], []
     current_spectrum = []
+
     with open(path_or_buffer, "r") as fp:
         for line in fp:
             if line.startswith(" #"):
@@ -135,12 +185,46 @@ def read_fisa(path_or_buffer, *, age_map=None):
 
     if current_spectrum:
         spectra_blocks.append(current_spectrum)
-        del current_spectrum
 
     header = _process_header(header_lines)
-
     spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
-    age, str_age = _get_age(header, age_map)
-    extra = {'str_age': str_age}
-    return core.SpectralSummary(age=age, extra=extra, header=header, data=spectra)
+    str_template = _get_str_template(header)
+    name_template = _get_name_template(header)
+
+    try:
+        age = age_map[name_template]
+    except KeyError:
+        raise ValueError(
+            f"Missing age mapping for template '{name_template}' "
+            "in age_map."
+        )
+
+    reddening_value, av_value = _get_reddening(header, rv)
+    normalization_point = header["normalization_point"]
+
+    try:
+        z_value = z_map[name_template]
+    except KeyError:
+        raise ValueError(
+            f"Missing metallicity mapping for template '{name_template}' "
+            "in z_map."
+        )
+
+    extra_info = {
+        "str_template": str_template,
+        "name_template": name_template,
+        "age_map": age_map,
+        "z_map": z_map,
+    }
+
+    return core.SpectralSummary(
+        header=header,
+        data=spectra,
+        age=age,
+        reddening=reddening_value,
+        av_value=av_value,
+        normalization_point=normalization_point,
+        z_value=z_value,
+        extra_info=extra_info,
+    )

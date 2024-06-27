@@ -5,7 +5,7 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
-"""Test input data."""
+"""FISA test input data."""
 
 # =============================================================================
 # IMPORTS
@@ -15,12 +15,16 @@ import datetime as dt
 
 from astropy.table import QTable
 
+import numpy as np
+
+import pytest
+
 from spyctral import core
 from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 
 
-def test_read_fisa_type(file_path):
+def test_read_fisa(file_path):
     path = file_path("case_SC_FISA.fisa")
 
     summary = fisa.read_fisa(path)
@@ -60,3 +64,50 @@ def test_read_fisa_type(file_path):
     assert len(summary.data.Template_spectrum) == 3401
     assert len(summary.data.Observed_spectrum) == 3000
     assert len(summary.data.Residual_flux) == 3000
+
+    assert isinstance(summary.age, float)
+    assert isinstance(summary.reddening, float)
+    assert isinstance(summary.av_value, float)
+    assert isinstance(summary.normalization_point, float)
+    assert isinstance(summary.z_value, float)
+
+    assert isinstance(summary.extra_info, Bunch)
+    assert isinstance(summary.extra_info.str_template, str)
+    assert isinstance(summary.extra_info.name_template, str)
+    assert isinstance(summary.extra_info.age_map, dict)
+    assert isinstance(summary.extra_info.z_map, dict)
+
+    assert summary.extra_info.str_template == "G2.dat"
+    assert summary.extra_info.name_template == "G2"
+    assert (
+        summary.age
+        == summary.extra_info.age_map[summary.extra_info.name_template]
+    )
+    assert (
+        summary.z_value
+        == summary.extra_info.z_map[summary.extra_info.name_template]
+    )
+
+
+def test_read_fisa_with_nodefault_parameters(file_path):
+    """Test FISA with no-default parameters"""
+    path = file_path("case_SC_FISA.fisa")
+    age_map_test = {
+        "G1": np.random.randint(1e6, 1e12),
+        "G3": np.random.randint(1e6, 1e12),
+    }
+    z_map_test = {
+        "G1": np.random.randint(-1, 1),
+        "G3": np.random.randint(-1, 1),
+    }
+
+    with pytest.raises(
+        ValueError, match="Missing age mapping for template 'G2' in age_map."
+    ):
+        fisa.read_fisa(path, age_map=age_map_test)
+
+    with pytest.raises(
+        ValueError,
+        match="Missing metallicity mapping for template 'G2' in z_map.",
+    ):
+        fisa.read_fisa(path, z_map=z_map_test)

@@ -14,7 +14,7 @@ import dateutil.parser
 
 import numpy as np
 
-# import pandas as pd
+import pandas as pd
 
 from spyctral import core
 
@@ -37,7 +37,7 @@ def _proces_header(header_ln):
             head_dict["Date"] = dateutil.parser.parse(
                 re.findall(SL_GET_DATE, sl)[0]
             )
-            head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
+            # head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
         sl = re.sub(
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
@@ -89,6 +89,25 @@ def _proces_header(header_ln):
     return head_dict
 
 
+def _convert_to_float(block_table):
+    for i, row in enumerate(block_table):
+        converted_row = []
+        for item in row:
+            try:
+                # Intentar convertir el elemento en un número
+                converted_item = float(item)
+            except ValueError:
+                # Si no se puede convertir a número, levantar una excepción
+                raise ValueError(
+                    # "The table can't be converted to float"
+                    f"Element at position ({i}) in {row} table cannot "
+                     "be converted to a number."
+                )
+            converted_row.append(converted_item)
+        block_table[i] = converted_row
+    return block_table
+
+
 def _proces_tables(block_lines):
     """Recives a list that contains the lines of the tables and
     return a dictionary with 4 tables as values"""
@@ -125,22 +144,9 @@ def _proces_tables(block_lines):
         .strip()
     )
 
-    # Verificar que los elementos sean números
-    for i, row in enumerate(blocks[4]):
-        converted_row = []
-        for item in row:
-            try:
-                # Intentar convertir el elemento en un número
-                converted_item = float(item)
-            except ValueError:
-                # Si no se puede convertir a número, levantar una excepción
-                raise ValueError(
-                    f"Element at position ({i})"
-                    " in 'synthetic_spectrum' table cannot "
-                    "  be converted to a number."
-                )
-            converted_row.append(converted_item)
-        blocks[4][i] = converted_row
+    # Convert the possible tables into float
+    for index_blocks in [1, 2, 4]:
+        blocks[index_blocks] = _convert_to_float(blocks[index_blocks])
 
     # Crear la tabla synthetic_spectrum con unidades
     synthetic_spectrum_table = QTable(
@@ -166,24 +172,124 @@ def _proces_tables(block_lines):
 
     return spectra_dict
 
-def _get_age(tables_dict, x_j_gt, decimals):
-    
-    df = starlight.tabla_synthesis_results
-    df = df[df["x_j(%)"] > x_j_gt]
+
+def _get_ssp_contributions(tables_dict, xj_percent):
+    ssps_vector = tables_dict["synthetic_results"]
+    ssps_vector = (
+        ssps_vector.to_pandas()
+    )  # Convertir QTable a DataFrame de Pandas
+
+    # Convertir todas las columnas a números flotantes
+    ssps_vector = ssps_vector.apply(pd.to_numeric, errors="coerce")
+
+    ssps_vector = ssps_vector[ssps_vector["x_j(%)"] > xj_percent].reset_index(
+        drop=True
+    )
+    ssps_vector["x_j(%)"] = (
+        ssps_vector["x_j(%)"] * 100 / ssps_vector["x_j(%)"].sum()
+    )
+
+    return ssps_vector
+
+
+def _get_age(ssps_vector, age_decimals):
+    """
+    This function get age from input file.
+    """
 
     age = int(
         10
         ** (
-            ((df["x_j(%)"] * np.log10(df["age_j(yr)"]))).sum()
-            / df["x_j(%)"].sum()
+            (
+                (ssps_vector["x_j(%)"] * np.log10(ssps_vector["age_j(yr)"]))
+            ).sum()
+            / ssps_vector["x_j(%)"].sum()
         )
     )
     age = np.log10(age)
-    age = round(age, decimals)
+    age = round(age, age_decimals)
 
     return age
 
-def read_starlight(path, *, x_j_gt=5, decimals=2):
+
+def _get_reddening(header_info, rv):
+    """
+    This function determinate reddening value from input file.
+    """
+
+    av_value = header_info["AV_min"]
+    reddening_value = av_value / rv
+
+    return reddening_value, av_value
+
+
+def _get_metallicity(ssps_vector, z_decimals):
+    """
+    This function calculate metallicity value from input file.
+    """
+
+    z_value = (
+        (ssps_vector["x_j(%)"] * ssps_vector["Z_j"])
+    ).sum() / ssps_vector["x_j(%)"].sum()
+    z_value = round(z_value, z_decimals)
+
+    return z_value
+
+
+def _get_z_values(ssps_vector):
+    max_xj_index = ssps_vector["x_j(%)"].idxmax()
+    min_xj_index = ssps_vector["x_j(%)"].idxmin()
+
+    z_ssp_max = float(ssps_vector.loc[max_xj_index, "Z_j"])
+    z_ssp_min = float(ssps_vector.loc[min_xj_index, "Z_j"])
+
+    z_values = {"z_ssp_max": z_ssp_max, "z_ssp_min": z_ssp_min}
+
+    return z_values
+
+
+def _get_vel_values(header_info):
+    v0_min = float(header_info["v0_min"])
+    vd_min = float(header_info["vd_min"])
+
+    vel_values = {"v0_min": v0_min, "vd_min": vd_min}
+
+    return vel_values
+
+
+def _get_quality_fit_values(header_info):
+    chi2_nl_eff = float(header_info["chi2_Nl_eff"])
+    adev = float(header_info["adev"])
+
+    quality_fit = {"chi2_nl_eff": chi2_nl_eff, "adev": adev}
+
+    return quality_fit
+
+
+def _get_starlight_extra_info(ssps_vector, header_info):
+    z_values = _get_z_values(ssps_vector)
+    vel_values = _get_vel_values(header_info)
+    quality_fit = _get_quality_fit_values(header_info)
+
+    keys = (
+        list(z_values.keys())
+        + list(vel_values.keys())
+        + list(quality_fit.keys())
+    )
+    values = (
+        list(z_values.values())
+        + list(vel_values.values())
+        + list(quality_fit.values())
+    )
+
+    starlight_particular_info = pd.DataFrame(values, index=keys)
+
+    return starlight_particular_info
+
+
+def read_starlight(
+    path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
+):
     """Recives as input a path from the location of the starlight file and
     returns a two dicctionaries the first is the header information and the
     second is the tables information"""
@@ -200,7 +306,34 @@ def read_starlight(path, *, x_j_gt=5, decimals=2):
 
     tables_dict = _proces_tables(block_lines)
 
-    # return header_info, tables_dict
-    age= _get_age(tables_dict, x_j_gt, decimals)
-    extra = {'x_j_gt':x_j_gt, 'decimals': decimals}
-    return core.SpectralSummary(age=age, extra=extra, header=header_info, data=tables_dict)
+    ssps_vector = _get_ssp_contributions(tables_dict, xj_percent)
+
+    age = _get_age(ssps_vector, age_decimals)
+
+    reddening_value, av_value = _get_reddening(header_info, rv)
+
+    normalization_point = header_info["l_norm"]
+
+    z_value = _get_metallicity(ssps_vector, z_decimals)
+
+    synthesis_info = _get_starlight_extra_info(ssps_vector, header_info)
+
+    extra_info = {
+        "xj_percent": xj_percent,
+        "age_decimals": age_decimals,
+        "rv": rv,
+        "z_decimals": z_decimals,
+        "ssps_vector": ssps_vector,
+        "synthesis_info": synthesis_info,
+    }
+
+    return core.SpectralSummary(
+        header=header_info,
+        data=tables_dict,
+        age=age,
+        reddening=reddening_value,
+        av_value=av_value,
+        normalization_point=normalization_point,
+        z_value=z_value,
+        extra_info=extra_info,
+    )

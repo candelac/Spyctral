@@ -117,16 +117,6 @@ def _get_name_template(header):
     return name_template
 
 
-# def _get_age(age_map, name_template):
-#    """
-#    This function get age from input file.
-#    """
-#
-#    age = age_map[name_template]
-#
-#    return age
-
-
 def _get_reddening(header, rv):
     """
     This function get reddening value from input file.

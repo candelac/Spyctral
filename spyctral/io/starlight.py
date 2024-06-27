@@ -37,7 +37,7 @@ def _proces_header(header_ln):
             head_dict["Date"] = dateutil.parser.parse(
                 re.findall(SL_GET_DATE, sl)[0]
             )
-            head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
+            # head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
         sl = re.sub(
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
@@ -89,6 +89,25 @@ def _proces_header(header_ln):
     return head_dict
 
 
+def _convert_to_float(block_table):
+    for i, row in enumerate(block_table):
+        converted_row = []
+        for item in row:
+            try:
+                # Intentar convertir el elemento en un número
+                converted_item = float(item)
+            except ValueError:
+                # Si no se puede convertir a número, levantar una excepción
+                raise ValueError(
+                    # "The table can't be converted to float"
+                    f"Element at position ({i}) in {row} table cannot "
+                     "be converted to a number."
+                )
+            converted_row.append(converted_item)
+        block_table[i] = converted_row
+    return block_table
+
+
 def _proces_tables(block_lines):
     """Recives a list that contains the lines of the tables and
     return a dictionary with 4 tables as values"""
@@ -125,22 +144,9 @@ def _proces_tables(block_lines):
         .strip()
     )
 
-    # Verificar que los elementos sean números
-    for i, row in enumerate(blocks[4]):
-        converted_row = []
-        for item in row:
-            try:
-                # Intentar convertir el elemento en un número
-                converted_item = float(item)
-            except ValueError:
-                # Si no se puede convertir a número, levantar una excepción
-                raise ValueError(
-                    f"Element at position ({i})"
-                    " in 'synthetic_spectrum' table cannot "
-                    "  be converted to a number."
-                )
-            converted_row.append(converted_item)
-        blocks[4][i] = converted_row
+    # Convert the possible tables into float
+    for index_blocks in [1, 2, 4]:
+        blocks[index_blocks] = _convert_to_float(blocks[index_blocks])
 
     # Crear la tabla synthetic_spectrum con unidades
     synthetic_spectrum_table = QTable(

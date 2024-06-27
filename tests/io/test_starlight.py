@@ -12,8 +12,11 @@
 # =============================================================================
 
 import datetime as dt
+import re
 
 from astropy.table import QTable
+
+import pytest
 
 from spyctral import core
 from spyctral.io import starlight
@@ -83,21 +86,28 @@ def test_read_starlight(file_path):
     assert isinstance(summary.header.YAV_min, float)
 
     assert isinstance(summary.data, Bunch)
-    assert isinstance(
-        summary.data.synthetic_spectrum, QTable
-    )  # faltan unidades
+    assert isinstance(summary.data.synthetic_spectrum, QTable)
     assert isinstance(
         summary.data.results_average_chains_xj, QTable
-    )  # faltan unidades y nombre de columnas
+    )  # faltan nombre de columnas
     assert isinstance(
         summary.data.results_average_chains_mj, QTable
-    )  # faltan unidades y nombre de columnas
+    )  # faltan nombre de columnas
     assert isinstance(
         summary.data.results_average_chains_Av_chi2_mass, QTable
     )  # faltan unidades
-    assert isinstance(
-        summary.data.synthetic_results, QTable
-    )  # faltan unidades
+    assert isinstance(summary.data.synthetic_results, QTable)
+
+    # assert all(
+    #    isinstance(x, float) for x in summary.data["synthetic_spectrum"]
+    # )
+
+    # assert all(
+    #    isinstance(x, float) for x in summary.data.results_average_chains_xj
+    # )
+    # assert all(
+    #    isinstance(x, float) for x in summary.data.results_average_chains_mj
+    # )
 
     assert len(summary.data.synthetic_results) == 69
     assert len(summary.data.results_average_chains_xj) == 69
@@ -111,3 +121,18 @@ def test_read_starlight(file_path):
     assert isinstance(summary.normalization_point, float)
     assert isinstance(summary.z_value, float)
     assert isinstance(summary.extra_info, Bunch)
+
+
+def test_convert_to_float(file_path):
+    path = file_path("case_SC_Starlight_broken.out")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Element at position (1) in ['2', 'novalue', "
+            "'0.2377', '0.0000', '0.9042', '0.2231', '0.4009', "
+            "'0.0000', '0.4409', '0.0000'] table cannot be "
+            "converted to a number."
+        ),
+    ):
+        starlight.read_starlight(path)

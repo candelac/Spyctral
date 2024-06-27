@@ -1,378 +1,277 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # License: MIT
 # Copyright (c) 2023, Cerdosino Candela, Fiore J.Manuel, Martinez J.Luis,
 # Tapia-Reina Martina
 # All rights reserved.
 
-# import attrs
-
-# from .utils.bunch import Bunch
-
-# Esta clase habría que re diseñarla/sacarla
-
-# @attrs.define
-# class SpectralSummary:
-#    header = attrs.field(converter=lambda v: Bunch("header_items:", v))
-#    data = attrs.field(converter=lambda v: Bunch("data_items:", v))
-
-
-# -----------------------------------------------------------------------------
-# clases adaptadas de feets:
-
 # =============================================================================
 # IMPORTS
 # =============================================================================
 
-import copy
-import itertools as it
-from collections import Counter
-from collections.abc import Mapping
+import astropy.units as u
+from astropy.table import QTable
 
-import attr
+import attrs
 
 import numpy as np
 
-from . import extractors
-from .extractors.core import (
-    DATAS,
-    DATA_FISA,  # esto preguntar a marti
-    DATA_STL,
-)
+import pandas as pd
+
+from specutils import Spectrum1D
+
+from .utils.bunch import Bunch
+
+# from plot_utils import make_plot_base
 
 # =============================================================================
-# EXCEPTIONS
+# Useful functions
 # =============================================================================
 
 
-class FeatureNotFound(ValueError):
-    """Raises when a non-available feature are requested.
+def _header_to_dataframe(header):
+    """Convert the header into a ``pandas.DataFrame``."""
+    keys = list(header.keys())
+    values = list(header.values())
+    df = pd.DataFrame(values, index=keys)
+    return df
 
-    A non-available feature can be:
 
-    - The feature don't exist in any of the registered extractor.
-    - The feature can't be requested with the available data.
+def _make_spectrum1d_from_qtable(qtable):
+    """
+    Creates a Spectrum1D object from a QTable.
 
+    Parameters:
+    - qtable (QTable): The table containing the data.
+
+    Returns:
+    - dict: A dictionary with the Spectrum1D objects created
+            from the QTable data.
+            The keys are 'synthetic_spectrum', 'observed_spectrum',
+            and 'residual_spectrum'.
     """
 
-
-class DataRequiredError(ValueError):
-    """Raised when the feature-space required another data."""
-
-
-class FeatureSpaceError(ValueError):
-    """The FeatureSpace can't be configured with the given parameters."""
-
-
-# =============================================================================
-# RESULTSET
-# =============================================================================
-
-
-class _Map(Mapping):
-    """Internal representation of a immutable dict"""
-
-    def __init__(self, d):
-        self._keys = tuple(d.keys())
-        self._values = tuple(d.values())
-
-    def __getitem__(self, k):
-        """x.__getitem__(y) <==> x[y]"""
-        if k not in self._keys:
-            raise KeyError(k)
-        idx = self._keys.index(k)
-        return self._values[idx]
-
-    def __iter__(self):
-        """x.__iter__() <==> iter(x)"""
-        return iter(self._keys)
-
-    def __len__(self):
-        """x.__len__() <==> len(x)"""
-        return len(self._keys)
-
-
-@attr.s(frozen=True, auto_attribs=True, repr=False)
-class FeatureSet:
-    """Clase que va a contener/mostrar los features"""
-
-    features_names: tuple = attr.ib(converter=tuple)
-    values: dict = attr.ib(converter=_Map)
-    extractors: dict = attr.ib(converter=_Map)
-    timeserie: dict = attr.ib(converter=_Map)
-
-    def __attrs_post_init__(self):
-        cnt = Counter(
-            it.chain(self.features_names, self.values, self.extractors)
-        )
-        diff = set(k for k, v in cnt.items() if v < 3)
-        if diff:
-            joined_diff = ", ".join(diff)
-            raise FeatureNotFound(
-                f"The features '{joined_diff}' must be in 'features_names' "
-                "'values' and 'extractors'"
+    # Verify that the required columns are present in the QTable
+    required_columns = ["l_obs", "f_obs", "f_syn", "weights"]
+    for col in required_columns:
+        if col not in qtable.colnames:
+            raise ValueError(
+                f"The column '{col}' is not present in the QTable."
             )
 
-    def __iter__(self):
-        """x.__iter__() <==> iter(x)"""
-        return iter(self.as_arrays())
+    # Extract the necessary columns
+    wavelength = qtable["l_obs"]
+    flux_obs = qtable["f_obs"].data  # Extract data without units
+    flux_syn = qtable["f_syn"].data  # Extract data without units
+    # weights = qtable["weights"].data
 
-    def __getitem__(self, k):
-        """x.__getitem__(y) <==> x[y]"""
-        return copy.deepcopy(self.values[k])
+    # Calculate the residual flux
+    residual_flux = (flux_obs - flux_syn) / flux_obs
 
-    def __repr__(self):
-        """x.__repr__() <==> repr(x)"""
-        feats = ", ".join(self.features_names)
-        ts = ", ".join(d for d in DATAS if self.timeserie.get(d) is not None)
-        return f"FeatureSet(features=<{feats}>, timeserie=<{ts}>)"
+    # Create the Spectrum1D objects
+    spectra = {
+        "synthetic_spectrum": Spectrum1D(
+            flux=flux_syn * u.dimensionless_unscaled, spectral_axis=wavelength
+        ),
+        "observed_spectrum": Spectrum1D(
+            flux=flux_obs * u.dimensionless_unscaled, spectral_axis=wavelength
+        ),
+        "residual_spectrum": Spectrum1D(
+            flux=residual_flux * u.dimensionless_unscaled,
+            spectral_axis=wavelength,
+        ),
+    }
 
-    def extractor_of(self, feature):
-        """Retrieve the  extractor instance used for create the feature."""
-        return copy.deepcopy(self.extractors[feature])
+    return spectra
 
-    # def plot(self): ...
 
-    # def as_arrays(self): ...
+def make_spectrum(obj):
+    """Crear espectros a partir de datos"""
+    spectra = {}
+    for key, value in obj.data.items():
+        if isinstance(value, QTable):
+            if len(value.columns) == 2:
+                try:
+                    # Extraer datos de las columnas
+                    wavelength = value[value.colnames[0]]
+                    flux = value[value.colnames[1]]
 
-    def as_dict(self):
-        """Return a copy of values"""
-        return dict(self.values)
+                    # Validar que los datos sean tipos numéricos
+                    if np.issubdtype(
+                        wavelength.dtype, np.number
+                    ) and np.issubdtype(flux.dtype, np.number):
+                        spectra[key] = Spectrum1D(
+                            flux=flux * u.dimensionless_unscaled,
+                            spectral_axis=wavelength,
+                        )
+                    else:
+                        raise TypeError(
+                            f"Error al crear el espectro para {key}:"
+                            "la longitud de onda y el flujo deben ser"
+                            " tipos numéricos"
+                        )
+                except (IndexError, TypeError) as e:
+                    raise ValueError(
+                        f"Error al crear el espectro para {key}: {e}"
+                    )
+            elif len(value.columns) == 4 and key == "synthetic_spectrum":
+                try:
+                    spectra.update(_make_spectrum1d_from_qtable(value))
 
-    # def as_dataframe(self): ...
+                except (IndexError, TypeError) as e:
+                    raise ValueError(
+                        f"Error al crear el espectro para {key}: {e}"
+                    )
+            else:
+                None
+    return spectra
 
 
 # =============================================================================
-# FEATURE EXTRACTORS
+# CLASSES
 # =============================================================================
 
 
-class FeatureSpace:
-    """Clase que permite seleccionar los features (edad, enrojecimiento,
-    metalicidad, etc) que se pueden calcular basado en los datos que se tienen
-    disponibles (fisa, starlight).
-    Los features que da son los que satisfacen todos los filtros.
+@attrs.define
+class SpectralSummary:
+    """This object encapsulates all the data getted from inputfile.
 
-    Parameters
+    Attributes
     ----------
-
-    data : array-like, optional, default ``None``
-        fisa o starlight
-
-    only : array-like, optional, default ``None``
-        features que queres calcular, ej: edad, metalicidad
-
-    exclude : array-like, optional, default ``None``
-        features que no queres calcular
-
-    kwargs : `Feature_name={param1: value, param2: value, ...}``
-        parámetros extra para configurar los extractors
+    header : dict-like
+        Header info from inputfile.
+    data : dict-like
+        Spectra information in Qtables.
+    age : float
+        Age information.
+    reddening : float
+        Reddening information.
+    av_value : float
+        Av value.
+    normalization_point : float
+        Normalization point value.
+    z_value : float
+        Metallicity value.
+    extra_info : dict-like
+        Additional info.
     """
 
-    def __init__(self, data=None, only=None, exclude=None, **kwargs):
-        # retrieve all the extractors
-        exts = extractors.registered_extractors()
+    header: dict = attrs.field(converter=lambda v: Bunch("header", v))
+    data: dict = attrs.field(converter=lambda v: Bunch("data", v))
+    age: float = attrs.field(converter=float)
+    reddening: float = attrs.field(converter=float)
+    av_value: float = attrs.field(converter=float)
+    normalization_point: float = attrs.field(converter=float)
+    z_value: float = attrs.field(converter=float)
+    extra_info: dict = attrs.field(converter=lambda v: Bunch("extra", v))
 
-        # store all the parameters for the extractors
-        self._kwargs = kwargs
-
-        # get all posible features by data (segun sea None o dado)
-        if data:
-            fbdata = []
-            for fname, f in exts.items():
-                if not f.get_required_data().difference(data):
-                    fbdata.append(fname)
-        else:
-            fbdata = exts.keys()
-        self._data = frozenset(data or extractors.DATAS)
-        self._features_by_data = frozenset(fbdata)
-
-        # validate the list of features or select all of them
-        if only:
-            for f in only:
-                if f not in exts:
-                    raise FeatureNotFound(f)
-        self._only = frozenset(only or exts.keys())
-
-        # select the features to exclude or not exclude anything
-        if exclude:
-            for f in exclude:
-                if f not in exts:
-                    raise FeatureNotFound(f)
-        self._exclude = frozenset(exclude or ())
-
-        # the candidate to be the features to be extracted:
-        # features entre data y only, menos los exclude
-        candidates = self._features_by_data.intersection(
-            self._only
-        ).difference(self._exclude)
-
-        # remove by dependencies
-        if only or exclude:
-            final = set()
-            for f in candidates:
-                fcls = exts[f]
-                dependencies = fcls.get_dependencies()
-                if dependencies.issubset(candidates):
-                    final.add(f)
-        else:
-            final = candidates
-
-        # the final features
-        self._features = frozenset(final)
-
-        # create a ndarray for all the results (ordenado)
-        self._features_as_array = np.array(sorted(self._features))
-
-        # initialize the extractors and determine the required data only
-        features_extractors, features_extractors_names = set(), set()
-        required_data = set()
-        for fcls in set(exts.values()):  # exts=extractores
-            if fcls.get_features().intersection(self._features):
-                # if: solo los features que necesito sg data
-
-                params = self._kwargs.get(fcls.__name__, {})
-                fext = fcls(**params)
-
-                features_extractors.add(fext)
-                features_extractors_names.add(fext.name)
-                required_data.update(fext.get_required_data())
-
-        if not features_extractors:
-            raise FeatureSpaceError("No feature extractor was selected")
-
-        self._features_extractors = frozenset(features_extractors)
-        self._features_extractors_names = frozenset(features_extractors_names)
-        self._required_data = frozenset(required_data)
-
-        # excecution order by dependencies
-        # sort_by_dependencies: calcula el orden de resolución de los extractor
-        self._execution_plan = extractors.sort_by_dependencies(
-            features_extractors
-        )
-
-        not_found = set(self._kwargs).difference(
-            self._features_extractors_names
-        )
-        if not_found:
-            joined_not_found = ", ".join(not_found)
-            raise FeatureNotFound(
-                "This space not found feature(s) extractor(s) "
-                f"{joined_not_found} to assign the given parameter(s)"
-            )
-
-    def __repr__(self):
-        """x.__repr__() <==> repr(x)"""
-        return str(self)
-
-    def __str__(self):
-        """x.__str__() <==> str(x)"""
-        if not hasattr(self, "__str"):
-            extractors = [str(extractor) for extractor in self._execution_plan]
-            space = ", ".join(extractors)
-            self.__str = "<FeatureSpace: {}>".format(space)
-        return self.__str
-
-    def preprocess_timeserie(self, d):  # esto es necesario?
-        """Validate if the required values of the time-serie exist with
-        non ``None`` values in the dict ``d``. Finally returns a
-        new dictionary whose non-null values have been converted to
-        ``np.ndarray``
-        """
-        array_data = {}
-        for k, v in d.items():
-            if k in self._required_data and v is None:
-                raise DataRequiredError(k)
-            array_data[k] = v if v is None else np.asarray(v)
-        return array_data
-
-    def extract(
-        self,
-        fisa=None,
-        starlight=None,
-    ):
-        """Extrae los features de fisa o starlight.
-        This method must be provided with the required timeseries data
-        specified in the attribute ``required_data_``.
-
-        Parameters
-        ----------
-        fisa : iterable, optional
-        starlight : iterable, optional
+    @property
+    def header_info_df(self) -> pd.DataFrame:
+        """Convert header info to a pandas DataFrame.
 
         Returns
         -------
-        spyctral.core.FeatureSet
-            Container of a calculated features.
-
+        pd.DataFrame
+            DataFrame containing header information.
         """
-        timeserie = self.preprocess_timeserie(  # ver
-            {
-                DATA_FISA: fisa,
-                DATA_STL: starlight,
-            }
+        return _header_to_dataframe(self.header)
+
+    @property
+    def spectra(self) -> dict:
+        """Generate spectra from data.
+
+        Returns
+        -------
+        dict
+            Dictionary containing the spectra information.
+        """
+        return make_spectrum(self)
+
+    def get_spectrum(self, name: str):
+        """Get the spectrum by name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the spectrum.
+
+        Returns
+        -------
+        Spectrum
+            The spectrum corresponding to the given name.
+        """
+        return self.spectra[name]
+
+    def __getitem__(self, k: str):
+        """Allow attribute access using dictionary-like syntax.
+
+        Parameters
+        ----------
+        k : str
+            Attribute name.
+
+        Returns
+        -------
+        Any
+            Value of the attribute.
+
+        Raises
+        ------
+        KeyError
+            If the attribute does not exist.
+        """
+        try:
+            return getattr(self, k)
+        except AttributeError:
+            raise KeyError(k)
+
+    def __len__(self) -> int:
+        """Return the number of attributes defined in the class.
+
+        Returns
+        -------
+        int
+            Number of attributes.
+        """
+        return len(attrs.fields(SpectralSummary))
+
+    def __repr__(self) -> str:
+        """Return a string representation of the instance.
+
+        Returns
+        -------
+        str
+            String representation.
+        """
+        return (
+            f"SpectralSummary(header={str(self.header)}, "
+            f"data={str(self.data)})"
         )
 
-        # ejecuta los extractors:
-        features, extractors = {}, {}
-        for fextractor in self._execution_plan:
-            # .extract de la clase Extractor: extrae los parametros necesarios
-            # para ejecutar la extracción del feature y lo ejecuta
-            result = fextractor.extract(features=features, **timeserie)
-            for fname, fvalue in result.items():
-                features[fname] = fvalue
-                extractors[fname] = copy.deepcopy(fextractor)
+    def get_metallicity(self) -> dict:
+        """Calculate metallicity value from Z value.
 
-        # remove all the not needed features and extractors
-        flt_features, flt_extractors = {}, {}
-        for fname in self._features_as_array:
-            flt_features[fname] = features[fname]
-            flt_extractors[fname] = extractors[fname]
+        Returns
+        -------
+        dict
+            Dictionary with z_value and [Fe/H] ratio.
+        """
+        z_sun = 0.019
+        feh_ratio = np.log10(self.z_value / z_sun)
 
-        rs = FeatureSet(
-            features_names=self._features_as_array,
-            values=flt_features,
-            extractors=flt_extractors,
-            timeserie=timeserie,
-        )
-        return rs
+        metallicity_info = {"Z_value": self.z_value, "[Fe/H]": feh_ratio}
 
-    @property
-    def extractors_conf(self):
-        return copy.deepcopy(self._kwargs)
+        return metallicity_info
 
-    @property
-    def data(self):
-        return self._data
+    def make_plots(self):
+        """Generate plots from spectra created with make_spectrum.
 
-    @property
-    def only(self):
-        return self._only
-
-    @property
-    def exclude(self):
-        return self._exclude
-
-    @property
-    def features_by_data_(self):
-        return self._features_by_data
-
-    @property
-    def features_(self):
-        return self._features
-
-    @property
-    def features_extractors_(self):
-        return self._features_extractors
-
-    @property
-    def features_as_array_(self):
-        return self._features_as_array
-
-    @property
-    def excecution_plan_(self):
-        return self._execution_plan
-
-    @property
-    def required_data_(self):
-        return self._required_data
+        This function is currently commented out and does not execute.
+        """
+        # Esta función está comentada y no se ejecuta.
+        """
+        spectra = self.spectra
+        for key, spectrum in spectra.items():
+            make_plot_base(spectrum.spectral_axis, spectrum.flux, key)
+        """
+        pass

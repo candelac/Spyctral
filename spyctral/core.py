@@ -23,6 +23,8 @@ from specutils import Spectrum1D
 
 from .utils.bunch import Bunch
 
+import matplotlib.pyplot as plt
+
 # from plot_utils import make_plot_base
 
 # CONSTANTS
@@ -235,6 +237,30 @@ class SpectralSummary:
         feh_ratio = np.log10(self.z_value / Z_SUN)
 
         return feh_ratio
+
+    def plotSL(self, color=["sienna", "plum", "olive"], styleline='-', grid='False'):
+        spectra = self.spectra
+        spect_names = ["synthetic_spectrum",
+                       "observed_spectrum", "residual_spectrum"]
+        fig, ax = plt.subplots(figsize=(22, 10))
+        fig.suptitle("Gráficos de Starlight")
+        current_ax = 0
+        for valores in spectra:
+            ax = fig.axes[0]
+            ax.plot(
+                spectra[valores].flux,
+                label=spect_names[current_ax],
+                color=color[current_ax],
+                linewidth=1,
+                linestyle=styleline
+            )
+            current_ax += 1
+        ax.set_xlabel("Longitud de onda(Angstrom)")
+        ax.axhline(y=0, color='grey', linestyle=styleline, label='y=0')
+        ax.set_ylabel('Flux')
+        ax.legend()
+        ax.grid(grid)
+        plt.show()
 
     def make_plots(self):
         """Generate plots from spectra created with make_spectrum.

@@ -238,16 +238,29 @@ class SpectralSummary:
 
         return feh_ratio
 
-    def plotSL(self, color=["sienna", "plum", "olive"], styleline='-', grid='False'):
+    def plot(self, color=["sienna", "plum", "olive", "blue"], styleline='-', grid='False'):
+        """
+        Plots spectrum from Starlight and FISA
+        usage: plot()
+               plot([<color1>, <color2>, <color3>, <color3>]"")
+               plot([<color1>, <color2>, <color3>, <color3>], <styleline>)
+        return: plot matplotlib.pyplot style
+        """
         spectra = self.spectra
-        spect_names = ["synthetic_spectrum",
-                       "observed_spectrum", "residual_spectrum"]
+        # ["synthetic_spectrum", "observed_spectrum", "residual_spectrum"]
+        spect_names = list(spectra.keys())
         fig, ax = plt.subplots(figsize=(22, 10))
-        fig.suptitle("Gráficos de Starlight")
+
+        if len(spect_names) == 3:
+            fig.suptitle("Gráficos de Starlight")
+        else:
+            fig.suptitle("Gráficos de FISA")
+
         current_ax = 0
         for valores in spectra:
             ax = fig.axes[0]
             ax.plot(
+                spectra[valores].spectral_axis,
                 spectra[valores].flux,
                 label=spect_names[current_ax],
                 color=color[current_ax],

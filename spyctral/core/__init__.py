@@ -12,8 +12,8 @@
 # IMPORTS
 # =============================================================================
 
-from io.fisa import read_fisa
-from io.starlight import read_starlight
+from ..io.fisa import read_fisa
+from ..io.starlight import read_starlight
 
 from .core import SpectralSummary
 

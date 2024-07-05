@@ -19,7 +19,7 @@ import numpy as np
 
 import pytest
 
-from spyctral import core
+from spyctral.core import core
 from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 

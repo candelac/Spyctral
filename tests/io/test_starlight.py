@@ -18,7 +18,7 @@ from astropy.table import QTable
 
 import pytest
 
-from spyctral import core
+from spyctral.core import core
 from spyctral.io import starlight
 from spyctral.utils.bunch import Bunch
 

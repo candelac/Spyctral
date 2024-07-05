@@ -28,7 +28,15 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 urls = {Homepage = "https://github.com/candelac/Spyctral"}
-dependencies = ["attrs", "numpy", "python-dateutil", "astropy", "pandas", "specutils"]
+dependencies = [
+    "attrs", 
+    "numpy", 
+    "python-dateutil", 
+    "astropy", 
+    "pandas", 
+    "specutils", 
+    "matplotlib"
+]
 
 [tool.setuptools]
 include-package-data = true

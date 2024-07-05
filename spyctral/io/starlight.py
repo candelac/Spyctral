@@ -16,7 +16,7 @@ import numpy as np
 
 import pandas as pd
 
-from spyctral import core
+from spyctral.core import core
 
 
 SL_GET_HEADER = re.compile(r"\[")

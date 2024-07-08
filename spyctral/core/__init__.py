@@ -12,10 +12,9 @@
 # IMPORTS
 # =============================================================================
 
+from .core import SpectralSummary
 from ..io.fisa import read_fisa
 from ..io.starlight import read_starlight
-
-from .core import SpectralSummary
 
 __all__ = ["SpectralSummary", "read_fisa", "read_starlight"]
 

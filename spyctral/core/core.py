@@ -27,9 +27,14 @@ from ..utils.bunch import Bunch
 
 # from plot_utils import make_plot_base
 
+
+# =============================================================================
 # CONSTANTS
+# =============================================================================
+
 #: Z sun (cite)
 Z_SUN = 0.019
+
 
 # =============================================================================
 # Useful functions
@@ -219,9 +224,15 @@ class SpectralSummary:
         str
             String representation.
         """
+
+        header_keys = ", ".join(self.header.keys())
+        data_keys = ", ".join(self.data.keys())
+
         return (
-            f"SpectralSummary(header={str(self.header)}, "
-            f"data={str(self.data)})"
+            f"SpectralSummary(\n"
+            f"  header={{ {header_keys} }},\n"
+            f"  data={{ {data_keys} }}\n"
+            f")"
         )
 
     @property

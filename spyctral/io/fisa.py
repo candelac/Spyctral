@@ -14,6 +14,8 @@ import dateutil.parser
 
 from spyctral.core import core
 
+from specutils import Spectrum1D
+
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"
 )
@@ -127,6 +129,23 @@ def _get_reddening(header, rv):
     return reddening_value, av_value
 
 
+def _get_spectra(data):
+    """Make spectra from data"""
+    spectra = {}
+    for key, value in data.items():
+        try:
+            wavelength = value[value.colnames[0]]
+            flux = value[value.colnames[1]]
+            spectra[key] = Spectrum1D(
+                flux=flux * u.dimensionless_unscaled, spectral_axis=wavelength
+            )
+
+        except KeyError:
+            raise ValueError("Data tables are not in the correct way.")
+
+    return spectra
+
+
 def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
     """
     Reads a FISA file and extracts relevant
@@ -187,7 +206,7 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
         spectra_blocks.append(current_spectrum)
 
     header = _process_header(header_lines)
-    spectra = _process_blocks(spectra_blocks, header.get("spectra_names"))
+    data = _process_blocks(spectra_blocks, header.get("spectra_names"))
 
     str_template = _get_str_template(header)
     name_template = _get_name_template(header)
@@ -211,6 +230,8 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
             "in z_map."
         )
 
+    spectra = _get_spectra(data)
+
     extra_info = {
         "str_template": str_template,
         "name_template": name_template,
@@ -220,11 +241,12 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
 
     return core.SpectralSummary(
         header=header,
-        data=spectra,
+        data=data,
         age=age,
         reddening=reddening_value,
         av_value=av_value,
         normalization_point=normalization_point,
         z_value=z_value,
+        spectra=spectra,
         extra_info=extra_info,
     )

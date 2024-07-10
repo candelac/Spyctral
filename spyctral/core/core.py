@@ -9,23 +9,13 @@
 # IMPORTS
 # =============================================================================
 
-import astropy.units as u
-
-# from astropy.table import QTable
-
 import attrs
 
 import numpy as np
 
 import pandas as pd
 
-from specutils import Spectrum1D
-
 from ..utils.bunch import Bunch
-
-# import matplotlib.pyplot as plt
-
-# from plot_utils import make_plot_base
 
 
 # =============================================================================
@@ -48,63 +38,6 @@ def _header_to_dataframe(header):
     df = pd.DataFrame(values, index=keys)
     df.columns = ["value"]
     return df
-
-
-def _make_spectrum1d_from_qtable(qtable):
-    """
-    Creates a Spectrum1D object from a QTable.
-
-    Parameters:
-    - qtable (QTable): The table containing the data.
-
-    Returns:
-    - dict: A dictionary with the Spectrum1D objects created
-            from the QTable data.
-            The keys are 'synthetic_spectrum', 'observed_spectrum',
-            and 'residual_spectrum'.
-    """
-
-    # Extract the necessary columns
-    wavelength = qtable["l_obs"]
-    flux_obs = qtable["f_obs"].data  # Extract data without units
-    flux_syn = qtable["f_syn"].data  # Extract data without units
-    # weights = qtable["weights"].data
-
-    # Calculate the residual flux
-    residual_flux = (flux_obs - flux_syn) / flux_obs
-
-    # Create the Spectrum1D objects
-    spectra = {
-        "synthetic_spectrum": Spectrum1D(
-            flux=flux_syn * u.dimensionless_unscaled, spectral_axis=wavelength
-        ),
-        "observed_spectrum": Spectrum1D(
-            flux=flux_obs * u.dimensionless_unscaled, spectral_axis=wavelength
-        ),
-        "residual_spectrum": Spectrum1D(
-            flux=residual_flux * u.dimensionless_unscaled,
-            spectral_axis=wavelength,
-        ),
-    }
-
-    return spectra
-
-
-def _make_spectrum(obj):
-    """Make spectra from data"""
-    spectra = {}
-    for key, value in obj.data.items():
-        if len(value.columns) == 2:
-            wavelength = value[value.colnames[0]]
-            flux = value[value.colnames[1]]
-            spectra[key] = Spectrum1D(
-                flux=flux * u.dimensionless_unscaled, spectral_axis=wavelength
-            )
-
-        elif len(value.columns) == 4 and key == "synthetic_spectrum":
-            spectra.update(_make_spectrum1d_from_qtable(value))
-
-    return spectra
 
 
 # =============================================================================
@@ -132,6 +65,10 @@ class SpectralSummary:
         Normalization point value.
     z_value : float
         Metallicity value.
+
+    spectra: dict-like
+        Spectrum set from data
+
     extra_info : dict-like
         Additional info.
     """
@@ -143,6 +80,7 @@ class SpectralSummary:
     av_value: float = attrs.field(converter=float)
     normalization_point: float = attrs.field(converter=float)
     z_value: float = attrs.field(converter=float)
+    spectra: dict = attrs.field(converter=lambda v: Bunch("spectra", v))
     extra_info: dict = attrs.field(converter=lambda v: Bunch("extra", v))
 
     @property
@@ -155,18 +93,6 @@ class SpectralSummary:
             DataFrame containing header information.
         """
         return _header_to_dataframe(self.header)
-
-    @property
-    def spectra(self) -> dict:
-        """Generate spectra from data.
-
-        Returns
-        -------
-        dict
-            Dictionary containing the spectra information.
-        """
-
-        return _make_spectrum(self)
 
     def get_spectrum(self, name: str):
         """Get the spectrum by name.

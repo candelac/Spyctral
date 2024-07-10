@@ -18,6 +18,8 @@ import pandas as pd
 
 from spyctral.core import core
 
+from specutils import Spectrum1D
+
 
 SL_GET_HEADER = re.compile(r"\[")
 SL_GET_TITLE_VALUE = re.compile(r"\[")
@@ -287,6 +289,60 @@ def _get_starlight_extra_info(ssps_vector, header_info):
     return starlight_particular_info
 
 
+def _make_spectrum1d_from_qtable(qtable):
+    """
+    Creates a Spectrum1D object from a QTable.
+
+    Parameters:
+    - qtable (QTable): The table containing the data.
+
+    Returns:
+    - dict: A dictionary with the Spectrum1D objects created
+            from the QTable data.
+            The keys are 'synthetic_spectrum', 'observed_spectrum',
+            and 'residual_spectrum'.
+    """
+
+    # Extract the necessary columns
+    wavelength = qtable["l_obs"]
+    flux_obs = qtable["f_obs"].data  # Extract data without units
+    flux_syn = qtable["f_syn"].data  # Extract data without units
+    # weights = qtable["weights"].data
+
+    # Calculate the residual flux
+    residual_flux = (flux_obs - flux_syn) / flux_obs
+
+    # Create the Spectrum1D objects
+    spectra = {
+        "synthetic_spectrum": Spectrum1D(
+            flux=flux_syn * u.dimensionless_unscaled, spectral_axis=wavelength
+        ),
+        "observed_spectrum": Spectrum1D(
+            flux=flux_obs * u.dimensionless_unscaled, spectral_axis=wavelength
+        ),
+        "residual_spectrum": Spectrum1D(
+            flux=residual_flux * u.dimensionless_unscaled,
+            spectral_axis=wavelength,
+        ),
+    }
+
+    return spectra
+
+
+def _get_spectra(data):
+    """Make spectra from data"""
+    spectra = {}
+    for key, value in data.items():
+        try:
+            if len(value.columns) == 4 and key == "synthetic_spectrum":
+                spectra = _make_spectrum1d_from_qtable(value)
+
+        except KeyError:
+            raise ValueError("Data tables are not in the correct way.")
+
+    return spectra
+
+
 def read_starlight(
     path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
 ):
@@ -318,6 +374,8 @@ def read_starlight(
 
     synthesis_info = _get_starlight_extra_info(ssps_vector, header_info)
 
+    spectra = _get_spectra(tables_dict)
+
     extra_info = {
         "xj_percent": xj_percent,
         "age_decimals": age_decimals,
@@ -335,5 +393,6 @@ def read_starlight(
         av_value=av_value,
         normalization_point=normalization_point,
         z_value=z_value,
+        spectra=spectra,
         extra_info=extra_info,
     )

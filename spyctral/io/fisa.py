@@ -5,6 +5,11 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
 import re
 
 import astropy.units as u
@@ -12,9 +17,14 @@ from astropy.table import QTable
 
 import dateutil.parser
 
+from specutils import Spectrum1D
+
 from spyctral.core import core
 
-from specutils import Spectrum1D
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
 
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"
@@ -133,15 +143,11 @@ def _get_spectra(data):
     """Make spectra from data"""
     spectra = {}
     for key, value in data.items():
-        try:
-            wavelength = value[value.colnames[0]]
-            flux = value[value.colnames[1]]
-            spectra[key] = Spectrum1D(
-                flux=flux * u.dimensionless_unscaled, spectral_axis=wavelength
-            )
-
-        except KeyError:
-            raise ValueError("Data tables are not in the correct way.")
+        wavelength = value[value.colnames[0]]
+        flux = value[value.colnames[1]]
+        spectra[key] = Spectrum1D(
+            flux=flux * u.dimensionless_unscaled, spectral_axis=wavelength
+        )
 
     return spectra
 

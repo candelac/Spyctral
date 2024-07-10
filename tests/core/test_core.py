@@ -19,10 +19,7 @@ import pandas as pd
 
 import pytest
 
-from specutils import Spectrum1D
-
 from spyctral.io import fisa
-from spyctral.io import starlight
 from spyctral.utils.bunch import Bunch
 
 
@@ -75,33 +72,6 @@ def test_spectralsummary_header_info_df(file_path):
     )
 
     assert df.equals(df_expected)
-
-
-def test_spectralsummary_spectra_fisa(file_path):
-    """Test of the "spectra" property with FISA."""
-
-    path = file_path("case_SC_FISA.fisa")
-
-    summary = fisa.read_fisa(path)
-
-    assert isinstance(summary.spectra, dict)
-    assert isinstance(summary.spectra["Unreddened_spectrum"], Spectrum1D)
-    assert isinstance(summary.spectra["Template_spectrum"], Spectrum1D)
-    assert isinstance(summary.spectra["Observed_spectrum"], Spectrum1D)
-    assert isinstance(summary.spectra["Residual_flux"], Spectrum1D)
-
-
-def test_spectralsummary_spectra_starlight(file_path):
-    """Test of the "spectra" property with STARLIGHT."""
-
-    path = file_path("case_SC_Starlight.out")
-
-    summary = starlight.read_starlight(path)
-
-    assert isinstance(summary.spectra, dict)
-    assert isinstance(summary.spectra["synthetic_spectrum"], Spectrum1D)
-    assert isinstance(summary.spectra["residual_spectrum"], Spectrum1D)
-    assert isinstance(summary.spectra["observed_spectrum"], Spectrum1D)
 
 
 def test_spectralsummary_get_spectrum(file_path):
@@ -179,7 +149,7 @@ def test_spectralsummary_len(file_path):
 
     summary = fisa.read_fisa(path)
 
-    assert len(summary) == 8
+    assert len(summary) == 9
     assert len(summary.header) == 6
     assert len(summary.data) == 4
     assert len(summary.extra_info) == 4

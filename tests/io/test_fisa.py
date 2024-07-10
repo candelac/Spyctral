@@ -19,9 +19,16 @@ import numpy as np
 
 import pytest
 
+from specutils import Spectrum1D
+
 from spyctral.core import core
 from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
+
+
+# =============================================================================
+# FISA TESTS
+# =============================================================================
 
 
 def test_read_fisa(file_path):
@@ -39,12 +46,6 @@ def test_read_fisa(file_path):
     assert isinstance(summary.header.normalization_point, float)
     assert isinstance(summary.header.spectra_names, tuple)
 
-    assert isinstance(summary.data, Bunch)
-    assert isinstance(summary.data.Unreddened_spectrum, QTable)
-    assert isinstance(summary.data.Template_spectrum, QTable)
-    assert isinstance(summary.data.Observed_spectrum, QTable)
-    assert isinstance(summary.data.Residual_flux, QTable)
-
     assert summary.header.fisa_version == "0.92"
     assert summary.header.date_time == dt.datetime(2022, 4, 1, 21, 46, 19)
     assert summary.header.reddening == 0.280868769
@@ -60,6 +61,12 @@ def test_read_fisa(file_path):
         "Residual_flux",
     )
 
+    assert isinstance(summary.data, Bunch)
+    assert isinstance(summary.data.Unreddened_spectrum, QTable)
+    assert isinstance(summary.data.Template_spectrum, QTable)
+    assert isinstance(summary.data.Observed_spectrum, QTable)
+    assert isinstance(summary.data.Residual_flux, QTable)
+
     assert len(summary.data.Unreddened_spectrum) == 3000
     assert len(summary.data.Template_spectrum) == 3401
     assert len(summary.data.Observed_spectrum) == 3000
@@ -70,6 +77,12 @@ def test_read_fisa(file_path):
     assert isinstance(summary.av_value, float)
     assert isinstance(summary.normalization_point, float)
     assert isinstance(summary.z_value, float)
+
+    assert isinstance(summary.spectra, Bunch)
+    assert isinstance(summary.spectra.Unreddened_spectrum, Spectrum1D)
+    assert isinstance(summary.spectra.Template_spectrum, Spectrum1D)
+    assert isinstance(summary.spectra.Observed_spectrum, Spectrum1D)
+    assert isinstance(summary.spectra.Residual_flux, Spectrum1D)
 
     assert isinstance(summary.extra_info, Bunch)
     assert isinstance(summary.extra_info.str_template, str)

@@ -5,6 +5,11 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
 import re
 
 import astropy.units as u
@@ -16,10 +21,14 @@ import numpy as np
 
 import pandas as pd
 
-from spyctral.core import core
-
 from specutils import Spectrum1D
 
+from spyctral.core import core
+
+
+# =============================================================================
+# FUNCTIONS
+# =============================================================================
 
 SL_GET_HEADER = re.compile(r"\[")
 SL_GET_TITLE_VALUE = re.compile(r"\[")
@@ -333,12 +342,8 @@ def _get_spectra(data):
     """Make spectra from data"""
     spectra = {}
     for key, value in data.items():
-        try:
-            if len(value.columns) == 4 and key == "synthetic_spectrum":
-                spectra = _make_spectrum1d_from_qtable(value)
-
-        except KeyError:
-            raise ValueError("Data tables are not in the correct way.")
+        if len(value.columns) == 4 and key == "synthetic_spectrum":
+            spectra = _make_spectrum1d_from_qtable(value)
 
     return spectra
 

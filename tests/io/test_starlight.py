@@ -16,11 +16,20 @@ import re
 
 from astropy.table import QTable
 
+import pandas as pd
+
 import pytest
+
+from specutils import Spectrum1D
 
 from spyctral.core import core
 from spyctral.io import starlight
 from spyctral.utils.bunch import Bunch
+
+
+# =============================================================================
+# STARLIGHT TESTS
+# =============================================================================
 
 
 def test_read_starlight(file_path):
@@ -120,7 +129,19 @@ def test_read_starlight(file_path):
     assert isinstance(summary.av_value, float)
     assert isinstance(summary.normalization_point, float)
     assert isinstance(summary.z_value, float)
+
+    assert isinstance(summary.spectra, Bunch)
+    assert isinstance(summary.spectra.synthetic_spectrum, Spectrum1D)
+    assert isinstance(summary.spectra.residual_spectrum, Spectrum1D)
+    assert isinstance(summary.spectra.observed_spectrum, Spectrum1D)
+
     assert isinstance(summary.extra_info, Bunch)
+    assert isinstance(summary.extra_info.xj_percent, int)
+    assert isinstance(summary.extra_info.age_decimals, int)
+    assert isinstance(summary.extra_info.rv, float)
+    assert isinstance(summary.extra_info.z_decimals, int)
+    assert isinstance(summary.extra_info.ssps_vector, pd.DataFrame)
+    assert isinstance(summary.extra_info.synthesis_info, pd.DataFrame)
 
 
 def test_convert_to_float(file_path):

@@ -164,10 +164,14 @@ def test_spectralsummary_repr(file_path):
 
     repr_expected = (
         "SpectralSummary(\n"
-        "  header={ fisa_version, date_time, reddening,"
-        " adopted_template, normalization_point, spectra_names },\n"
-        "  data={ Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
-        " Residual_flux }\n)"
+        "  header={fisa_version, date_time, reddening,"
+        " adopted_template, normalization_point, spectra_names},\n"
+        "  data={Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
+        " Residual_flux},\n"
+        "  age, reddening, av_value, normalization_point, z_value,\n"
+        "  spectra={Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
+        " Residual_flux},\n"
+        "  extra_info={str_template, name_template, age_map, z_map})"
     )
 
     assert repr(summary) == repr_expected

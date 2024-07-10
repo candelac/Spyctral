@@ -153,12 +153,16 @@ class SpectralSummary:
 
         header_keys = ", ".join(self.header.keys())
         data_keys = ", ".join(self.data.keys())
+        spectra_keys = ", ".join(self.spectra.keys())
+        extra_info_keys = ", ".join(self.extra_info.keys())
 
         return (
             f"SpectralSummary(\n"
-            f"  header={{ {header_keys} }},\n"
-            f"  data={{ {data_keys} }}\n"
-            f")"
+            f"  header={{{header_keys}}},\n"
+            f"  data={{{data_keys}}},\n"
+            "  age, reddening, av_value, normalization_point, z_value,\n"
+            f"  spectra={{{spectra_keys}}},\n"
+            f"  extra_info={{{extra_info_keys}}})"
         )
 
     @property

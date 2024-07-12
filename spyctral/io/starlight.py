@@ -48,7 +48,7 @@ def _proces_header(header_ln):
             head_dict["Date"] = dateutil.parser.parse(
                 re.findall(SL_GET_DATE, sl)[0]
             )
-            # head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
+            #head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
         sl = re.sub(
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
@@ -99,25 +99,15 @@ def _proces_header(header_ln):
 
     return head_dict
 
-
-def _convert_to_float(block_table):
-    for i, row in enumerate(block_table):
-        converted_row = []
-        for item in row:
-            try:
-                # Intentar convertir el elemento en un número
-                converted_item = float(item)
-            except ValueError:
-                # Si no se puede convertir a número, levantar una excepción
-                raise ValueError(
-                    # "The table can't be converted to float"
-                    f"Element at position ({i}) in {row} table cannot "
-                    "be converted to a number."
-                )
-            converted_row.append(converted_item)
-        block_table[i] = converted_row
-    return block_table
-
+def _is_float(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
 
 def _proces_tables(block_lines):
     """Recives a list that contains the lines of the tables and
@@ -143,7 +133,7 @@ def _proces_tables(block_lines):
             # Generates a block for each empty line that founds
             # and if the block is larger it appends it
             else:
-                if len(tab) > 1:
+                if len(tab) >= 1:
                     blocks.append(tab)
                     tab = []
     blocks.append(tab)
@@ -153,11 +143,46 @@ def _proces_tables(block_lines):
         .replace(".", "")
         .replace("?", "")
         .strip()
-    )
+    ).split(' ')
+    #Toma las unidades de los headers y remueve los '()'
+    unities = []
+    clean_title = []
+    for t in first_title:
+        splited = t.split('(')
+        if len(splited[0])>0:
+            clean_title.append(splited[0])
+        else :
+ 
+            clean_title.append(splited[1].split(')')[1])
+            
+        if (len(splited)>= 2) :
+            if (splited[1].split(')')[0] == '%'):
+                unities.append(splited[1].split(')')[0])
+            else: 
+                unities.append('')
+        else:
+            unities.append('')
 
-    # Convert the possible tables into float
-    for index_blocks in [1, 2, 4]:
-        blocks[index_blocks] = _convert_to_float(blocks[index_blocks])
+    # Verificar que los elementos sean números
+    for ibl, lin in enumerate(blocks) :
+        for i, row in enumerate(blocks[ibl]):
+            converted_row = []
+            for item in row:
+                try:
+                    # Intentar convertir el elemento en un número
+                    if _is_float(item):
+                        converted_item = float(item)
+                        
+                except ValueError:
+                    # Si no se puede convertir a número, levantar una excepción
+                    raise ValueError(
+                        f"Element at position ({i})"
+                        " in 'synthetic_spectrum' table cannot "
+                        "  be converted to a number."
+                    )
+                converted_row.append(converted_item)
+            blocks[ibl][i] = converted_row
+    
 
     # Crear la tabla synthetic_spectrum con unidades
     synthetic_spectrum_table = QTable(
@@ -171,7 +196,8 @@ def _proces_tables(block_lines):
         # Cambio: Usar la tabla con unidades
         "synthetic_spectrum": synthetic_spectrum_table,
         "synthetic_results": QTable(
-            rows=blocks[0], names=first_title.split(" ")
+            rows=blocks[0], names=clean_title,
+              units = unities
         ),
         "results_average_chains_xj": QTable(rows=blocks[1]),
         "results_average_chains_mj": QTable(rows=blocks[2]),
@@ -184,6 +210,7 @@ def _proces_tables(block_lines):
     return spectra_dict
 
 
+
 def _get_ssp_contributions(tables_dict, xj_percent):
     ssps_vector = tables_dict["synthetic_results"]
     ssps_vector = (
@@ -193,11 +220,11 @@ def _get_ssp_contributions(tables_dict, xj_percent):
     # Convertir todas las columnas a números flotantes
     ssps_vector = ssps_vector.apply(pd.to_numeric, errors="coerce")
 
-    ssps_vector = ssps_vector[ssps_vector["x_j(%)"] > xj_percent].reset_index(
+    ssps_vector = ssps_vector[ssps_vector["x_j"] > (xj_percent/100)].reset_index(
         drop=True
     )
-    ssps_vector["x_j(%)"] = (
-        ssps_vector["x_j(%)"] * 100 / ssps_vector["x_j(%)"].sum()
+    ssps_vector["x_j"] = (
+        ssps_vector["x_j"] / ssps_vector["x_j"].sum()
     )
 
     return ssps_vector
@@ -212,9 +239,9 @@ def _get_age(ssps_vector, age_decimals):
         10
         ** (
             (
-                (ssps_vector["x_j(%)"] * np.log10(ssps_vector["age_j(yr)"]))
+                (ssps_vector["x_j"] * np.log10(ssps_vector["age_j"]))
             ).sum()
-            / ssps_vector["x_j(%)"].sum()
+            / ssps_vector["x_j"].sum()
         )
     )
     age = np.log10(age)
@@ -240,16 +267,16 @@ def _get_metallicity(ssps_vector, z_decimals):
     """
 
     z_value = (
-        (ssps_vector["x_j(%)"] * ssps_vector["Z_j"])
-    ).sum() / ssps_vector["x_j(%)"].sum()
+        (ssps_vector["x_j"] * ssps_vector["Z_j"])
+    ).sum() / ssps_vector["x_j"].sum()
     z_value = round(z_value, z_decimals)
 
     return z_value
 
 
 def _get_z_values(ssps_vector):
-    max_xj_index = ssps_vector["x_j(%)"].idxmax()
-    min_xj_index = ssps_vector["x_j(%)"].idxmin()
+    max_xj_index = ssps_vector["x_j"].idxmax()
+    min_xj_index = ssps_vector["x_j"].idxmin()
 
     z_ssp_max = float(ssps_vector.loc[max_xj_index, "Z_j"])
     z_ssp_min = float(ssps_vector.loc[min_xj_index, "Z_j"])

@@ -26,12 +26,20 @@ __version__ = "0.0.1"
 # IMPORTS
 # =============================================================================
 
-from .core import SpectralSummary
+from .core.core import SpectralSummary
+from .io import fisa
+from .io import starlight
 from .io.fisa import read_fisa
 from .io.starlight import read_starlight
 
 
-__all__ = ["SpectralSummary", "read_fisa", "read_starlight"]
+__all__ = [
+    "SpectralSummary",
+    "fisa",
+    "starlight",
+    "read_fisa",
+    "read_starlight",
+]
 
 
 # __file__ ?

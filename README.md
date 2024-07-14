@@ -31,7 +31,7 @@ This is the first version of Spyctral code and we hope to add functionality so t
 ## Authors
 
 * Tapia-Reina Martina (martina.tapia@mi.unc.edu.ar)
-* Cerdosino Candela (mail)
-* Fiore J.Manuel (mail)
-* Martinez J.Luis (mail)
-* Cabral Juan (mail)
+* Cerdosino Candela (candelacerdosino@mi.unc.edu.ar)
+* Fiore J.Manuel (juanmfiore@mi.unc.edu.ar)
+* Martinez J.Luis (martinez.joseco@gmail.com)
+* Cabral Juan (jbcabral@unc.edu.ar)

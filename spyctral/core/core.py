@@ -9,8 +9,7 @@
 # IMPORTS
 # =============================================================================
 
-import matplotlib.pyplot as plt
-from .utils.bunch import Bunch
+# from .utils.bunch import Bunch
 import attrs
 
 import numpy as np
@@ -19,12 +18,12 @@ import pandas as pd
 
 from ..utils.bunch import Bunch
 
-<< << << < HEAD: spyctral/core.py
+# << << << < HEAD: spyctral/core.py
 
 
 # from plot_utils import make_plot_base
-== == == =
->>>>>> > main: spyctral/core/core.py
+# == == == =
+# >>>>>> > main: spyctral/core/core.py
 
 # =============================================================================
 # CONSTANTS
@@ -272,15 +271,17 @@ class SpectralSummary:
 
     #    ax.legend(spect_names)
 
-    def make_plots(self):
+    @property
+    def plot(self):
         """Generate plots from spectra created with make_spectrum.
 
-        This function is currently commented out and does not execute.
-        """
-        # Esta función está comentada y no se ejecuta.
-        """
         spectra = self.spectra
         for key, spectrum in spectra.items():
             make_plot_base(spectrum.spectral_axis, spectrum.flux, key)
         """
-        pass
+
+        """Plot accesor"""
+        from .plot import SpectralPlotter
+        return SpectralPlotter(self)
+
+        # pass

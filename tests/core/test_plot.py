@@ -107,7 +107,7 @@ def test_single_plots_starlight(file_path):
 
     summary = spy.read_starlight(path)
 
-    axisos = summary.plot.single("Observed_spectrum")
+    axisos = summary.plot.single("observed_spectrum")
     axisus = summary.plot.single("synthetic_spectrum")
     axistrs = summary.plot.single("residual_spectrum")
 

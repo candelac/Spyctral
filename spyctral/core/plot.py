@@ -7,7 +7,6 @@
 
 import matplotlib.pyplot as plt
 import attr
-import numpy as np
 
 
 @attr.s(repr=False)
@@ -41,7 +40,8 @@ class SpectralPlotter:
 
         if spectrum_name not in spectra:
             raise ValueError(
-                f"Spectrum '{spectrum_name}' not found in spectra.")
+                f"Spectrum '{spectrum_name}' not found in spectra."
+            )
         spectrum = spectra[spectrum_name]
 
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -56,8 +56,9 @@ class SpectralPlotter:
 
         fig, ax = plt.subplots(figsize=(10, 6))
         for name, spectrum in spectra.items():
-            ax.plot(spectrum.spectral_axis,
-                    spectrum.flux, label=name, **kwargs)
+            ax.plot(
+                spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
+            )
         self._set_common_labels(ax, "All Spectra")
         ax.legend()
         plt.show()
@@ -72,8 +73,12 @@ class SpectralPlotter:
                 cumulative_offset += offset
             else:
                 cumulative_offset = 0
-            ax.plot(spectrum.spectral_axis, spectrum.flux +
-                    cumulative_offset, label=name, **kwargs)
+            ax.plot(
+                spectrum.spectral_axis,
+                spectrum.flux + cumulative_offset,
+                label=name,
+                **kwargs,
+            )
         ax.set_ylabel("Flux (Offset Applied)")
         self._set_common_labels(ax, "Spectra with Offset")
         ax.legend()
@@ -90,8 +95,9 @@ class SpectralPlotter:
             axes = [axes]
 
         for ax, (name, spectrum) in zip(axes, spectra.items()):
-            ax.plot(spectrum.spectral_axis,
-                    spectrum.flux, label=name, **kwargs)
+            ax.plot(
+                spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
+            )
             ax.set_ylabel("Flux")
             ax.legend()
             ax.grid(True)
@@ -154,7 +160,7 @@ class SpectralPlotter:
         #        _title = "Gráficos de FISA"
         #    # Crear un DataFrame vacío para inicializar el plot
         #    df_empty = pd.DataFrame({'wavelength': [], 'flux': []})
-        #    ax = df_empty.plot(x='wavelength', y='flux')  # Crear el subplot vacío
+        #    ax = df_empty.plot(x='wavelength', y='flux')
         #    # Graficar cada espectro por separado
         #    for idx, name in enumerate(spect_names):
         #        df = pd.DataFrame({

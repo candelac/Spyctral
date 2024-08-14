@@ -80,9 +80,11 @@ class SpectralSummary:
         Additional info.
     """
 
+    obj_name: str = attrs.field(converter=str)
     header: dict = attrs.field(converter=lambda v: Bunch("header", v))
     data: dict = attrs.field(converter=lambda v: Bunch("data", v))
     age: float = attrs.field(converter=float)
+    err_age: float = attrs.field(converter=float)
     reddening: float = attrs.field(converter=float)
     av_value: float = attrs.field(converter=float)
     normalization_point: float = attrs.field(converter=float)
@@ -186,102 +188,39 @@ class SpectralSummary:
 
         return feh_ratio
 
-    # def plot(self, color=["sienna", "plum", "olive", "blue"],
-    #          styleline='-', grid='False'):
-    #    """
-    #    Plots spectrum from Starlight and FISA
-    #    usage: plot()
-    #           plot([<color1>, <color2>, <color3>, <color3>]"")
-    #           plot([<color1>, <color2>, <color3>, <color3>], <styleline>)
-    #    return: plot matplotlib.pyplot style
-    #    """
-    #    spectra = self.spectra
-    #    # ["synthetic_spectrum", "observed_spectrum", "residual_spectrum"]
-    #    spect_names = list(spectra.keys())
-    #    fig, ax = plt.subplots(figsize=(22, 10))
-    #
-    #    if len(spect_names) == 3:
-    #        fig.suptitle("Gráficos de Starlight")
-    #    else:
-    #        fig.suptitle("Gráficos de FISA")
-
-    #    current_ax = 0
-    #    for valores in spectra:
-    #        ax = fig.axes[0]
-    #        ax.plot(
-    #            spectra[valores].spectral_axis,
-    #            spectra[valores].flux,
-    #            label=spect_names[current_ax],
-    #            color=color[current_ax],
-    #            linewidth=1,
-    #            linestyle=styleline
-    #        )
-    #        current_ax += 1
-    #    ax.set_xlabel("Longitud de onda(Angstrom)")
-    #    ax.axhline(y=0, color='grey', linestyle=styleline, label='y=0')
-    #    ax.set_ylabel('Flux')
-    #    ax.legend()
-    #    ax.grid(grid)
-    #    plt.show()
-
-    # def plotPd(self, color=["sienna", "plum", "olive", "blue"],
-    #           styleline='-', _grid=False,
-    #           xlim=None, ylim=None):
-    # Ejemplo de uso
-    # Suponiendo que 'star' es una instancia de SpectralSummary y tiene
-    # los datos cargados
-    # star = spy.read_starlight('tests/datasets/case_SC_Starlight.out')
-    # star.plotSL(xlim=(3000, 7000), ylim=(-1.2, 1.2))
-
-    #    spectra = self.spectra
-    #    # Obtener dinámicamente los nombres
-    #    spect_names = list(spectra.keys())
-
-    # Determinar el título dinámicamente
-    #    if len(spect_names) == 3:
-    #        _title = "Gráficos de Starlight"
-    #    else:
-    #        _title = "Gráficos de FISA"
-
-    #    # Crear un DataFrame vacío para inicializar el plot
-    #    df_empty = pd.DataFrame({'wavelength': [], 'flux': []})
-    #    ax = df_empty.plot(x='wavelength', y='flux')  # Crear el subplot vacío
-
-    #    # Graficar cada espectro por separado
-    #    for idx, name in enumerate(spect_names):
-    #        df = pd.DataFrame({
-    #            'wavelength': spectra[name].spectral_axis.value,
-    #            'flux': spectra[name].flux.value
-    #        })
-
-    #        # Crear el plot usando pandas
-    #        df.plot(x='wavelength', y='flux', ax=ax,
-    #                color=color[idx], linestyle=styleline, label=name,
-    #                title=_title, grid=_grid)
-
-    #    ax.set_xlabel("Longitud de onda (Angstrom)")
-    #    ax.set_ylabel('Flux')
-    #    ax.axhline(y=0, color='grey', linestyle=styleline, label='y=0')
-
-    #    # Configurar límites de los ejes si se proporcionan
-    #    if xlim:
-    #        ax.set_xlim(xlim)
-    #    if ylim:
-    #        ax.set_ylim(ylim)
-
-    #    ax.legend(spect_names)
-
     @property
     def plot(self):
-        """Generate plots from spectra created with make_spectrum.
+        """Generate plots from spectra."""
 
-        spectra = self.spectra
-        for key, spectrum in spectra.items():
-            make_plot_base(spectrum.spectral_axis, spectrum.flux, key)
-        """
-
-        """Plot accesor"""
         from .plot import SpectralPlotter
+
         return SpectralPlotter(self)
 
-        # pass
+    @property
+    def get_all_properties(self) -> pd.DataFrame:
+        """Make a dataframe with all the parameter values.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing all the parameters values.
+        """
+        age = f"{self.age:.2e}"
+        err_age = f"{self.err_age:.2e}"
+
+        properties = {
+            "object_name": self.obj_name,
+            "age": age,
+            "err_age": err_age,
+            "reddening": self.reddening,
+            "av_value": self.av_value,
+            "z_value": self.z_value,
+            "feh_ratio": self.feh_ratio,
+            "normalization_point": self.normalization_point,
+        }
+
+        df = pd.DataFrame(
+            list(properties.items()), columns=["Property", "Value"]
+        )
+
+        return df

@@ -44,7 +44,9 @@ FISA_RX_NORMALIZATION_POINT = re.compile(
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
-FISA_DEFAULT_AGE_MAP = {"G2": 9, "G3": 9.1}
+FISA_DEFAULT_AGE_MAP = {"G2": 10e9, "G3": 15e9}
+
+FISA_DEFAULT_ERROR_AGE_MAP = {"G2": 1e9, "G3": 5e9}
 
 FISA_DEFAULT_Z_MAP = {"G2": 0.4, "G3": 0.5}
 
@@ -152,7 +154,15 @@ def _get_spectra(data):
     return spectra
 
 
-def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
+def read_fisa(
+    path_or_buffer,
+    *,
+    age_map=None,
+    error_age_map=None,
+    rv=3.1,
+    z_map=None,
+    object_name="object_1",
+):
     """
     Reads a FISA file and extracts relevant
     information to create a SpectralSummary object.
@@ -193,7 +203,12 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
     """
     # Use default mappings if None provided
     age_map = FISA_DEFAULT_AGE_MAP if age_map is None else age_map
+    error_age_map = (
+        FISA_DEFAULT_ERROR_AGE_MAP if error_age_map is None else error_age_map
+    )
     z_map = FISA_DEFAULT_Z_MAP if z_map is None else z_map
+
+    obj_name = object_name
 
     header_lines, spectra_blocks = [], []
     current_spectrum = []
@@ -225,6 +240,7 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
             "in age_map."
         )
 
+    err_age = error_age_map[name_template]
     reddening_value, av_value = _get_reddening(header, rv)
     normalization_point = header["normalization_point"]
 
@@ -242,13 +258,16 @@ def read_fisa(path_or_buffer, *, age_map=None, rv=3.1, z_map=None):
         "str_template": str_template,
         "name_template": name_template,
         "age_map": age_map,
+        "error_age_map": error_age_map,
         "z_map": z_map,
     }
 
     return core.SpectralSummary(
+        obj_name=obj_name,
         header=header,
         data=data,
         age=age,
+        err_age=err_age,
         reddening=reddening_value,
         av_value=av_value,
         normalization_point=normalization_point,

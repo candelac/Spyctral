@@ -232,17 +232,37 @@ def _get_age(ssps_vector, age_decimals):
     This function get age from input file.
     """
 
-    age = int(
-        10
-        ** (
-            ((ssps_vector["x_j"] * np.log10(ssps_vector["age_j"]))).sum()
-            / ssps_vector["x_j"].sum()
-        )
+    age = ((ssps_vector["x_j"] * ssps_vector["age_j"]).sum()) / (
+        ssps_vector["x_j"].sum()
     )
-    age = np.log10(age)
+
     age = round(age, age_decimals)
+    
 
     return age
+
+
+def _get_error_age(ssps_vector, age, age_decimals):
+    """
+    This function get error age from input file.
+    """
+    
+    desviaciones_cuadradas_2 = (
+        ssps_vector["x_j"] * (ssps_vector["age_j"] - age) ** 2
+    )
+
+    suma_ponderada_desviaciones_cuadradas_2 = np.sum(desviaciones_cuadradas_2)
+
+    suma_pesos = np.sum(ssps_vector["x_j"])
+
+    varianza_ponderada_2 = suma_ponderada_desviaciones_cuadradas_2 / suma_pesos
+
+    err_age = np.sqrt(varianza_ponderada_2)
+
+    err_age = round(err_age, age_decimals)
+    
+
+    return err_age
 
 
 def _get_reddening(header_info, rv):
@@ -371,11 +391,19 @@ def _get_spectra(data):
 
 
 def read_starlight(
-    path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
+    path,
+    *,
+    xj_percent=5,
+    age_decimals=2,
+    rv=3.1,
+    z_decimals=3,
+    object_name="object_1",
 ):
     """Recives as input a path from the location of the starlight file and
     returns a two dicctionaries the first is the header information and the
     second is the tables information"""
+
+    obj_name = object_name
 
     header_lines, block_lines = [], []
     with open(path) as starfile:
@@ -392,6 +420,8 @@ def read_starlight(
     ssps_vector = _get_ssp_contributions(tables_dict, xj_percent)
 
     age = _get_age(ssps_vector, age_decimals)
+
+    err_age = _get_error_age(ssps_vector, age, age_decimals)
 
     reddening_value, av_value = _get_reddening(header_info, rv)
 
@@ -413,9 +443,11 @@ def read_starlight(
     }
 
     return core.SpectralSummary(
+        obj_name=obj_name,
         header=header_info,
         data=tables_dict,
         age=age,
+        err_age=err_age,
         reddening=reddening_value,
         av_value=av_value,
         normalization_point=normalization_point,

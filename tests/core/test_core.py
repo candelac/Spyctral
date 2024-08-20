@@ -123,7 +123,7 @@ def test_spectralsummary_getitem(file_path):
 
     assert summary["header"] == header_expected
     # assert summary["data"] == data_expected
-    assert summary["age"] == 9.0
+    assert summary["age"] == 1e10
     assert summary["reddening"] == 0.280868769
     assert summary["av_value"] == 0.8706931839000001
     assert summary["normalization_point"] == 5299.4502
@@ -149,10 +149,10 @@ def test_spectralsummary_len(file_path):
 
     summary = fisa.read_fisa(path)
 
-    assert len(summary) == 9
+    assert len(summary) == 11
     assert len(summary.header) == 6
     assert len(summary.data) == 4
-    assert len(summary.extra_info) == 4
+    assert len(summary.extra_info) == 5
 
 
 def test_spectralsummary_repr(file_path):
@@ -171,7 +171,8 @@ def test_spectralsummary_repr(file_path):
         "  age, reddening, av_value, normalization_point, z_value,\n"
         "  spectra={Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
         " Residual_flux},\n"
-        "  extra_info={str_template, name_template, age_map, z_map})"
+        "  extra_info={str_template, name_template, age_map, error_age_map,"
+        " z_map})"
     )
 
     assert repr(summary) == repr_expected
@@ -187,3 +188,40 @@ def test_spectralsummary_feh_ratio(file_path):
     feh_ratio_expected = np.log10(summary.z_value / Z_SUN)
 
     assert summary.feh_ratio == feh_ratio_expected
+
+
+def test_spectralsummary_get_all_properties(file_path):
+    """Test of the "get_all_properties" with FISA."""
+
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = fisa.read_fisa(path)
+
+    df = summary.get_all_properties
+
+    df_expected = pd.DataFrame(
+        {
+            "Property": [
+                "object_name",
+                "age",
+                "err_age",
+                "reddening",
+                "av_value",
+                "z_value",
+                "feh_ratio",
+                "normalization_point",
+            ],
+            "Value": [
+                "object_1",
+                "1.00e+10",
+                "1.00e+09",
+                0.280868769,
+                0.8706931839000001,
+                0.4,
+                1.3233063903751334,
+                5299.4502,
+            ],
+        }
+    )
+
+    assert df.equals(df_expected)

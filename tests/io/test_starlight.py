@@ -16,6 +16,8 @@ import datetime as dt
 
 from astropy.table import QTable
 
+import numpy as np
+
 import pandas as pd
 
 # import pytest
@@ -107,17 +109,6 @@ def test_read_starlight(file_path):
     )  # faltan unidades
     assert isinstance(summary.data.synthetic_results, QTable)
 
-    # assert all(
-    #    isinstance(x, float) for x in summary.data["synthetic_spectrum"]
-    # )
-
-    # assert all(
-    #    isinstance(x, float) for x in summary.data.results_average_chains_xj
-    # )
-    # assert all(
-    #    isinstance(x, float) for x in summary.data.results_average_chains_mj
-    # )
-
     assert len(summary.data.synthetic_results) == 69
     assert len(summary.data.results_average_chains_xj) == 69
     assert len(summary.data.results_average_chains_mj) == 69
@@ -142,6 +133,14 @@ def test_read_starlight(file_path):
     assert isinstance(summary.extra_info.z_decimals, int)
     assert isinstance(summary.extra_info.ssps_vector, pd.DataFrame)
     assert isinstance(summary.extra_info.synthesis_info, pd.DataFrame)
+
+
+def test_is_float():
+    assert starlight._is_float(np.random.randint(1, 100))
+
+
+def test_is_float_none():
+    assert not starlight._is_float(None)  # == False
 
 
 """

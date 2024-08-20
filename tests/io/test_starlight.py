@@ -140,7 +140,7 @@ def test_is_float():
 
 
 def test_is_float_none():
-    assert not starlight._is_float(None)  # == False
+    assert not starlight._is_float(None)
 
 
 """

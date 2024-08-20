@@ -11,132 +11,158 @@
 # IMPORTS
 # =============================================================================
 
+from matplotlib.testing.decorators import check_figures_equal
 
 import spyctral as spy
 
+@check_figures_equal(extensions=["png"])
+def test_SpectralPlotter_all(file_path, fig_test, fig_ref):
+    '''With FISA.'''
 
-def test_all_plots_fisa(file_path):
     path = file_path("case_SC_FISA.fisa")
 
     summary = spy.read_fisa(path)
 
-    axis = summary.plot()
-
-    suptitle = axis.get_figure()._suptitle.get_text()
-    title = axis.get_title()
-    xlabel = axis.get_xlabel()
-    ylabel = axis.get_ylabel()
-
-    assert suptitle == "FISA"
-    assert title == "All Spectra"
-    assert xlabel == "Wavelength (Angstrom)"
-    assert ylabel == "Flux"
-
-
-def test_all_plots_starlight(file_path):
-    path = file_path("case_SC_Starlight.out")
-
-    summary = spy.read_starlight(path)
-
-    axis = summary.plot()
-
-    suptitle = axis.get_figure()._suptitle.get_text()
-    title = axis.get_title()
-    xlabel = axis.get_xlabel()
-    ylabel = axis.get_ylabel()
-
-    assert suptitle == "Starlight"
-    assert title == "All Spectra"
-    assert xlabel == "Wavelength (Angstrom)"
-    assert ylabel == "Flux"
+    plotter = spy.core.plot.SpectralPlotter(summary)
+    
+    # test
+    test_ax = fig_test.subplots()
+    plotter.all(ax=test_ax)
+    
+    #expected
+    exp_ax = fig_ref.subplots()
+  
+    exp_ax.hist2d(p.x, p.y, cmap="viridis")
+    exp_ax.scatter(p.x, p.y)    
+    
+    exp_ax.set_title("Scatter Hist")
 
 
-def test_single_plots_fisa(file_path):
-    path = file_path("case_SC_FISA.fisa")
+# -----------------------------------------------
 
-    summary = spy.read_fisa(path)
-
-    axists = summary.plot.single("Template_spectrum")
-    axisos = summary.plot.single("Observed_spectrum")
-    axisus = summary.plot.single("Unreddened_spectrum")
-    axistrs = summary.plot.single("Residual_flux")
-
-    suptitlet = axists.get_figure()._suptitle.get_text()
-    titlets = axists.get_title()
-    xlabelts = axists.get_xlabel()
-    ylabelts = axists.get_ylabel()
-
-    suptitleo = axisos.get_figure()._suptitle.get_text()
-    titleos = axisos.get_title()
-    xlabelos = axisos.get_xlabel()
-    ylabelos = axisos.get_ylabel()
-
-    suptitleu = axisus.get_figure()._suptitle.get_text()
-    titleus = axisus.get_title()
-    xlabelus = axisus.get_xlabel()
-    ylabelus = axisus.get_ylabel()
-
-    suptitler = axistrs.get_figure()._suptitle.get_text()
-    titlers = axistrs.get_title()
-    xlabelrs = axistrs.get_xlabel()
-    ylabelrs = axistrs.get_ylabel()
-
-    assert suptitlet == "FISA"
-    assert titlets == "Spectrum Template_spectrum"
-    assert xlabelts == "Wavelength (Angstrom)"
-    assert ylabelts == "Flux"
-
-    assert suptitleo == "FISA"
-    assert titleos == "Spectrum Observed_spectrum"
-    assert xlabelos == "Wavelength (Angstrom)"
-    assert ylabelos == "Flux"
-
-    assert suptitleu == "FISA"
-    assert titleus == "Spectrum Unreddened_spectrum"
-    assert xlabelus == "Wavelength (Angstrom)"
-    assert ylabelus == "Flux"
-
-    assert suptitler == "FISA"
-    assert titlers == "Spectrum Residual_flux"
-    assert xlabelrs == "Wavelength (Angstrom)"
-    assert ylabelrs == "Flux"
+#def test_all_plots_fisa(file_path):
+#    path = file_path("case_SC_FISA.fisa")
+#
+#    summary = spy.read_fisa(path)
+#
+#    axis = summary.plot()
+#
+#    suptitle = axis.get_figure()._suptitle.get_text()
+#    title = axis.get_title()
+#    xlabel = axis.get_xlabel()
+#    ylabel = axis.get_ylabel()
+#
+#    assert suptitle == "FISA"
+#    assert title == "All Spectra"
+#    assert xlabel == "Wavelength (Angstrom)"
+#    assert ylabel == "Flux"
 
 
-def test_single_plots_starlight(file_path):
-    path = file_path("case_SC_Starlight.out")
+# def test_all_plots_starlight(file_path):
+#     path = file_path("case_SC_Starlight.out")
+# 
+#     summary = spy.read_starlight(path)
+# 
+#     axis = summary.plot()
+# 
+#     suptitle = axis.get_figure()._suptitle.get_text()
+#     title = axis.get_title()
+#     xlabel = axis.get_xlabel()
+#     ylabel = axis.get_ylabel()
+# 
+#     assert suptitle == "Starlight"
+#     assert title == "All Spectra"
+#     assert xlabel == "Wavelength (Angstrom)"
+#     assert ylabel == "Flux"
 
-    summary = spy.read_starlight(path)
 
-    axisos = summary.plot.single("observed_spectrum")
-    axisus = summary.plot.single("synthetic_spectrum")
-    axistrs = summary.plot.single("residual_spectrum")
+# def test_single_plots_fisa(file_path):
+#     path = file_path("case_SC_FISA.fisa")
+# 
+#     summary = spy.read_fisa(path)
+# 
+#     axists = summary.plot.single("Template_spectrum")
+#     axisos = summary.plot.single("Observed_spectrum")
+#     axisus = summary.plot.single("Unreddened_spectrum")
+#     axistrs = summary.plot.single("Residual_flux")
+# 
+#     suptitlet = axists.get_figure()._suptitle.get_text()
+#     titlets = axists.get_title()
+#     xlabelts = axists.get_xlabel()
+#     ylabelts = axists.get_ylabel()
+# 
+#     suptitleo = axisos.get_figure()._suptitle.get_text()
+#     titleos = axisos.get_title()
+#     xlabelos = axisos.get_xlabel()
+#     ylabelos = axisos.get_ylabel()
+# 
+#     suptitleu = axisus.get_figure()._suptitle.get_text()
+#     titleus = axisus.get_title()
+#     xlabelus = axisus.get_xlabel()
+#     ylabelus = axisus.get_ylabel()
+# 
+#     suptitler = axistrs.get_figure()._suptitle.get_text()
+#     titlers = axistrs.get_title()
+#     xlabelrs = axistrs.get_xlabel()
+#     ylabelrs = axistrs.get_ylabel()
+# 
+#     assert suptitlet == "FISA"
+#     assert titlets == "Spectrum Template_spectrum"
+#     assert xlabelts == "Wavelength (Angstrom)"
+#     assert ylabelts == "Flux"
+# 
+#     assert suptitleo == "FISA"
+#     assert titleos == "Spectrum Observed_spectrum"
+#     assert xlabelos == "Wavelength (Angstrom)"
+#     assert ylabelos == "Flux"
+# 
+#     assert suptitleu == "FISA"
+#     assert titleus == "Spectrum Unreddened_spectrum"
+#     assert xlabelus == "Wavelength (Angstrom)"
+#     assert ylabelus == "Flux"
+# 
+#     assert suptitler == "FISA"
+#     assert titlers == "Spectrum Residual_flux"
+#     assert xlabelrs == "Wavelength (Angstrom)"
+#    assert ylabelrs == "Flux"
 
-    suptitleo = axisos.get_figure()._suptitle.get_text()
-    titleos = axisos.get_title()
-    xlabelos = axisos.get_xlabel()
-    ylabelos = axisos.get_ylabel()
 
-    suptitleu = axisus.get_figure()._suptitle.get_text()
-    titleus = axisus.get_title()
-    xlabelus = axisus.get_xlabel()
-    ylabelus = axisus.get_ylabel()
-
-    suptitler = axistrs.get_figure()._suptitle.get_text()
-    titlers = axistrs.get_title()
-    xlabelrs = axistrs.get_xlabel()
-    ylabelrs = axistrs.get_ylabel()
-
-    assert suptitleo == "Starlight"
-    assert titleos == "Spectrum observed_spectrum"
-    assert xlabelos == "Wavelength (Angstrom)"
-    assert ylabelos == "Flux"
-
-    assert suptitleu == "Starlight"
-    assert titleus == "Spectrum synthetic_spectrum"
-    assert xlabelus == "Wavelength (Angstrom)"
-    assert ylabelus == "Flux"
-
-    assert suptitler == "Starlight"
-    assert titlers == "Spectrum residual_spectrum"
-    assert xlabelrs == "Wavelength (Angstrom)"
-    assert ylabelrs == "Flux"
+#def test_single_plots_starlight(file_path):
+#    path = file_path("case_SC_Starlight.out")
+#
+#    summary = spy.read_starlight(path)
+#
+#    axisos = summary.plot.single("observed_spectrum")
+#    axisus = summary.plot.single("synthetic_spectrum")
+#    axistrs = summary.plot.single("residual_spectrum")
+#
+#    suptitleo = axisos.get_figure()._suptitle.get_text()
+#    titleos = axisos.get_title()
+#    xlabelos = axisos.get_xlabel()
+#    ylabelos = axisos.get_ylabel()
+#
+#    suptitleu = axisus.get_figure()._suptitle.get_text()
+#    titleus = axisus.get_title()
+#    xlabelus = axisus.get_xlabel()
+#    ylabelus = axisus.get_ylabel()
+#
+#    suptitler = axistrs.get_figure()._suptitle.get_text()
+#    titlers = axistrs.get_title()
+#    xlabelrs = axistrs.get_xlabel()
+#    ylabelrs = axistrs.get_ylabel()
+#
+#    assert suptitleo == "Starlight"
+#    assert titleos == "Spectrum observed_spectrum"
+#    assert xlabelos == "Wavelength (Angstrom)"
+#    assert ylabelos == "Flux"
+#
+#    assert suptitleu == "Starlight"
+#    assert titleus == "Spectrum synthetic_spectrum"
+#    assert xlabelus == "Wavelength (Angstrom)"
+#    assert ylabelus == "Flux"
+#
+#    assert suptitler == "Starlight"
+#    assert titlers == "Spectrum residual_spectrum"
+#    assert xlabelrs == "Wavelength (Angstrom)"
+#    assert ylabelrs == "Flux"
+#

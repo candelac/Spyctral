@@ -27,6 +27,7 @@ __version__ = "0.0.1"
 # =============================================================================
 
 from .core.core import SpectralSummary
+from .core.plot import SpectralPlotter
 from .io import fisa
 from .io import starlight
 from .io.fisa import read_fisa
@@ -39,6 +40,7 @@ __all__ = [
     "starlight",
     "read_fisa",
     "read_starlight",
+    "SpectralPlotter",
 ]
 
 

@@ -96,24 +96,24 @@ class SpectralPlotter:
         # plt.show()
         return ax
 
-    # def subplots(self, ax= None, **kwargs):
-    #    spectra = self._summary.spectra
-    #    n = len(spectra)
+    def subplots(self, ax=None, **kwargs):
+        spectra = self._summary.spectra
+        n = len(spectra)
 
-    #    fig, ax = plt.subplots(n, 1, figsize=(10, 4 * n), sharex=True)
-    #    plt.suptitle(self._get_file_type())
+        fig, ax = plt.subplots(n, 1, figsize=(10, 4 * n), sharex=True)
+        plt.suptitle(self._get_file_type())
 
-    #    if n == 1:
-    #        ax = [ax]
+        if n == 1:
+            ax = [ax]
 
-    #    for ax_i, (name, spectrum) in zip(ax, spectra.items()):
-    #        ax_i.plot(
-    #            spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
-    #        )
-    #        ax_i.set_ylabel("Flux")
-    #        ax_i.legend()
-    #        ax_i.grid(True)
+        for ax_i, (name, spectrum) in zip(ax, spectra.items()):
+            ax_i.plot(
+                spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
+            )
+            ax_i.set_ylabel("Flux")
+            ax_i.legend()
+            ax_i.grid(True)
 
-    #    fig.supxlabel("Wavelength (Angstrom)")
-    # plt.show()
-    #    return ax
+        plt.xlabel("Wavelength (Angstrom)")
+        # plt.show()
+        return ax

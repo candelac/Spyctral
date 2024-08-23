@@ -29,19 +29,10 @@ class SpectralPlotter:
         method = getattr(self, kind)
         return method(**kwargs)
 
-    def _get_file_type(self):
-        """Determine the file type based on the spectra length."""
-        spect_names = list(self._summary.spectra.keys())
-        if len(spect_names) == 3:
-            return "Starlight"
-        else:
-            return "FISA"
-
-    def _set_common_labels(self, ax, title):
-        ax.set_xlabel("Wavelength (Angstrom)")
+    def _set_common_labels(self, ax, title, obj_name):
+        ax.set_xlabel(r"Wavelength ($\AA$)")
         ax.set_ylabel("Flux")
-        ax.set_title(title + " - " + self._get_file_type())
-        # plt.suptitle(self._get_file_type())
+        ax.set_title(title + " - " + obj_name)
         ax.grid(True)
 
     def all_spectra(self, ax=None, **kwargs):
@@ -53,7 +44,7 @@ class SpectralPlotter:
             ax.plot(
                 spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
             )
-        self._set_common_labels(ax, "All Spectra")
+        self._set_common_labels(ax, "All Spectra", self._summary.obj_name)
         ax.legend()
         # plt.show()
         return ax
@@ -61,16 +52,13 @@ class SpectralPlotter:
     def single(self, spectrum_name, ax=None, **kwargs):
         spectra = self._summary.spectra
 
-        if spectrum_name not in spectra:
-            raise ValueError(
-                f"Spectrum '{spectrum_name}' not found in spectra."
-            )
-        else:
-            spectrum = spectra[spectrum_name]
+        spectrum = spectra[spectrum_name]
 
         ax = plt.gca() if ax is None else ax
         ax.plot(spectrum.spectral_axis, spectrum.flux, **kwargs)
-        self._set_common_labels(ax, f"Spectrum {spectrum_name}")
+        self._set_common_labels(
+            ax, f"Spectrum {spectrum_name}", self._summary.obj_name
+        )
         # plt.show()
         return ax
 
@@ -91,7 +79,9 @@ class SpectralPlotter:
                 label=name,
                 **kwargs,
             )
-        self._set_common_labels(ax, "Spectra with Offset")
+        self._set_common_labels(
+            ax, "Spectra with Offset", self._summary.obj_name
+        )
         ax.legend()
         # plt.show()
         return ax
@@ -101,7 +91,7 @@ class SpectralPlotter:
         n = len(spectra)
 
         fig, ax = plt.subplots(n, 1, figsize=(10, 4 * n), sharex=True)
-        plt.suptitle(self._get_file_type())
+        plt.suptitle(self._summary.obj_name)
 
         if n == 1:
             ax = [ax]
@@ -114,6 +104,6 @@ class SpectralPlotter:
             ax_i.legend()
             ax_i.grid(True)
 
-        plt.xlabel("Wavelength (Angstrom)")
+        plt.xlabel(r"Wavelength ($\AA$)")
         # plt.show()
         return ax

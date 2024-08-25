@@ -68,11 +68,11 @@ def _proces_header(header_ln):
                 if bool(
                     re.search(r"[0-9]", val)
                 ):  # filters for numeric values
-                    head_dict[starline_var[pos].strip().split(" ")[0]] = float(
+                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = float(
                         val
                     )
                 else:
-                    head_dict[starline_var[pos].strip().split(" ")[0]] = val
+                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = val
 
         # Handles string with S/N titles that repeats
         # overlaps if not handled.
@@ -203,7 +203,7 @@ def _proces_tables(block_lines):
         "results_average_chains_mj": QTable(rows=blocks[2]),
         "results_average_chains_Av_chi2_mass": QTable(
             rows=np.array(blocks[3]).T[1:],
-            names=np.array(blocks[3]).T[0],
+            names=['AV', 'ch2', 'Mass'],
         ),
     }
 

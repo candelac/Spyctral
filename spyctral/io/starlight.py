@@ -154,7 +154,6 @@ def _proces_tables(block_lines):
         if len(splited[0]) > 0:
             clean_title.append(splited[0])
         else:
-
             clean_title.append(splited[1].split(")")[1])
 
         if len(splited) >= 2:
@@ -237,7 +236,6 @@ def _get_age(ssps_vector, age_decimals):
     )
 
     age = round(age, age_decimals)
-    
 
     return age
 
@@ -246,7 +244,7 @@ def _get_error_age(ssps_vector, age, age_decimals):
     """
     This function get error age from input file.
     """
-    
+
     desviaciones_cuadradas_2 = (
         ssps_vector["x_j"] * (ssps_vector["age_j"] - age) ** 2
     )
@@ -260,7 +258,6 @@ def _get_error_age(ssps_vector, age, age_decimals):
     err_age = np.sqrt(varianza_ponderada_2)
 
     err_age = round(err_age, age_decimals)
-    
 
     return err_age
 

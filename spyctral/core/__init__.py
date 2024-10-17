@@ -17,6 +17,3 @@ from ..io.fisa import read_fisa
 from ..io.starlight import read_starlight
 
 __all__ = ["SpectralSummary", "read_fisa", "read_starlight"]
-
-
-# __file__ ?

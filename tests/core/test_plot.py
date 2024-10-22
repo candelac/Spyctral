@@ -11,14 +11,69 @@
 # IMPORTS
 # =============================================================================
 
+from unittest import mock
+
 # import matplotlib.pyplot as plt
 from matplotlib.testing.decorators import check_figures_equal
 
+import numpy as np
+
+import pytest
+
 import spyctral as spy
+
 
 # =============================================================================
 # SpectralPlotter TESTS
 # =============================================================================
+
+
+@pytest.mark.parametrize("plot_kind", ["all_spectra"])
+def test_spectralplotter_call(file_path, plot_kind):
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = spy.read_fisa(path)
+
+    plotter = spy.core.plot.SpectralPlotter(summary)
+
+    method_name = f"spyctral.core.plot.SpectralPlotter.{plot_kind}"
+
+    with mock.patch(method_name) as plot_method:
+        plotter(plot_kind=plot_kind)
+
+    plot_method.assert_called_once()
+
+
+def test_spectralplotter_resolve_axis_with_none(file_path):
+    """Test when ax is None, with FISA file."""
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = spy.read_fisa(path)
+
+    plotter = spy.core.plot.SpectralPlotter(summary)
+
+    n_spectra = len(summary.spectra)
+
+    ax = plotter._resolve_axis(None, n_spectra)
+
+    assert isinstance(ax, np.ndarray)
+    assert len(ax) == n_spectra
+
+
+# def test_spectralplotter_resolve_axis_iterable(file_path):
+#    """Test when ax is an iterable."""
+#    path = file_path("case_SC_FISA.fisa")
+
+#    summary = spy.read_fisa(path)
+
+#    plotter = spy.core.plot.SpectralPlotter(summary)
+
+#    fig, axes = plt.subplots(2)
+
+#    ax = plotter._resolve_axis(axes, 2)
+
+#    assert isinstance(ax, np.ndarray)
+#    assert ax.all() == axes.all()
 
 
 @check_figures_equal(extensions=["png"])
@@ -125,146 +180,62 @@ def test_spectralplotter_split(file_path, fig_test, fig_ref):
     exp_ax.legend()
 
 
-# @check_figures_equal(extensions=["png"])
-# def test_spectralplotter_subplots(file_path, fig_test, fig_ref):
-#    """Test the subplots function with a FISA file."""
-#
-#    path = file_path("case_SC_FISA.fisa")
-#
-#    summary = spy.read_fisa(path)
-#
-#    plotter = spy.core.plot.SpectralPlotter(summary)
-#
-#    # test
-#    test_ax = fig_test.subplots()
-#    plotter.subplots(ax=test_ax)
+@check_figures_equal(extensions=["png"])
+def test_spectralplotter_subplots(file_path, fig_test, fig_ref):
+    """Test the subplots function with a FISA file."""
 
+    path = file_path("case_SC_FISA.fisa")
 
-# -----------------------------------------------
+    summary = spy.read_fisa(path)
 
-# def test_all_plots_fisa(file_path):
-#    path = file_path("case_SC_FISA.fisa")
-#
-#    summary = spy.read_fisa(path)
-#
-#    axis = summary.plot()
-#
-#    suptitle = axis.get_figure()._suptitle.get_text()
-#    title = axis.get_title()
-#    xlabel = axis.get_xlabel()
-#    ylabel = axis.get_ylabel()
-#
-#    assert suptitle == "FISA"
-#    assert title == "All Spectra"
-#    assert xlabel == "Wavelength (Angstrom)"
-#    assert ylabel == "Flux"
+    plotter = spy.core.plot.SpectralPlotter(summary)
 
+    # test
+    test_axes = fig_test.subplots(4, 1, sharex=True)
+    plotter.subplots(ax=test_axes)
 
-# def test_all_plots_starlight(file_path):
-#     path = file_path("case_SC_Starlight.out")
-#
-#     summary = spy.read_starlight(path)
-#
-#     axis = summary.plot()
-#
-#     suptitle = axis.get_figure()._suptitle.get_text()
-#     title = axis.get_title()
-#     xlabel = axis.get_xlabel()
-#     ylabel = axis.get_ylabel()
-#
-#     assert suptitle == "Starlight"
-#     assert title == "All Spectra"
-#     assert xlabel == "Wavelength (Angstrom)"
-#     assert ylabel == "Flux"
+    # expected
+    exp_axes = fig_ref.subplots(4, 1, sharex=True).flatten()
 
+    spectrum_unreddened = summary.spectra["Unreddened_spectrum"]
+    spectrum_template = summary.spectra["Template_spectrum"]
+    spectrum_observed = summary.spectra["Observed_spectrum"]
+    spectrum_residual_flux = summary.spectra["Residual_flux"]
 
-# def test_single_plots_fisa(file_path):
-#     path = file_path("case_SC_FISA.fisa")
-#
-#     summary = spy.read_fisa(path)
-#
-#     axists = summary.plot.single("Template_spectrum")
-#     axisos = summary.plot.single("Observed_spectrum")
-#     axisus = summary.plot.single("Unreddened_spectrum")
-#     axistrs = summary.plot.single("Residual_flux")
-#
-#     suptitlet = axists.get_figure()._suptitle.get_text()
-#     titlets = axists.get_title()
-#     xlabelts = axists.get_xlabel()
-#     ylabelts = axists.get_ylabel()
-#
-#     suptitleo = axisos.get_figure()._suptitle.get_text()
-#     titleos = axisos.get_title()
-#     xlabelos = axisos.get_xlabel()
-#     ylabelos = axisos.get_ylabel()
-#
-#     suptitleu = axisus.get_figure()._suptitle.get_text()
-#     titleus = axisus.get_title()
-#     xlabelus = axisus.get_xlabel()
-#     ylabelus = axisus.get_ylabel()
-#
-#     suptitler = axistrs.get_figure()._suptitle.get_text()
-#     titlers = axistrs.get_title()
-#     xlabelrs = axistrs.get_xlabel()
-#     ylabelrs = axistrs.get_ylabel()
-#
-#     assert suptitlet == "FISA"
-#     assert titlets == "Spectrum Template_spectrum"
-#     assert xlabelts == "Wavelength (Angstrom)"
-#     assert ylabelts == "Flux"
-#
-#     assert suptitleo == "FISA"
-#     assert titleos == "Spectrum Observed_spectrum"
-#     assert xlabelos == "Wavelength (Angstrom)"
-#     assert ylabelos == "Flux"
-#
-#     assert suptitleu == "FISA"
-#     assert titleus == "Spectrum Unreddened_spectrum"
-#     assert xlabelus == "Wavelength (Angstrom)"
-#     assert ylabelus == "Flux"
-#
-#     assert suptitler == "FISA"
-#     assert titlers == "Spectrum Residual_flux"
-#     assert xlabelrs == "Wavelength (Angstrom)"
-#    assert ylabelrs == "Flux"
+    exp_axes[0].plot(
+        spectrum_unreddened.spectral_axis,
+        spectrum_unreddened.flux,
+        label="Unreddened_spectrum",
+    )
+    exp_axes[0].set_ylabel("Flux")
+    exp_axes[0].grid(True)
+    exp_axes[0].legend()
+    exp_axes[0].set_title("object_1")
 
+    exp_axes[1].plot(
+        spectrum_template.spectral_axis,
+        spectrum_template.flux,
+        label="Template_spectrum",
+    )
+    exp_axes[1].set_ylabel("Flux")
+    exp_axes[1].grid(True)
+    exp_axes[1].legend()
 
-# def test_single_plots_starlight(file_path):
-#    path = file_path("case_SC_Starlight.out")
-#
-#    summary = spy.read_starlight(path)
-#
-#    axisos = summary.plot.single("observed_spectrum")
-#    axisus = summary.plot.single("synthetic_spectrum")
-#    axistrs = summary.plot.single("residual_spectrum")
-#
-#    suptitleo = axisos.get_figure()._suptitle.get_text()
-#    titleos = axisos.get_title()
-#    xlabelos = axisos.get_xlabel()
-#    ylabelos = axisos.get_ylabel()
-#
-#    suptitleu = axisus.get_figure()._suptitle.get_text()
-#    titleus = axisus.get_title()
-#    xlabelus = axisus.get_xlabel()
-#    ylabelus = axisus.get_ylabel()
-#
-#    suptitler = axistrs.get_figure()._suptitle.get_text()
-#    titlers = axistrs.get_title()
-#    xlabelrs = axistrs.get_xlabel()
-#    ylabelrs = axistrs.get_ylabel()
-#
-#    assert suptitleo == "Starlight"
-#    assert titleos == "Spectrum observed_spectrum"
-#    assert xlabelos == "Wavelength (Angstrom)"
-#    assert ylabelos == "Flux"
-#
-#    assert suptitleu == "Starlight"
-#    assert titleus == "Spectrum synthetic_spectrum"
-#    assert xlabelus == "Wavelength (Angstrom)"
-#    assert ylabelus == "Flux"
-#
-#    assert suptitler == "Starlight"
-#    assert titlers == "Spectrum residual_spectrum"
-#    assert xlabelrs == "Wavelength (Angstrom)"
-#    assert ylabelrs == "Flux"
-#
+    exp_axes[2].plot(
+        spectrum_observed.spectral_axis,
+        spectrum_observed.flux,
+        label="Observed_spectrum",
+    )
+    exp_axes[2].set_ylabel("Flux")
+    exp_axes[2].grid(True)
+    exp_axes[2].legend()
+
+    exp_axes[3].plot(
+        spectrum_residual_flux.spectral_axis,
+        spectrum_residual_flux.flux,
+        label="Residual_flux",
+    )
+    exp_axes[3].set_ylabel("Flux")
+    exp_axes[3].grid(True)
+    exp_axes[3].legend()
+    exp_axes[3].set_xlabel(r"Wavelength ($\AA$)")

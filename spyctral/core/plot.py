@@ -26,9 +26,6 @@ import numpy as np
 class SpectralPlotter:
     _summary = attr.ib()
 
-    def __repr__(self):
-        return f"SpectralPlotter(summary{hex(id(self._summary))})"
-
     def __call__(self, plot_kind="all_spectra", **kwargs):
         method = getattr(self, plot_kind)
         return method(**kwargs)
@@ -43,9 +40,7 @@ class SpectralPlotter:
     def _resolve_axis(self, ax, n_spectra):
         """Resolve the axis for plotting."""
         if ax is None:
-            fig, ax = plt.subplots(
-                n_spectra, 1, figsize=(10, 4 * n_spectra), sharex=True
-            )
+            fig, ax = plt.subplots(n_spectra, 1, sharex=True)
             size_x, size_y = fig.get_size_inches()
             fig.set_size_inches(size_x, size_y * n_spectra)
         if not isinstance(ax, Iterable):
@@ -115,7 +110,7 @@ class SpectralPlotter:
             ax_i.legend()
             ax_i.grid(True)
 
-        plt.xlabel(r"Wavelength ($\AA$)")
-        plt.suptitle(self._summary.obj_name)
+        ax[n_spectra - 1].set_xlabel(r"Wavelength ($\AA$)")
+        ax[0].set_title(self._summary.obj_name)
         # plt.show()
         return ax

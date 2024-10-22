@@ -42,7 +42,7 @@ def test_spectralplotter_all_spectra(file_path, fig_test, fig_ref):
         exp_ax.plot(spectrum.spectral_axis, spectrum.flux, label=spectrum_name)
         exp_ax.set_xlabel(r"Wavelength ($\AA$)")
         exp_ax.set_ylabel("Flux")
-        exp_ax.set_title("All Spectra - object_1")
+        exp_ax.set_title("All spectra - object_1")
         exp_ax.grid(True)
     exp_ax.legend()
 
@@ -71,7 +71,7 @@ def test_spectralplotter_single_template_spectrum(
     exp_ax.plot(spectrum.spectral_axis, spectrum.flux)
     exp_ax.set_xlabel(r"Wavelength ($\AA$)")
     exp_ax.set_ylabel("Flux")
-    exp_ax.set_title("Spectrum Template_spectrum - object_1")
+    exp_ax.set_title("Template_spectrum - object_1")
     exp_ax.grid(True)
 
 
@@ -120,7 +120,7 @@ def test_spectralplotter_split(file_path, fig_test, fig_ref):
 
     exp_ax.set_xlabel(r"Wavelength ($\AA$)")
     exp_ax.set_ylabel("Flux")
-    exp_ax.set_title("Spectra with Offset - object_1")
+    exp_ax.set_title("Spectra with offset - object_1")
     exp_ax.grid(True)
     exp_ax.legend()
 

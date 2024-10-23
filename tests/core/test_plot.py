@@ -13,7 +13,7 @@
 
 from unittest import mock
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from matplotlib.testing.decorators import check_figures_equal
 
 import numpy as np
@@ -60,20 +60,38 @@ def test_spectralplotter_resolve_axis_with_none(file_path):
     assert len(ax) == n_spectra
 
 
-# def test_spectralplotter_resolve_axis_iterable(file_path):
-#    """Test when ax is an iterable."""
-#    path = file_path("case_SC_FISA.fisa")
+def test_spectralplotter_resolve_axis_iterable(file_path):
+    """Test when ax is an iterable."""
+    path = file_path("case_SC_FISA.fisa")
 
-#    summary = spy.read_fisa(path)
+    summary = spy.read_fisa(path)
 
-#    plotter = spy.core.plot.SpectralPlotter(summary)
+    plotter = spy.core.plot.SpectralPlotter(summary)
 
-#    fig, axes = plt.subplots(2)
+    fig, axes = plt.subplots(3)
 
-#    ax = plotter._resolve_axis(axes, 2)
+    ax = plotter._resolve_axis(axes, 3)
 
-#    assert isinstance(ax, np.ndarray)
-#    assert ax.all() == axes.all()
+    assert isinstance(ax, np.ndarray)
+    assert ax.all() == axes.all()
+    assert len(ax) == 3
+
+
+def test_spectralplotter_resolve_axis_single(file_path):
+    """Test when ax is an single axis."""
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = spy.read_fisa(path)
+
+    plotter = spy.core.plot.SpectralPlotter(summary)
+
+    fig, axes = plt.subplots()
+
+    ax = plotter._resolve_axis(axes, 1)
+
+    assert isinstance(ax, np.ndarray)
+    assert ax[0] == axes
+    assert len(ax) == 1
 
 
 @check_figures_equal(extensions=["png"])

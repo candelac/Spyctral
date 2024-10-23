@@ -9,7 +9,6 @@
 # IMPORTS
 # =============================================================================
 
-# from .utils.bunch import Bunch
 import attrs
 
 import numpy as np
@@ -18,12 +17,6 @@ import pandas as pd
 
 from ..utils.bunch import Bunch
 
-# << << << < HEAD: spyctral/core.py
-
-
-# from plot_utils import make_plot_base
-# == == == =
-# >>>>>> > main: spyctral/core/core.py
 
 # =============================================================================
 # CONSTANTS

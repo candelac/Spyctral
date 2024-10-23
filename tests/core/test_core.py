@@ -19,6 +19,7 @@ import pandas as pd
 
 import pytest
 
+from spyctral import core
 from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 
@@ -188,6 +189,16 @@ def test_spectralsummary_feh_ratio(file_path):
     feh_ratio_expected = np.log10(summary.z_value / Z_SUN)
 
     assert summary.feh_ratio == feh_ratio_expected
+
+
+def test_spectralsummary_plot(file_path):
+    """Test of the "plot" with FISA."""
+
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = fisa.read_fisa(path)
+
+    assert isinstance(summary.plot, core.plot.SpectralPlotter)
 
 
 def test_spectralsummary_get_all_properties(file_path):

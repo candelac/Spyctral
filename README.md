@@ -1,5 +1,7 @@
 # Spyctral: Astronomical spectral data analyser
 
+![Tests](https://github.com/candelac/Spyctral/blob/rama_j/.github/workflows/Testing.yml/badge.svg)
+
 Spyctral is a python package that allows to determine fundamental parameters of compact stellar systems from the analysis of their spectral synthesis and/or templates fitting. 
 
 ## Description 

@@ -1,0 +1,16 @@
+# ==============================================================
+# CI with GitHub Actions
+# ==============================================================
+
+name: GitHub CI
+
+on:
+  - push
+  - pull_request
+
+env:
+  default-python: '3.10'
+
+jobs:
+  testing:
+    uses: candelac/Spyctral/blob/rama_j/.github/workflows/Testing.yml

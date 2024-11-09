@@ -2,7 +2,7 @@
 # CI with GitHub Actions
 # ==============================================================
 
-name: Testing
+name: Tests
 
 on:
   - push

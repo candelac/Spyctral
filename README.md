@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/candelac/Spyctral/actions/workflows/Testing.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)]
+![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)
 
 Spyctral is a python package that allows to determine fundamental parameters of compact stellar systems from the analysis of their spectral synthesis and/or templates fitting. 
 

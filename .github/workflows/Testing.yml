@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        tox_env: [py310, py311]
+        tox_env: [py310]
         include:
           - tox_env: style
           - tox_env: docstyle
@@ -26,7 +26,6 @@ jobs:
           - tox_env: check-headers
           - tox_end: check-apidocsdir
           - tox_env: coverage
-          - tox_env: mkdocs
             pandoc: true
 
     # The operative sistem

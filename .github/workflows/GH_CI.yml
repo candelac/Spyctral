@@ -14,4 +14,4 @@ env:
 jobs:
   tests:
     name: Call Tests
-    uses: ./.github/workflows/Testing.yml
+    uses: ./.github/workflows/Testing.yml@main

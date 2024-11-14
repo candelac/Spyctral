@@ -5,168 +5,112 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
-import matplotlib.pyplot as plt
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
+from collections.abc import Iterable
+
 import attr
+
+import matplotlib.pyplot as plt
+
 import numpy as np
+
+# =============================================================================
+# CLASSES
+# =============================================================================
 
 
 @attr.s(repr=False)
 class SpectralPlotter:
     _summary = attr.ib()
 
-    def __repr__(self):
-        return f"SpectralPlotter(summary{hex(id(self._summary))})"
-
-    def __call__(self, kind="all", **kwargs):
-        method = getattr(self, kind)
+    def __call__(self, plot_kind="all_spectra", **kwargs):
+        method = getattr(self, plot_kind)
         return method(**kwargs)
 
-    def _get_file_type(self):
-        """Determine the file type based on the spectra length."""
-        spect_names = list(self._summary.spectra.keys())
-        if len(spect_names) == 3:
-            return "Starlight"
-        else:
-            return "FISA"
-
-    def _set_common_labels(self, ax, title):
-        ax.set_xlabel("Wavelength (Angstrom)")
+    def _set_common_labels(self, ax, title, obj_name):
+        """Set common labels and titles for plots."""
+        ax.set_xlabel(r"Wavelength ($\AA$)")
         ax.set_ylabel("Flux")
-        ax.set_title(title)
-        plt.suptitle(self._get_file_type())
+        ax.set_title(f"{title} - {obj_name}")
         ax.grid(True)
 
-    def single(self, spectrum_name, **kwargs):
+    def _resolve_axis(self, ax, n_spectra):
+        """Resolve the axis for plotting."""
+        if ax is None:
+            fig, ax = plt.subplots(n_spectra, 1, sharex=True)
+            size_x, size_y = fig.get_size_inches()
+            fig.set_size_inches(size_x, size_y * n_spectra)
+        if not isinstance(ax, Iterable):
+            ax = [ax]
+        return np.asarray(ax)
+
+    def all_spectra(self, ax=None, **kwargs):
         spectra = self._summary.spectra
 
-        if spectrum_name not in spectra:
-            raise ValueError(
-                f"Spectrum '{spectrum_name}' not found in spectra.")
+        ax = plt.gca() if ax is None else ax
+        # kwargs.setdefault("-")
+        for name, spectrum in spectra.items():
+            ax.plot(
+                spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
+            )
+        self._set_common_labels(ax, "All spectra", self._summary.obj_name)
+        ax.legend()
+        # plt.show()
+        return ax
+
+    def single(self, spectrum_name, ax=None, **kwargs):
+        spectra = self._summary.spectra
+
         spectrum = spectra[spectrum_name]
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        ax = plt.gca() if ax is None else ax
         ax.plot(spectrum.spectral_axis, spectrum.flux, **kwargs)
-        self._set_common_labels(ax, f"Spectrum {spectrum_name}")
+        self._set_common_labels(ax, spectrum_name, self._summary.obj_name)
+        # plt.show()
+        return ax
 
-        plt.show()
-
-    def all(self, **kwargs):
+    def split(self, offset=0.1, ax=None, **kwargs):
         spectra = self._summary.spectra
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        for name, spectrum in spectra.items():
-            ax.plot(spectrum.spectral_axis,
-                    spectrum.flux, label=name, **kwargs)
-        self._set_common_labels(ax, "All Spectra")
-        ax.legend()
-        plt.show()
-
-    def split(self, offset=0.1, **kwargs):
-        spectra = self._summary.spectra
-        fig, ax = plt.subplots(figsize=(10, 6))
+        ax = plt.gca() if ax is None else ax
         cumulative_offset = 0
         for name, spectrum in spectra.items():
             if name not in ["residual_spectrum", "Residual_flux"]:
                 cumulative_offset += offset
             else:
                 cumulative_offset = 0
-            ax.plot(spectrum.spectral_axis, spectrum.flux +
-                    cumulative_offset, label=name, **kwargs)
-        ax.set_ylabel("Flux (Offset Applied)")
-        self._set_common_labels(ax, "Spectra with Offset")
+
+            ax.plot(
+                spectrum.spectral_axis,
+                spectrum.flux + cumulative_offset,
+                label=name,
+                **kwargs,
+            )
+        self._set_common_labels(
+            ax, "Spectra with offset", self._summary.obj_name
+        )
         ax.legend()
-        plt.show()
+        # plt.show()
+        return ax
 
-    def subplots(self, **kwargs):
+    def subplots(self, ax=None, **kwargs):
         spectra = self._summary.spectra
-        n = len(spectra)
-        fig, axes = plt.subplots(n, 1, figsize=(10, 4 * n), sharex=True)
-        plt.suptitle(self._get_file_type())
+        n_spectra = len(spectra)
 
-        if n == 1:
-            axes = [axes]
+        ax = self._resolve_axis(ax, n_spectra)
 
-        for ax, (name, spectrum) in zip(axes, spectra.items()):
-            ax.plot(spectrum.spectral_axis,
-                    spectrum.flux, label=name, **kwargs)
-            ax.set_ylabel("Flux")
-            ax.legend()
-            ax.grid(True)
+        for ax_i, (name, spectrum) in zip(ax, spectra.items()):
+            ax_i.plot(
+                spectrum.spectral_axis, spectrum.flux, label=name, **kwargs
+            )
+            ax_i.set_ylabel("Flux")
+            ax_i.legend()
+            ax_i.grid(True)
 
-        plt.xlabel("Wavelength (Angstrom)")
-        plt.show()
-
-        # def plot(self, color=["sienna", "plum", "olive", "blue"],
-        #          styleline='-', grid='False'):
-        #    """
-        #    Plots spectrum from Starlight and FISA
-        #    usage: plot()
-        #           plot([<color1>, <color2>, <color3>, <color3>]"")
-        #           plot([<color1>, <color2>, <color3>, <color3>], <styleline>)
-        #    return: plot matplotlib.pyplot style
-        #    """
-        #    spectra = self.spectra
-        #    # ["synthetic_spectrum", "observed_spectrum", "residual_spectrum"]
-        #    spect_names = list(spectra.keys())
-        #    fig, ax = plt.subplots(figsize=(22, 10))
-        #
-        #    if len(spect_names) == 3:
-        #        fig.suptitle("Gráficos de Starlight")
-        #    else:
-        #        fig.suptitle("Gráficos de FISA")
-        #    current_ax = 0
-        #    for valores in spectra:
-        #        ax = fig.axes[0]
-        #        ax.plot(
-        #            spectra[valores].spectral_axis,
-        #            spectra[valores].flux,
-        #            label=spect_names[current_ax],
-        #            color=color[current_ax],
-        #            linewidth=1,
-        #            linestyle=styleline
-        #        )
-        #        current_ax += 1
-        #    ax.set_xlabel("Longitud de onda(Angstrom)")
-        #    ax.axhline(y=0, color='grey', linestyle=styleline, label='y=0')
-        #    ax.set_ylabel('Flux')
-        #    ax.legend()
-        #    ax.grid(grid)
-        #    plt.show()
-        # def plotPd(self, color=["sienna", "plum", "olive", "blue"],
-        #           styleline='-', _grid=False,
-        #           xlim=None, ylim=None):
-        # Ejemplo de uso
-        # Suponiendo que 'star' es una instancia de SpectralSummary y tiene
-        # los datos cargados
-        # star = spy.read_starlight('tests/datasets/case_SC_Starlight.out')
-        # star.plotSL(xlim=(3000, 7000), ylim=(-1.2, 1.2))
-        #    spectra = self.spectra
-        #    # Obtener dinámicamente los nombres
-        #    spect_names = list(spectra.keys())
-        # Determinar el título dinámicamente
-        #    if len(spect_names) == 3:
-        #        _title = "Gráficos de Starlight"
-        #    else:
-        #        _title = "Gráficos de FISA"
-        #    # Crear un DataFrame vacío para inicializar el plot
-        #    df_empty = pd.DataFrame({'wavelength': [], 'flux': []})
-        #    ax = df_empty.plot(x='wavelength', y='flux')  # Crear el subplot vacío
-        #    # Graficar cada espectro por separado
-        #    for idx, name in enumerate(spect_names):
-        #        df = pd.DataFrame({
-        #            'wavelength': spectra[name].spectral_axis.value,
-        #            'flux': spectra[name].flux.value
-        #        })
-        #        # Crear el plot usando pandas
-        #        df.plot(x='wavelength', y='flux', ax=ax,
-        #                color=color[idx], linestyle=styleline, label=name,
-        #                title=_title, grid=_grid)
-        #    ax.set_xlabel("Longitud de onda (Angstrom)")
-        #    ax.set_ylabel('Flux')
-        #    ax.axhline(y=0, color='grey', linestyle=styleline, label='y=0')
-        #    # Configurar límites de los ejes si se proporcionan
-        #    if xlim:
-        #        ax.set_xlim(xlim)
-        #    if ylim:
-        #        ax.set_ylim(ylim)
-        #    ax.legend(spect_names)
+        ax[n_spectra - 1].set_xlabel(r"Wavelength ($\AA$)")
+        ax[0].set_title(self._summary.obj_name)
+        # plt.show()
+        return ax

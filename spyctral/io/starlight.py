@@ -48,7 +48,7 @@ def _proces_header(header_ln):
             head_dict["Date"] = dateutil.parser.parse(
                 re.findall(SL_GET_DATE, sl)[0]
             )
-            #head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
+            # head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
         sl = re.sub(
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
@@ -68,11 +68,11 @@ def _proces_header(header_ln):
                 if bool(
                     re.search(r"[0-9]", val)
                 ):  # filters for numeric values
-                    head_dict[starline_var[pos].strip().split(" ")[0]] = float(
+                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = float(
                         val
                     )
                 else:
-                    head_dict[starline_var[pos].strip().split(" ")[0]] = val
+                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = val
 
         # Handles string with S/N titles that repeats
         # overlaps if not handled.
@@ -99,15 +99,17 @@ def _proces_header(header_ln):
 
     return head_dict
 
+
 def _is_float(element: any) -> bool:
-    #If you expect None to be passed:
-    if element is None: 
+    # If you expect None to be passed:
+    if element is None:
         return False
     try:
         float(element)
         return True
     except ValueError:
         return False
+
 
 def _proces_tables(block_lines):
     """Recives a list that contains the lines of the tables and
@@ -143,28 +145,27 @@ def _proces_tables(block_lines):
         .replace(".", "")
         .replace("?", "")
         .strip()
-    ).split(' ')
-    #Toma las unidades de los headers y remueve los '()'
+    ).split(" ")
+    # Toma las unidades de los headers y remueve los '()'
     unities = []
     clean_title = []
     for t in first_title:
-        splited = t.split('(')
-        if len(splited[0])>0:
+        splited = t.split("(")
+        if len(splited[0]) > 0:
             clean_title.append(splited[0])
-        else :
- 
-            clean_title.append(splited[1].split(')')[1])
-            
-        if (len(splited)>= 2) :
-            if (splited[1].split(')')[0] == '%'):
-                unities.append(splited[1].split(')')[0])
-            else: 
-                unities.append('')
         else:
-            unities.append('')
+            clean_title.append(splited[1].split(")")[1])
+
+        if len(splited) >= 2:
+            if splited[1].split(")")[0] == "%":
+                unities.append(splited[1].split(")")[0])
+            else:
+                unities.append("")
+        else:
+            unities.append("")
 
     # Verificar que los elementos sean números
-    for ibl, lin in enumerate(blocks) :
+    for ibl, lin in enumerate(blocks):
         for i, row in enumerate(blocks[ibl]):
             converted_row = []
             for item in row:
@@ -172,7 +173,7 @@ def _proces_tables(block_lines):
                     # Intentar convertir el elemento en un número
                     if _is_float(item):
                         converted_item = float(item)
-                        
+
                 except ValueError:
                     # Si no se puede convertir a número, levantar una excepción
                     raise ValueError(
@@ -182,7 +183,6 @@ def _proces_tables(block_lines):
                     )
                 converted_row.append(converted_item)
             blocks[ibl][i] = converted_row
-    
 
     # Crear la tabla synthetic_spectrum con unidades
     synthetic_spectrum_table = QTable(
@@ -196,19 +196,17 @@ def _proces_tables(block_lines):
         # Cambio: Usar la tabla con unidades
         "synthetic_spectrum": synthetic_spectrum_table,
         "synthetic_results": QTable(
-            rows=blocks[0], names=clean_title,
-              units = unities
+            rows=blocks[0], names=clean_title, units=unities
         ),
         "results_average_chains_xj": QTable(rows=blocks[1]),
         "results_average_chains_mj": QTable(rows=blocks[2]),
         "results_average_chains_Av_chi2_mass": QTable(
             rows=np.array(blocks[3]).T[1:],
-            names=np.array(blocks[3]).T[0],
+            names=['AV', 'ch2', 'Mass'],
         ),
     }
 
     return spectra_dict
-
 
 
 def _get_ssp_contributions(tables_dict, xj_percent):
@@ -220,12 +218,10 @@ def _get_ssp_contributions(tables_dict, xj_percent):
     # Convertir todas las columnas a números flotantes
     ssps_vector = ssps_vector.apply(pd.to_numeric, errors="coerce")
 
-    ssps_vector = ssps_vector[ssps_vector["x_j"] > (xj_percent/100)].reset_index(
-        drop=True
-    )
-    ssps_vector["x_j"] = (
-        ssps_vector["x_j"] / ssps_vector["x_j"].sum()
-    )
+    ssps_vector = ssps_vector[
+        ssps_vector["x_j"] > (xj_percent / 100)
+    ].reset_index(drop=True)
+    ssps_vector["x_j"] = ssps_vector["x_j"] / ssps_vector["x_j"].sum()
 
     return ssps_vector
 
@@ -235,19 +231,35 @@ def _get_age(ssps_vector, age_decimals):
     This function get age from input file.
     """
 
-    age = int(
-        10
-        ** (
-            (
-                (ssps_vector["x_j"] * np.log10(ssps_vector["age_j"]))
-            ).sum()
-            / ssps_vector["x_j"].sum()
-        )
+    age = ((ssps_vector["x_j"] * ssps_vector["age_j"]).sum()) / (
+        ssps_vector["x_j"].sum()
     )
-    age = np.log10(age)
+
     age = round(age, age_decimals)
 
     return age
+
+
+def _get_error_age(ssps_vector, age, age_decimals):
+    """
+    This function get error age from input file.
+    """
+
+    desviaciones_cuadradas_2 = (
+        ssps_vector["x_j"] * (ssps_vector["age_j"] - age) ** 2
+    )
+
+    suma_ponderada_desviaciones_cuadradas_2 = np.sum(desviaciones_cuadradas_2)
+
+    suma_pesos = np.sum(ssps_vector["x_j"])
+
+    varianza_ponderada_2 = suma_ponderada_desviaciones_cuadradas_2 / suma_pesos
+
+    err_age = np.sqrt(varianza_ponderada_2)
+
+    err_age = round(err_age, age_decimals)
+
+    return err_age
 
 
 def _get_reddening(header_info, rv):
@@ -266,9 +278,9 @@ def _get_metallicity(ssps_vector, z_decimals):
     This function calculate metallicity value from input file.
     """
 
-    z_value = (
-        (ssps_vector["x_j"] * ssps_vector["Z_j"])
-    ).sum() / ssps_vector["x_j"].sum()
+    z_value = ((ssps_vector["x_j"] * ssps_vector["Z_j"])).sum() / ssps_vector[
+        "x_j"
+    ].sum()
     z_value = round(z_value, z_decimals)
 
     return z_value
@@ -376,11 +388,19 @@ def _get_spectra(data):
 
 
 def read_starlight(
-    path, *, xj_percent=5, age_decimals=2, rv=3.1, z_decimals=3
+    path,
+    *,
+    xj_percent=5,
+    age_decimals=2,
+    rv=3.1,
+    z_decimals=3,
+    object_name="object_1",
 ):
     """Recives as input a path from the location of the starlight file and
     returns a two dicctionaries the first is the header information and the
     second is the tables information"""
+
+    obj_name = object_name
 
     header_lines, block_lines = [], []
     with open(path) as starfile:
@@ -397,6 +417,8 @@ def read_starlight(
     ssps_vector = _get_ssp_contributions(tables_dict, xj_percent)
 
     age = _get_age(ssps_vector, age_decimals)
+
+    err_age = _get_error_age(ssps_vector, age, age_decimals)
 
     reddening_value, av_value = _get_reddening(header_info, rv)
 
@@ -418,9 +440,11 @@ def read_starlight(
     }
 
     return core.SpectralSummary(
+        obj_name=obj_name,
         header=header_info,
         data=tables_dict,
         age=age,
+        err_age=err_age,
         reddening=reddening_value,
         av_value=av_value,
         normalization_point=normalization_point,

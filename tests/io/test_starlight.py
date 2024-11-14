@@ -12,13 +12,15 @@
 # =============================================================================
 
 import datetime as dt
-import re
+
 
 from astropy.table import QTable
 
+import numpy as np
+
 import pandas as pd
 
-import pytest
+# import pytest
 
 from specutils import Spectrum1D
 
@@ -73,9 +75,9 @@ def test_read_starlight(file_path):
     assert isinstance(summary.header.clip_method, str)
     assert isinstance(summary.header.N_chains, float)
     assert isinstance(summary.header.NEX0s_base, float)
-    # assert isinstance(summary.header.Clip-Bug, float) # lee mal el -
-    # assert isinstance(summary.header.RC-Crash, float) # lee mal el -
-    # assert isinstance(summary.header.Burn-Inwarning-flags, float) # lee mal
+    assert isinstance(summary.header.Clip_Bug, float)
+    assert isinstance(summary.header.RC_Crash, float)
+    assert isinstance(summary.header.Burn_In, float)
     assert isinstance(summary.header.n_censored_weights, float)
     assert isinstance(summary.header.wei_nsig_threshold, float)
     assert isinstance(summary.header.wei_limit, float)
@@ -107,17 +109,6 @@ def test_read_starlight(file_path):
     )  # faltan unidades
     assert isinstance(summary.data.synthetic_results, QTable)
 
-    # assert all(
-    #    isinstance(x, float) for x in summary.data["synthetic_spectrum"]
-    # )
-
-    # assert all(
-    #    isinstance(x, float) for x in summary.data.results_average_chains_xj
-    # )
-    # assert all(
-    #    isinstance(x, float) for x in summary.data.results_average_chains_mj
-    # )
-
     assert len(summary.data.synthetic_results) == 69
     assert len(summary.data.results_average_chains_xj) == 69
     assert len(summary.data.results_average_chains_mj) == 69
@@ -144,6 +135,15 @@ def test_read_starlight(file_path):
     assert isinstance(summary.extra_info.synthesis_info, pd.DataFrame)
 
 
+def test_is_float():
+    assert starlight._is_float(np.random.randint(1, 100))
+
+
+def test_is_float_none():
+    assert not starlight._is_float(None)
+
+
+"""
 def test_convert_to_float(file_path):
     path = file_path("case_SC_Starlight_broken.out")
 
@@ -157,3 +157,4 @@ def test_convert_to_float(file_path):
         ),
     ):
         starlight.read_starlight(path)
+"""

@@ -9,7 +9,6 @@
 # IMPORTS
 # =============================================================================
 
-# from .utils.bunch import Bunch
 import attrs
 
 import numpy as np
@@ -18,12 +17,6 @@ import pandas as pd
 
 from ..utils.bunch import Bunch
 
-# << << << < HEAD: spyctral/core.py
-
-
-# from plot_utils import make_plot_base
-# == == == =
-# >>>>>> > main: spyctral/core/core.py
 
 # =============================================================================
 # CONSTANTS
@@ -166,12 +159,12 @@ class SpectralSummary:
         extra_info_keys = ", ".join(self.extra_info.keys())
 
         return (
-            f"SpectralSummary(\n"
+            f"<SpectralSummary(\n"
             f"  header={{{header_keys}}},\n"
             f"  data={{{data_keys}}},\n"
             "  age, reddening, av_value, normalization_point, z_value,\n"
             f"  spectra={{{spectra_keys}}},\n"
-            f"  extra_info={{{extra_info_keys}}})"
+            f"  extra_info={{{extra_info_keys}}})>"
         )
 
     @property

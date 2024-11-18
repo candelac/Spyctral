@@ -42,6 +42,3 @@ __all__ = [
     "read_starlight",
     "SpectralPlotter",
 ]
-
-
-# __file__ ?

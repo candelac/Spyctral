@@ -19,6 +19,7 @@ import pandas as pd
 
 import pytest
 
+from spyctral import core
 from spyctral.io import fisa
 from spyctral.utils.bunch import Bunch
 
@@ -163,7 +164,7 @@ def test_spectralsummary_repr(file_path):
     summary = fisa.read_fisa(path)
 
     repr_expected = (
-        "SpectralSummary(\n"
+        "<SpectralSummary(\n"
         "  header={fisa_version, date_time, reddening,"
         " adopted_template, normalization_point, spectra_names},\n"
         "  data={Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
@@ -172,7 +173,7 @@ def test_spectralsummary_repr(file_path):
         "  spectra={Unreddened_spectrum, Template_spectrum, Observed_spectrum,"
         " Residual_flux},\n"
         "  extra_info={str_template, name_template, age_map, error_age_map,"
-        " z_map})"
+        " z_map})>"
     )
 
     assert repr(summary) == repr_expected
@@ -188,6 +189,16 @@ def test_spectralsummary_feh_ratio(file_path):
     feh_ratio_expected = np.log10(summary.z_value / Z_SUN)
 
     assert summary.feh_ratio == feh_ratio_expected
+
+
+def test_spectralsummary_plot(file_path):
+    """Test of the "plot" with FISA."""
+
+    path = file_path("case_SC_FISA.fisa")
+
+    summary = fisa.read_fisa(path)
+
+    assert isinstance(summary.plot, core.plot.SpectralPlotter)
 
 
 def test_spectralsummary_get_all_properties(file_path):

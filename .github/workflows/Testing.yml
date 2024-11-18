@@ -1,0 +1,48 @@
+# ==============================================================
+# CI with GitHub Actions
+# ==============================================================
+
+name: Tests
+
+on:
+  - push
+  - pull_request
+
+env:
+  default-python: '3.10'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        tox_env: [py310]
+        include:
+          - tox_env: style
+          - tox_env: docstyle
+          - tox_env: check-manifest
+          - tox_env: check-testdir
+          - tox_env: check-headers
+          - tox_end: check-apidocsdir
+          - tox_env: coverage
+            pandoc: true
+
+    # The operative sistem
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+
+    # the steps of the CI
+    steps:
+      - uses: actions/checkout@master
+
+      # tox steps
+      - name: Set up Python ${{ steps.pyversion.outputs.result || env.default-python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ steps.pyversion.outputs.result || env.default-python }}
+
+      - name: Install tox
+        run: pip install tox
+
+      - name: tox -re ${{ matrix.tox_env }}
+        run: tox -re ${{ matrix.tox_env }}

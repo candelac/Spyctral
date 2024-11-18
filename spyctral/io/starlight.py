@@ -227,9 +227,9 @@ def _get_ssp_contributions(tables_dict, xj_percent):
     ssps_vector = ssps_vector.apply(pd.to_numeric, errors="coerce")
 
     ssps_vector = ssps_vector[
-        ssps_vector["x_j"] > (xj_percent / 100)
+        ssps_vector["x_j"] > xj_percent
     ].reset_index(drop=True)
-    ssps_vector["x_j"] = ssps_vector["x_j"] / ssps_vector["x_j"].sum()
+    ssps_vector["x_j"] = (ssps_vector["x_j"] * 100) / ssps_vector["x_j"].sum()
 
     return ssps_vector
 

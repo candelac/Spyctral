@@ -46,7 +46,7 @@ class SpectralPlotter:
             )
         self._set_common_labels(ax, "All Spectra", self._summary.obj_name)
         ax.legend()
-        # plt.show()
+        plt.show()
         return ax
 
     def single(self, spectrum_name, ax=None, **kwargs):
@@ -59,7 +59,7 @@ class SpectralPlotter:
         self._set_common_labels(
             ax, f"Spectrum {spectrum_name}", self._summary.obj_name
         )
-        # plt.show()
+        plt.show()
         return ax
 
     def split(self, offset=0.1, ax=None, **kwargs):
@@ -83,7 +83,7 @@ class SpectralPlotter:
             ax, "Spectra with Offset", self._summary.obj_name
         )
         ax.legend()
-        # plt.show()
+        plt.show()
         return ax
 
     def subplots(self, ax=None, **kwargs):
@@ -105,5 +105,5 @@ class SpectralPlotter:
             ax_i.grid(True)
 
         plt.xlabel(r"Wavelength ($\AA$)")
-        # plt.show()
+        plt.show()
         return ax

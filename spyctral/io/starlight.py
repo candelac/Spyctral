@@ -68,11 +68,19 @@ def _proces_header(header_ln):
                 if bool(
                     re.search(r"[0-9]", val)
                 ):  # filters for numeric values
-                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = float(
-                        val
-                    )
+                    head_dict[
+                        starline_var[pos]
+                        .strip()
+                        .split(" ")[0]
+                        .replace("-", "_")
+                    ] = float(val)
                 else:
-                    head_dict[starline_var[pos].strip().split(" ")[0].replace('-','_')] = val
+                    head_dict[
+                        starline_var[pos]
+                        .strip()
+                        .split(" ")[0]
+                        .replace("-", "_")
+                    ] = val
 
         # Handles string with S/N titles that repeats
         # overlaps if not handled.
@@ -202,7 +210,7 @@ def _proces_tables(block_lines):
         "results_average_chains_mj": QTable(rows=blocks[2]),
         "results_average_chains_Av_chi2_mass": QTable(
             rows=np.array(blocks[3]).T[1:],
-            names=['AV', 'ch2', 'Mass'],
+            names=["AV", "ch2", "Mass"],
         ),
     }
 
@@ -238,6 +246,20 @@ def _get_age(ssps_vector, age_decimals):
     age = round(age, age_decimals)
 
     return age
+
+
+def _get_log_age(ssps_vector, age_decimals):
+    """
+    This function get log age from input file.
+    """
+
+    l_age = ((ssps_vector["x_j"] * np.log10(ssps_vector["age_j"])).sum()) / (
+        ssps_vector["x_j"].sum()
+    )
+
+    l_age = round(l_age, age_decimals)
+
+    return l_age
 
 
 def _get_error_age(ssps_vector, age, age_decimals):
@@ -430,6 +452,8 @@ def read_starlight(
 
     spectra = _get_spectra(tables_dict)
 
+    l_age = _get_log_age(ssps_vector, age_decimals)
+
     extra_info = {
         "xj_percent": xj_percent,
         "age_decimals": age_decimals,
@@ -437,6 +461,7 @@ def read_starlight(
         "z_decimals": z_decimals,
         "ssps_vector": ssps_vector,
         "synthesis_info": synthesis_info,
+        "average_log_age": l_age,
     }
 
     return core.SpectralSummary(

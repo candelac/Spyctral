@@ -50,9 +50,9 @@ FISA_DEFAULT_AGE_MAP = {
     "G3": 13e9,
     "G4": 13e9,
     "G5": 13e9,
-    "ya_lmc": 3e6 - 6e6,
-    "yba_be": 4e6 - 8e6,
-    "Ya1": 2e6 - 4e6,
+    "ya_lmc": 3e6,
+    "yba_be": 4e6,
+    "Ya1": 2e6,
 }
 
 FISA_DEFAULT_ERROR_AGE_MAP = {
@@ -68,10 +68,10 @@ FISA_DEFAULT_ERROR_AGE_MAP = {
 
 FISA_DEFAULT_Z_MAP = {
     "G1": 1.00,
-    "G2": -0.4,
-    "G3": -1.0,
-    "G4": -1.5,
-    "G5": -1.9,
+    "G2": 0.4,
+    "G3": 1.0,
+    "G4": 1.5,
+    "G5": 1.9,
     "ya_lmc": 0.42,
     "yba_be": 0.42,
     "Ya1": 1.0,

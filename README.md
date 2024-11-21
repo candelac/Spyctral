@@ -25,16 +25,24 @@ You will need Python 3.8 or higher to run Sypctral.
 
 ## Basic install
 Git installed is required, otherwise must install it.
-Install Git: 
+Install Git:
+´´´bash
 Open the terminal 
-Run the commands sudo apt-get update and sudo apt-get install git 
+Run the commands 
+$ sudo apt-get update
+$ sudo apt-get install git
+
 Verify the installation with the command git –version 
 Configure Git: 
 Set your username 
 Set your confirmation email address 
 Clone the repository:
+Use the command 
+$ git clone https://github.com/candelac/Spyctral.git
+´´´ 
+  
  
-Use the command git clone https://github.com/candelac/Spyctral.git
+
 
 ## Tutorial
 

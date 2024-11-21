@@ -24,7 +24,21 @@ Spyctral needs a minimum of one text file and you need to know the source code o
 You will need Python 3.8 or higher to run Sypctral.
 
 ## Basic install
+Git installed is required, otherwise must install it.
+Install Git: 
+Open the terminal 
+Run the commands sudo apt-get update and sudo apt-get install git 
+Verify the installation with the command git –version 
+Configure Git: 
+Set your username 
+Set your confirmation email address 
+Clone the repository:
+ 
+Use the command git clone https://github.com/candelac/Spyctral.git
+
 ## Tutorial
+
+
 ## Future upgrades 
 This is the first version of Spyctral code and we hope to add functionality so that the package will support output files from other synthesis codes, the next one to be included is A.S.A.D. 
 

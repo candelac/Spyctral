@@ -380,8 +380,9 @@ def _make_spectrum1d_from_qtable(qtable):
     # weights = qtable["weights"].data
 
     # Calculate the residual flux
-    residual_flux = (flux_obs - flux_syn) / flux_obs
-
+    #residual_flux = (flux_obs - flux_syn) / flux_obs
+    residual_flux = flux_obs - flux_syn
+    
     # Create the Spectrum1D objects
     spectra = {
         "synthetic_spectrum": Spectrum1D(

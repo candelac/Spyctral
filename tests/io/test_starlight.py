@@ -133,6 +133,7 @@ def test_read_starlight(file_path):
     assert isinstance(summary.extra_info.z_decimals, int)
     assert isinstance(summary.extra_info.ssps_vector, pd.DataFrame)
     assert isinstance(summary.extra_info.synthesis_info, pd.DataFrame)
+    assert isinstance(summary.extra_info.average_log_age, float)
 
 
 def test_is_float():

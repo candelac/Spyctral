@@ -41,12 +41,20 @@ Clone the repository:
 ``` bash 
 $ git clone https://github.com/candelac/Spyctral.git
 ```
+Install dependencies
+``` bash
+$ pip install attrs numpy python-dateutil astropy pandas specutils matplotlib
+```
   
  
 
 
 ## Tutorial
-
+In the Spyctral repository there are two different files to be handled: FISA files and Starlight files.
+### FISA files
+``` bash
+$
+```
 
 ## Future upgrades 
 This is the first version of Spyctral code and we hope to add functionality so that the package will support output files from other synthesis codes, the next one to be included is A.S.A.D. 

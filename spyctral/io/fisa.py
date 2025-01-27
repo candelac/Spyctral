@@ -6,7 +6,7 @@
 # All rights reserved.
 
 # =============================================================================
-# This file process 
+# This file process
 # =============================================================================
 
 # =============================================================================
@@ -169,11 +169,12 @@ FISA_DEFAULT_AGE_MAP = {
 FISA_DEFAULT_ERROR_AGE_MAP
 Descripción en castellano:
 
-Define errores en los valores de edad (en años) para cada plantilla espectral. Por ejemplo:
+Define errores en los valores de edad (en años) para cada plantilla espectral.
+Por ejemplo:
     "G1": 1e9 → Error de 1 mil millones de años.
 
 *****************************************************************************************
-*****************************************************************************************    
+*****************************************************************************************
 Description in English:
 
 Defines errors in age values (in years) for each spectral template. For example:
@@ -223,8 +224,8 @@ FISA_DEFAULT_Z_MAP = {
 def _process_header(lines):
     """
     Descripción en castellano:
-    Esta función procesa las líneas del encabezado de un archivo FISA y extrae 
-    información clave, como la versión de FISA, la fecha, el enrojecimiento, 
+    Esta función procesa las líneas del encabezado de un archivo FISA y extrae
+    información clave, como la versión de FISA, la fecha, el enrojecimiento,
     la plantilla adoptada, el punto de normalización y los nombres de los espectros.
 
     Argumentos:
@@ -294,7 +295,7 @@ def _process_header(lines):
 def _fisa_spectra_names(spectra, table_names):
     """
     Descripción en castellano:
-        Renombra las tablas espectrales asociando cada espectro con su nombre 
+        Renombra las tablas espectrales asociando cada espectro con su nombre
         correspondiente, basado en una lista de nombres de tabla.
 
     Argumentos:
@@ -308,12 +309,13 @@ def _fisa_spectra_names(spectra, table_names):
     *************************************************************************************
     *************************************************************************************
     Description in English:
-        Renames the spectral tables by associating each spectrum with its corresponding 
+        Renames the spectral tables by associating each spectrum with its corresponding
         name, based on a list of table names.
 
     Arguments:
         spectra (list): List of spectral tables (`QTable` objects) processed.
-        table_names (tuple): Tuple of strings representing the names associated with each spectrum.
+        table_names (tuple): Tuple of strings representing the names associated with
+            each spectrum.
 
     Returns:
         dict: A dictionary where the keys are table names and the values
@@ -328,18 +330,18 @@ def _fisa_spectra_names(spectra, table_names):
 def _process_blocks(spectra_blocks, tab_names):
     """
     Descripción en castellano:
-        Procesa los bloques de datos espectrales extraídos de un archivo FISA y los 
-        convierte en tablas estructuradas con columnas para longitud de onda y flujo 
+        Procesa los bloques de datos espectrales extraídos de un archivo FISA y los
+        convierte en tablas estructuradas con columnas para longitud de onda y flujo
         normalizado.
 
     Argumentos:
-        spectra_blocks (list): Lista de bloques espectrales, donde cada bloque contiene 
+        spectra_blocks (list): Lista de bloques espectrales, donde cada bloque contiene
         líneas de datos en formato texto.
-        tab_names (tuple): Tupla de cadenas que representan los nombres asociados a cada 
+        tab_names (tuple): Tupla de cadenas que representan los nombres asociados a cada
         espectro.
 
     Retorna:
-        dict: Un diccionario donde las claves son los nombres de las tablas (tab_names) 
+        dict: Un diccionario donde las claves son los nombres de las tablas (tab_names)
         y los valores son tablas espectrales (`QTable`) con las siguientes columnas:
             - "Wavelength" (con unidad de longitud de onda en Angstroms).
             - "Normalizated_flux" (flujo normalizado).
@@ -351,15 +353,18 @@ def _process_blocks(spectra_blocks, tab_names):
         into structured tables with columns for wavelength and normalized flux.
 
     Arguments:
-        spectra_blocks (list): List of spectral blocks, where each block contains lines of text-formatted data.
-        tab_names (tuple): Tuple of strings representing the names associated with each spectrum.
+        spectra_blocks (list): List of spectral blocks, where each block contains lines
+            of text-formatted data.
+        tab_names (tuple): Tuple of strings representing the names associated with each
+            spectrum.
 
     Returns:
-        dict: A dictionary where keys are table names (tab_names) and values are spectral tables (`QTable`) with the following columns:
+        dict: A dictionary where keys are table names (tab_names) and values are spectral
+            tables (`QTable`) with the following columns:
             - "Wavelength" (with unit of wavelength in Angstroms).
             - "Normalizated_flux" (normalized flux).
     """
-    
+
     spectra = []
 
     for block in spectra_blocks:
@@ -385,12 +390,12 @@ def _process_blocks(spectra_blocks, tab_names):
 def _get_str_template(header):
     """
     Descripción en castellano:
-        Extrae el nombre del archivo de la plantilla adoptada (template) desde el 
+        Extrae el nombre del archivo de la plantilla adoptada (template) desde el
         encabezado.
 
     Argumentos:
-        header (dict): Diccionario que contiene la información del encabezado del 
-            archivo FISA, incluyendo la ruta completa de la plantilla adoptada en 
+        header (dict): Diccionario que contiene la información del encabezado del
+            archivo FISA, incluyendo la ruta completa de la plantilla adoptada en
             la clave 'adopted_template'.
 
     Retorna:
@@ -417,12 +422,12 @@ def _get_str_template(header):
 def _get_name_template(header):
     """
     Descripción en castellano:
-        Obtiene el nombre base de la plantilla adoptada desde el encabezado del archivo 
+        Obtiene el nombre base de la plantilla adoptada desde el encabezado del archivo
         FISA.  El nombre base es el nombre del archivo sin la extensión.
 
     Argumentos:
-        header (dict): Diccionario que contiene la información del encabezado del archivo 
-        FISA, incluyendo la ruta completa de la plantilla adoptada en la clave 
+        header (dict): Diccionario que contiene la información del encabezado del archivo
+        FISA, incluyendo la ruta completa de la plantilla adoptada en la clave
         'adopted_template'.
 
     Retorna:
@@ -450,27 +455,28 @@ def _get_name_template(header):
 def _get_reddening(header, rv):
     """
     Descripción en castellano:
-        Calcula el valor de enrojecimiento (reddening) y su equivalente en magnitud de 
-        extinción (A_v), basado en el valor proporcionado en el encabezado del archivo 
+        Calcula el valor de enrojecimiento (reddening) y su equivalente en magnitud de
+        extinción (A_v), basado en el valor proporcionado en el encabezado del archivo
         FISA y el parámetro de enrojecimiento (R_v).
 
     Argumentos:
-        header (dict): Diccionario que contiene la información del encabezado del archivo 
+        header (dict): Diccionario que contiene la información del encabezado del archivo
             FISA.
-        rv (float): Valor del parámetro de enrojecimiento (R_v), típicamente 3.1 para el 
+        rv (float): Valor del parámetro de enrojecimiento (R_v), típicamente 3.1 para el
             medio interestelar.
 
     Retorna:
         tuple:
             - reddening_value (float): Valor de enrojecimiento extraído del encabezado.
-            - av_value (float): Valor de magnitud de extinción (A_v) calculado como 
+            - av_value (float): Valor de magnitud de extinción (A_v) calculado como
                 reddening_value * R_v.
 
     *************************************************************************************
     *************************************************************************************
     Description in English:
         Calculates the reddening value and its equivalent extinction magnitude (A_v),
-        based on the value provided in the FISA file header and the reddening parameter (R_v).
+        based on the value provided in the FISA file header and the reddening parameter
+        (R_v).
 
     Arguments:
         header (dict): Dictionary containing the header information of the FISA file.
@@ -479,7 +485,8 @@ def _get_reddening(header, rv):
     Returns:
         tuple:
             - reddening_value (float): Reddening value extracted from the header.
-            - av_value (float): Extinction magnitude (A_v) calculated as reddening_value * R_v.
+            - av_value (float): Extinction magnitude (A_v) calculated as reddening_value
+                * R_v.
     """
 
     reddening_value = header["reddening"]
@@ -491,17 +498,17 @@ def _get_reddening(header, rv):
 def _get_spectra(data):
     """
     Descripción en castellano:
-        Convierte los datos espectrales procesados en un diccionario de objetos `Spectrum1D`,
-        que representan espectros con longitud de onda y flujo.
+        Convierte los datos espectrales procesados en un diccionario de objetos
+        `Spectrum1D`, que representan espectros con longitud de onda y flujo.
 
     Argumentos:
-        data (dict): Diccionario donde las claves son los nombres de los espectros y los 
-            valores son tablas espectrales (`QTable`) con columnas de longitud de onda y 
+        data (dict): Diccionario donde las claves son los nombres de los espectros y los
+            valores son tablas espectrales (`QTable`) con columnas de longitud de onda y
             flujo normalizado.
 
     Retorna:
-        dict: Un diccionario donde las claves son los nombres de los espectros y los 
-            valores son objetos `Spectrum1D` que contienen los datos de flujo y longitud 
+        dict: Un diccionario donde las claves son los nombres de los espectros y los
+            valores son objetos `Spectrum1D` que contienen los datos de flujo y longitud
             de onda.
 
     *************************************************************************************
@@ -511,12 +518,12 @@ def _get_spectra(data):
     representing spectra with wavelength and flux.
 
     Arguments:
-        data (dict): Dictionary where keys are spectrum names and values are spectral 
+        data (dict): Dictionary where keys are spectrum names and values are spectral
             tables (`QTable`) with columns for wavelength and normalized flux.
 
     Returns:
-        dict: A dictionary where keys are spectrum names and values are `Spectrum1D` objects
-            containing the flux and wavelength data.
+        dict: A dictionary where keys are spectrum names and values are `Spectrum1D`
+        objects containing the flux and wavelength data.
     """
 
     spectra = {}
@@ -539,27 +546,27 @@ def read_fisa(
     z_map=None,
     object_name="object_1",
 ):
-    """    
+    """
     Descripción en castellano:
-    Lee un archivo FISA y extrae los datos del espectro, incluyendo el encabezado y las columnas de datos.
+    Lee un archivo FISA y extrae los datos del espectro, incluyendo el encabezado y las
+    columnas de datos.
 
     Argumentos:
         nombre_archivo (str): Ruta y nombre del archivo FISA a leer.
-    
 
-    age_map : dict or None, opcional
-        Diccionario que mapea los valores de edad.
-        Si es None, el valor por defecto es FISA_DEFAULT_AGE_MAP.
-        (por defecto es None)
+        age_map : dict or None, opcional
+            Diccionario que mapea los valores de edad.
+            Si es None, el valor por defecto es FISA_DEFAULT_AGE_MAP.
+            (por defecto es None)
 
-    rv : float, opcional
-        Valor de enrojecimiento usado para los cálculos.
-        (valor por defecto es 3.1)
+        rv : float, opcional
+            Valor de enrojecimiento usado para los cálculos.
+            (valor por defecto es 3.1)
 
-    z_map : dict or None, opcional
-        Diccionario que mapea los valores de metalicidad.
-        Si es None, por defecto se toma FISA_DEFAULT_Z_MAP.
-        (por defecto es None)
+        z_map : dict or None, opcional
+            Diccionario que mapea los valores de metalicidad.
+            Si es None, por defecto se toma FISA_DEFAULT_Z_MAP.
+            (por defecto es None)
 
     Retorna:
         SpectralSummary:
@@ -570,32 +577,35 @@ def read_fisa(
             - 'reddening' (float): Valor de enrojecimiento extraído del encabezado.
             - 'template' (str): Ruta de la plantilla utilizada, extraída del encabezado.
             - 'norm_point' (float): Punto de normalización extraído del encabezado.
-    
+
     Notas:
-        Esta función procesa un archivo FISA, extrayendo información del encabezado y bloques de espectros.
-        Calcula la edad, el enrojecimiento, el valor AV, el punto de normalización y los valores de 
-        metalicidad según los datos proporcionados o predeterminados.
-    *****************************************************************************************
-    *****************************************************************************************
+        Esta función procesa un archivo FISA, extrayendo información del encabezado y
+        bloques de espectros.
+        Calcula la edad, el enrojecimiento, el valor AV, el punto de normalización y
+        los valores de metalicidad según los datos proporcionados o predeterminados.
+
+    *************************************************************************************
+    *************************************************************************************
     Description in English:
-    Reads a FISA file and extracts the spectral data, including the header and data columns.
+    Reads a FISA file and extracts the spectral data, including the header and data
+    columns.
 
     Arguments:
         nombre_archivo (str): Path and name of the FISA file to read.
-    
-    age_map : dict or None, optional
-        Mapping dictionary for age values.
-        If None, defaults to FISA_DEFAULT_AGE_MAP.
-        (default is None)
 
-    rv : float, optional
-        Reddening value to use for calculations.
-        (default is 3.1)
+        age_map : dict or None, optional
+            Mapping dictionary for age values.
+            If None, defaults to FISA_DEFAULT_AGE_MAP.
+            (default is None)
 
-    z_map : dict or None, optional
-        Mapping dictionary for metallicity values.
-        If None, defaults to FISA_DEFAULT_Z_MAP.
-        (default is None)
+        rv : float, optional
+            Reddening value to use for calculations.
+            (default is 3.1)
+
+        z_map : dict or None, optional
+            Mapping dictionary for metallicity values.
+            If None, defaults to FISA_DEFAULT_Z_MAP.
+            (default is None)
 
     Returns:
         SpectralSummary:
@@ -608,11 +618,11 @@ def read_fisa(
             - 'norm_point' (float): Normalization point extracted from the header.
 
     Notes:
-        This function processes a FISA file, extracting header information and spectra blocks.
-        It computes age, reddening, AV value, normalization point, and metallicity values based 
-        on the provided or default mappings.
+        This function processes a FISA file, extracting header information and spectra
+        blocks.
+        It computes age, reddening, AV value, normalization point, and metallicity values
+        based on the provided or default mappings.
     """
-    
     # Use default mappings if None provided
     age_map = FISA_DEFAULT_AGE_MAP if age_map is None else age_map
     error_age_map = (

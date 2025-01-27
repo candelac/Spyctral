@@ -32,7 +32,29 @@ Z_SUN = 0.019
 
 
 def _header_to_dataframe(header):
-    """Convert the header into a ``pandas.DataFrame``."""
+    """
+    Descripción en castellano:
+    Convierte un encabezado dado (en forma de diccionario) en un DataFrame de pandas.
+
+    Argumentos:
+        header (dict): Diccionario que contiene las claves y valores del encabezado.
+
+    Retorna:
+        pd.DataFrame: DataFrame con las claves del encabezado como índice y los valores
+            en una columna llamada "value".
+
+    *************************************************************************************
+    *************************************************************************************
+    Description in English:
+    Converts a given header (in dictionary form) into a pandas DataFrame.
+
+    Arguments:
+        header (dict): Dictionary containing the header keys and values.
+
+    Returns:
+        pd.DataFrame: DataFrame with header keys as the index and values in a column
+            named "value".
+    """
     keys = list(header.keys())
     values = list(header.values())
     df = pd.DataFrame(values, index=keys)
@@ -47,30 +69,40 @@ def _header_to_dataframe(header):
 
 @attrs.define
 class SpectralSummary:
-    """This object encapsulates all the data getted from inputfile.
+    """
+    Descripción en castellano:
+    Esta clase encapsula todos los datos obtenidos de un archivo de entrada.
 
-    Attributes
-    ----------
-    header : dict-like
-        Header info from inputfile.
-    data : dict-like
-        Spectra information in Qtables.
-    age : float
-        Age information.
-    reddening : float
-        Reddening information.
-    av_value : float
-        Av value.
-    normalization_point : float
-        Normalization point value.
-    z_value : float
-        Metallicity value.
+    Atributos:
+        obj_name (str): Nombre del objeto.
+        header (dict): Información del encabezado del archivo de entrada.
+        data (dict): Información de los espectros en formato Qtables.
+        age (float): Edad del objeto.
+        err_age (float): Error asociado a la edad.
+        reddening (float): Valor de enrojecimiento.
+        av_value (float): Valor de  "Av".
+        normalization_point (float): Valor del punto de normalización.
+        z_value (float): Valor de metalicidad..
+        spectra (dict): Conjunto de espectros extraídos de los datos.
+        extra_info (dict): Información adicional.
 
-    spectra: dict-like
-        Spectrum set from data
+    *************************************************************************************
+    *************************************************************************************
+    Description in English:
+    This class encapsulates all the data obtained from an input file.
 
-    extra_info : dict-like
-        Additional info.
+    Attributes:
+        obj_name (str): Object name.
+        header (dict): Header information from the input file.
+        data (dict): Spectra information in Qtables format.
+        age (float): Object's age.
+        err_age (float): Error associated with the age.
+        reddening (float): Value of reddening.
+        av_value (float): Value of "Av".
+        normalization_point (float): Value of the normalization_point.
+        z_value (float): Metallicity value.
+        spectra (dict): Set of spectra extracted from the data.
+        extra_info (dict): Additional information.
     """
 
     obj_name: str = attrs.field(converter=str)
@@ -87,47 +119,82 @@ class SpectralSummary:
 
     @property
     def header_info_df(self) -> pd.DataFrame:
-        """Convert header info to a pandas DataFrame.
+        """
+            Descripción en castellano:
+            Convierte la información contenida en el atributo `header` a un DataFrame de
+            pandas.
 
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing header information.
+        Retorna:
+            pd.DataFrame: DataFrame que contiene la información del encabezado, donde las
+                claves del encabezado son los índices y los valores se almacenan en una
+                columna llamada "value".
+
+            *********************************************************************************
+            *********************************************************************************
+            Description in English:
+            Converts the information stored in the `header` attribute into a pandas
+            DataFrame.
+
+            Returns:
+            pd.DataFrame: DataFrame containing the header information, where the header
+                keys are the index, and the values are stored in a column named "value".
         """
         return _header_to_dataframe(self.header)
 
     def get_spectrum(self, name: str):
-        """Get the spectrum by name.
+        """
+        Descripción en castellano:
+        Obtiene un espectro específico a partir del conjunto de espectros almacenados
+        en el atributo `spectra`.
 
-        Parameters
-        ----------
-        name : str
-            Name of the spectrum.
+        Argumentos:
+            name (str): Nombre del espectro que se desea obtener.
 
-        Returns
-        -------
-        Spectrum
-            The spectrum corresponding to the given name.
+        Retorna:
+            Spectrum: El espectro correspondiente al nombre proporcionado.
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Retrieves a specific spectrum from the set of spectra stored in the `spectra`
+        attribute.
+
+        Arguments:
+            name (str): Name of the spectrum to retrieve.
+
+        Returns:
+            Spectrum: The spectrum corresponding to the given name.
         """
         return self.spectra[name]
 
     def __getitem__(self, k: str):
-        """Allow attribute access using dictionary-like syntax.
+        """
+         Descripción en castellano:
+         Permite acceder a los atributos de la clase utilizando una sintaxis similar a un
+         diccionario.
 
-        Parameters
-        ----------
-        k : str
-            Attribute name.
+        Argumentos:
+            k (str): Nombre del atributo que se desea obtener.
 
-        Returns
-        -------
-        Any
-            Value of the attribute.
+        Retorna:
+            Any: Valor del atributo solicitado.
 
-        Raises
-        ------
-        KeyError
-            If the attribute does not exist.
+        Lanza:
+            KeyError: Si el atributo no existe.
+
+        *************************************************************************************
+        *************************************************************************************
+        Description in English:
+        Allows access to the class attributes using dictionary-like syntax.
+
+        Arguments:
+            k (str): Name of the attribute to retrieve.
+
+        Returns:
+            Any: Value of the requested attribute.
+
+        Raises:
+            KeyError: If the attribute does not exist.
         """
         try:
             return getattr(self, k)
@@ -135,24 +202,45 @@ class SpectralSummary:
             raise KeyError(k)
 
     def __len__(self) -> int:
-        """Return the number of attributes defined in the class.
-
-        Returns
-        -------
-        int
-            Number of attributes.
         """
+        Descripción en castellano:
+        Retorna la cantidad de atributos definidos en la clase.
+
+        Retorna:
+            int: Número total de atributos en la clase.
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Returns the number of attributes defined in the class.
+
+        Returns:
+            int: Total number of attributes in the class.
+        """
+
         return len(attrs.fields(SpectralSummary))
 
     def __repr__(self) -> str:
-        """Return a string representation of the instance.
-
-        Returns
-        -------
-        str
-            String representation.
         """
+        Descripción en castellano:
+        Retorna una representación en forma de cadena de texto de la instancia de la
+        clase.
+        Incluye un resumen de los principales atributos: encabezado, datos, espectros e
+        información adicional.
 
+        Retorna:
+            str: Representación en cadena de la instancia.
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Returns a string representation of the class instance.
+        Includes a summary of the main attributes: header, data, spectra, and additional
+        info.
+
+        Returns:
+            str: String representation of the instance.
+        """
         header_keys = ", ".join(self.header.keys())
         data_keys = ", ".join(self.data.keys())
         spectra_keys = ", ".join(self.spectra.keys())
@@ -169,34 +257,72 @@ class SpectralSummary:
 
     @property
     def feh_ratio(self):
-        """Calculate metallicity value from Z value.
-
-        Returns
-        -------
-        Class
-            Metallicity with z_value and [Fe/H] ratio.
         """
+        Descripción en castellano:
+        Calcula la relación de metalicidad [Fe/H] a partir del valor Z
+        (`metallicity_value`) de la instancia y una constante solar (`Z_SUN`).
 
+        Retorna:
+            float: Relación de metalicidad [Fe/H].
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Calculates the metallicity ratio [Fe/H] using the Z value (`metallicity_value`)
+        of the instance and a solar constant (`Z_SUN`).
+
+        Returns:
+            float: Metallicity ratio [Fe/H].
+        """
         feh_ratio = np.log10(self.z_value / Z_SUN)
 
         return feh_ratio
 
     @property
     def plot(self):
-        """Generate plots from spectra."""
+        """
+        Descripción en castellano:
+        Genera un objeto para graficar los espectros almacenados en la instancia.
+        Utiliza la clase `SpectralPlotter` para gestionar las funcionalidades de
+        graficado.
 
+        Retorna:
+            SpectralPlotter: Objeto que permite generar gráficos de los espectros.
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Generates an object for plotting the spectra stored in the instance.
+        Uses the `SpectralPlotter` class to handle plotting functionalities.
+
+        Returns:
+            SpectralPlotter: Object that enables generating plots of the spectra.
+        """
         from .plot import SpectralPlotter
 
         return SpectralPlotter(self)
 
     @property
     def get_all_properties(self) -> pd.DataFrame:
-        """Make a dataframe with all the parameter values.
+        """
+        Descripción en castellano:
+        Crea un DataFrame que contiene todos los parámetros relevantes de la instancia.
+        Los valores numéricos se formatean para mostrar notación científica donde sea
+        necesario.
 
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing all the parameters values.
+        Retorna:
+            pd.DataFrame: DataFrame con dos columnas: "Property" (propiedad) y
+                "Value" (valor).
+
+        *********************************************************************************
+        *********************************************************************************
+        Description in English:
+        Creates a DataFrame containing all relevant parameters of the instance.
+        Numerical values are formatted to display scientific notation where necessary.
+
+        Returns:
+            pd.DataFrame: DataFrame with two columns: "Property" (property) and "Value"
+                (value).
         """
         age = f"{self.age:.2e}"
         err_age = f"{self.err_age:.2e}"

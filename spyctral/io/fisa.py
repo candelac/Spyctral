@@ -210,14 +210,14 @@ Defines metallicity values for each spectral template. For example:
     "G5": -1.9 → Low metallicity.
 """
 FISA_DEFAULT_Z_MAP = {
-    "G1": 1.00,
-    "G2": -0.4,
-    "G3": -1.0,
-    "G4": -1.5,
-    "G5": -1.9,
-    "ya_lmc": 0.42,
-    "yba_be": 0.42,
-    "Ya1": 1.0,
+    "G1": 0.19,
+    "G2": 0.00756403,
+    "G3": 0.0019,
+    "G4": 0.00060083,
+    "G5": 0.00023919,
+    "ya_lmc": 0.04997509,
+    "yba_be": 0.04997509,
+    "Ya1": 0.19,
 }
 
 

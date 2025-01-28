@@ -37,7 +37,7 @@ Clone this repo and then inside the local directory execute
 ``` bash
 $ git clone https://github.com/candelac/Spyctral.git
 $ cd Spyctral
-$ pip install -e
+$ pip install -e .
 ```
 ## Tutorial
 ## Future upgrades 

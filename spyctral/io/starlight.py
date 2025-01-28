@@ -40,29 +40,15 @@ PATRON = re.compile(r"#(.*?)(?:(?=\n)|$)")
 
 def _proces_header(header_ln):
     """
-    Descripción en castellano:
-    Recibe como entrada una lista con las líneas del encabezado de un archivo Starlight
-    y devuelve un diccionario con los parámetros y valores extraídos.
-
-    Argumentos:
-        header_ln (list): Lista de cadenas que representan las líneas del encabezado.
-
-    Retorna:
-        dict: Diccionario donde las claves son los nombres de los parámetros y los
-        valores son extraídos del encabezado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Receives a list of header lines from a Starlight file and returns a dictionary
-    with the extracted parameters and values.
+    Receives a list of header lines from a Starlight file and returns a
+    dictionary with the extracted parameters and values.
 
     Arguments:
         header_ln (list): List of strings representing the header lines.
 
     Returns:
-        dict: Dictionary where keys are parameter names and values are the extracted
-            values from the header.
+        dict: Dictionary where keys are parameter names and values are the
+            extracted values from the header.
     """
 
     head_dict = {}
@@ -71,7 +57,6 @@ def _proces_header(header_ln):
             head_dict["Date"] = dateutil.parser.parse(
                 re.findall(SL_GET_DATE, sl)[0]
             )
-            # head_dict["user"] = sl.split("[")[1].split("-")[0].strip()
 
         sl = re.sub(
             r"\s{2,}", " ", sl.replace("&", ",").replace("]\n", "")
@@ -133,27 +118,14 @@ def _proces_header(header_ln):
 
 def _is_float(element: any) -> bool:
     """
-    Descripción en castellano:
-    Verifica si un elemento dado puede ser convertido a un número de punto flotante.
-
-    Argumentos:
-        element (any): Elemento a verificar.
-
-    Retorna:
-        bool: `True` si el elemento puede ser convertido a un número flotante,
-        `False` en caso contrario.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     Checks whether a given element can be converted to a floating-point number.
 
     Arguments:
         element (any): Element to check.
 
     Returns:
-        bool: `True` if the element can be converted to a floating-point number,
-        `False` otherwise.
+        bool: `True` if the element can be converted to a floating-point
+            number, `False` otherwise.
     """
     # If you expect None to be passed:
     if element is None:
@@ -167,63 +139,38 @@ def _is_float(element: any) -> bool:
 
 def _proces_tables(block_lines):
     """
-    Descripción en castellano:
-    Procesa las líneas de los bloques de datos de un archivo Starlight y devuelve
-    un diccionario con cuatro tablas estructuradas que contienen información clave,
-    como el espectro sintético y los resultados.
-
-    Argumentos:
-        block_lines (list): Lista de cadenas que representan las líneas de los bloques
-        de datos.
-
-    Retorna:
-        dict: Un diccionario con las siguientes claves y valores:
-            - "synthetic_spectrum" (QTable): Tabla con las columnas "l_obs", "f_obs",
-                "f_syn" y "weights".
-            - "synthetic_results" (QTable): Tabla con los resultados sintéticos.
-            - "results_average_chains_xj" (QTable): Tabla con los promedios de cadenas
-                de x_j.
-            - "results_average_chains_mj" (QTable): Tabla con los promedios de cadenas
-                de m_j.
-            - "results_average_chains_Av_chi2_mass" (QTable): Tabla con valores promedio
-                de Av, chi^2 y masa.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     Processes the data block lines of a Starlight file and returns a dictionary
-    with four structured tables containing key information, such as the synthetic
-    spectrum and results.
+    with four structured tables containing key information, such as the
+    synthetic spectrum and results.
 
     Arguments:
         block_lines (list): List of strings representing the data block lines.
 
     Returns:
         dict: A dictionary with the following keys and values:
-            - "synthetic_spectrum" (QTable): Table with the columns "l_obs", "f_obs",
-                "f_syn", and "weights".
+            - "synthetic_spectrum" (QTable): Table with the columns "l_obs",
+                "f_obs", "f_syn", and "weights".
             - "synthetic_results" (QTable): Table with synthetic results.
-            - "results_average_chains_xj" (QTable): Table with averages of x_j chains.
-            - "results_average_chains_mj" (QTable): Table with averages of m_j chains.
-            - "results_average_chains_Av_chi2_mass" (QTable): Table with average values
-                of Av, chi^2, and mass.
+            - "results_average_chains_xj" (QTable): Table with averages of
+                x_j chains.
+            - "results_average_chains_mj" (QTable): Table with averages of
+                m_j chains.
+            - "results_average_chains_Av_chi2_mass" (QTable): Table with
+                average values of Av, chi^2, and mass.
     """
     block_titles = []
     blocks = []
     tab = []
     for sl in block_lines:
         # This part procces the tables.
-        # Esta parte procesa las tablas.
         if (
             re.search(SL_GET_TITLE_VALUE, sl) is None
             and re.match("##", sl) is None
         ):
             # Filters the titles of the tables.
-            # Filtra los títulos de las tablas.
             if re.search(r"# ", sl):
                 block_titles.append(sl)
             # Filters the empty spaces
-            # Elimina los espacios vacíos.
             elif len(sl) > 1:
                 # print(sl)
                 sl = re.sub(r"\s{2,}", " ", sl.strip())
@@ -243,7 +190,6 @@ def _proces_tables(block_lines):
         .replace("?", "")
         .strip()
     ).split(" ")
-    # Toma las unidades de los headers y remueve los '()'
     # Take the units from the headers and remove the '()'
     unities = []
     clean_title = []
@@ -309,29 +255,9 @@ def _proces_tables(block_lines):
 
 def _get_ssp_contributions(tables_dict, xj_percent):
     """
-    Descripción en castellano:
-    Calcula las contribuciones de los Single Stellar Populations (SSPs) a partir de los
-    resultados sintéticos, filtrando aquellas contribuciones mayores a un porcentaje dado
-    y normalizando los valores.
-
-    Argumentos:
-        tables_dict (dict): Diccionario que contiene las tablas procesadas, incluyendo
-            "synthetic_results".
-        xj_percent (float): Porcentaje mínimo para filtrar las contribuciones
-            (por ejemplo, 5 significa 5%).
-
-    Retorna:
-        pandas.DataFrame: DataFrame con las contribuciones de los SSPs filtradas y
-            normalizadas.
-        Incluye columnas como "x_j" (porcentajes normalizados) y "age_j"
-            (edades de las poblaciones estelares).
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Calculates the contributions of Single Stellar Populations (SSPs) from the synthetic
-    results, filtering those contributions greater than a given percentage and
-    normalizing the values.
+    Calculates the contributions of Single Stellar Populations (SSPs)
+    from the synthetic results, filtering those contributions greater
+    than a given percentage and normalizing the values.
 
     Arguments:
         tables_dict (dict): Dictionary containing processed tables, including
@@ -340,9 +266,9 @@ def _get_ssp_contributions(tables_dict, xj_percent):
             (e.g., 5 means 5%).
 
     Returns:
-        pandas.DataFrame: DataFrame with the filtered and normalized SSP contributions.
-        Includes columns like "x_j" (normalized percentages) and "age_j"
-            (stellar population ages).
+        pandas.DataFrame: DataFrame with the filtered and normalized SSP
+            contributions. Includes columns like "x_j" (normalized percentages)
+            and "age_j" (stellar population ages).
     """
 
     ssps_vector = tables_dict["synthetic_results"]
@@ -363,35 +289,18 @@ def _get_ssp_contributions(tables_dict, xj_percent):
 
 def _get_age(ssps_vector, age_decimals):
     """
-    Descripción en castellano:
-    Calcula la edad promedio ponderada de las poblaciones estelares (SSPs)
-    utilizando las contribuciones normalizadas (x_j) y las edades de las SSPs (age_j).
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de las
-            SSPs. Debe incluir las columnas "x_j" (contribuciones normalizadas) y "age_j"
-            (edades de las SSPs).
-        age_decimals (int): Número de decimales para redondear la edad calculada.
-
-    Retorna:
-        float: La edad promedio ponderada de las SSPs, redondeada al número de decimales
-            especificado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     Calculates the weighted average age of stellar populations (SSPs)
     using the normalized contributions (x_j) and SSP ages (age_j).
 
     Arguments:
         ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
-            Must include the columns "x_j" (normalized contributions) and "age_j"
-            (SSP ages).
+            Must include the columns "x_j" (normalized contributions) and
+            "age_j" (SSP ages).
         age_decimals (int): Number of decimals to round the calculated age.
 
     Returns:
-        float: The weighted average age of the SSPs, rounded to the specified number of
-            decimals.
+        float: The weighted average age of the SSPs, rounded to the specified
+            number of decimals.
     """
     age = ((ssps_vector["x_j"] * ssps_vector["age_j"]).sum()) / (
         ssps_vector["x_j"].sum()
@@ -404,34 +313,16 @@ def _get_age(ssps_vector, age_decimals):
 
 def _get_log_age(ssps_vector, age_decimals):
     """
-    Descripción en castellano:
-    Calcula el logaritmo base 10 de la edad promedio ponderada de las poblaciones
-    estelares (SSPs), utilizando las contribuciones normalizadas (x_j) y las edades de
-    las SSPs (age_j).
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de
-            las SSPs.  Debe incluir las columnas "x_j" (contribuciones normalizadas) y
-            "age_j" (edades de las SSPs).
-        age_decimals (int): Número de decimales para redondear el logaritmo de la edad
-            calculada.
-
-    Retorna:
-        float: El logaritmo base 10 de la edad promedio ponderada de las SSPs,
-        redondeado al número de decimales especificado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Calculates the base-10 logarithm of the weighted average age of stellar populations
-    (SSPs), using the normalized contributions (x_j) and SSP ages (age_j).
+    Calculates the base-10 logarithm of the weighted average age of
+    stellar populations (SSPs), using the normalized contributions (x_j)
+    and SSP ages (age_j).
 
     Arguments:
-        ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
-            Must include the columns "x_j" (normalized contributions) and "age_j"
-            (SSP ages).
-        age_decimals (int): Number of decimals to round the calculated logarithm
-            of the age.
+        ssps_vector (pandas.DataFrame): DataFrame containing SSP
+            contributions. Must include the columns "x_j" (normalized
+            contributions) and "age_j" (SSP ages).
+        age_decimals (int): Number of decimals to round the calculated
+            logarithm of the age.
 
     Returns:
         float: The base-10 logarithm of the weighted average age of the SSPs,
@@ -449,33 +340,14 @@ def _get_log_age(ssps_vector, age_decimals):
 
 def _get_error_age(ssps_vector, age, age_decimals):
     """
-    Descripción en castellano:
-    Calcula el error asociado a la edad promedio ponderada de las poblaciones estelares
-    (SSPs).
-    Este error se basa en la varianza ponderada de las edades de las SSPs.
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de
-            las SSPs.  Debe incluir las columnas "x_j" (contribuciones normalizadas) y
-            "age_j" (edades de las SSPs).
-        age (float): Edad promedio ponderada calculada.
-        age_decimals (int): Número de decimales para redondear el error calculado.
-
-    Retorna:
-        float: El error asociado a la edad promedio ponderada de las SSPs,
-        redondeado al número de decimales especificado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Calculates the error associated with the weighted average age of stellar populations
-    (SSPs).
+    Calculates the error associated with the weighted average age of stellar
+    populations (SSPs).
     This error is based on the weighted variance of the SSP ages.
 
     Arguments:
         ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
-            Must include the columns "x_j" (normalized contributions) and "age_j"
-            (SSP ages).
+            Must include the columns "x_j" (normalized contributions) and
+            "age_j" (SSP ages).
         age (float): Calculated weighted average age.
         age_decimals (int): Number of decimals to round the calculated error.
 
@@ -503,32 +375,14 @@ def _get_error_age(ssps_vector, age, age_decimals):
 
 def _get_reddening(header_info, rv):
     """
-    Descripción en castellano:
-    Determina el valor de enrojecimiento (reddening) y el valor de extinción (A_v)
-    a partir de la información del encabezado y el parámetro R_v.
-
-    Argumentos:
-        header_info (dict): Diccionario que contiene la información del encabezado del
-            archivo.
-            Debe incluir la clave "AV_min" para el valor mínimo de extinción.
-        rv (float): Parámetro de enrojecimiento (R_v), típicamente 3.1 para el medio
-            interestelar.
-
-    Retorna:
-        tuple:
-            - reddening_value (float): Valor de enrojecimiento calculado como A_v / R_v.
-            - av_value (float): Valor de extinción A_v extraído del encabezado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     Determines the reddening value and extinction value (A_v)
     from the header information and the R_v parameter.
 
     Arguments:
         header_info (dict): Dictionary containing the file header information.
             Must include the key "AV_min" for the minimum extinction value.
-        rv (float): Reddening parameter (R_v), typically 3.1 for the interstellar medium.
+        rv (float): Reddening parameter (R_v), typically 3.1 for the
+            interstellar medium.
 
     Returns:
         tuple:
@@ -544,38 +398,20 @@ def _get_reddening(header_info, rv):
 
 def _get_metallicity(ssps_vector, z_decimals):
     """
-    Descripción en castellano:
-    Calcula el valor promedio ponderado de metalicidad (Z) de las poblaciones estelares
-    (SSPs), utilizando las contribuciones normalizadas (x_j) y los valores de metalicidad
+    Calculates the weighted average metallicity (Z) of stellar populations
+    (SSPs), using the normalized contributions (x_j) and metallicity values
     (Z_j).
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de las
-        SSPs.
-            Debe incluir las columnas "x_j" (contribuciones normalizadas) y "Z_j"
-            (metalicidades de las SSPs).
-        z_decimals (int): Número de decimales para redondear el valor de metalicidad
-            calculado.
-
-    Retorna:
-        float: El valor promedio ponderado de metalicidad (Z),
-        redondeado al número de decimales especificado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Calculates the weighted average metallicity (Z) of stellar populations (SSPs),
-    using the normalized contributions (x_j) and metallicity values (Z_j).
 
     Arguments:
         ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
             Must include the columns "x_j" (normalized contributions) and "Z_j"
             (SSP metallicities).
-        z_decimals (int): Number of decimals to round the calculated metallicity value.
+        z_decimals (int): Number of decimals to round the calculated
+            metallicity value.
 
     Returns:
-        float: The weighted average metallicity (Z), rounded to the specified number of
-        decimals.
+        float: The weighted average metallicity (Z), rounded to the specified
+        number of decimals.
     """
 
     z_value = ((ssps_vector["x_j"] * ssps_vector["Z_j"])).sum() / ssps_vector[
@@ -588,26 +424,8 @@ def _get_metallicity(ssps_vector, z_decimals):
 
 def _get_z_values(ssps_vector):
     """
-    Descripción en castellano:
-    Obtiene los valores máximos y mínimos de metalicidad (Z) de las poblaciones estelares
-    (SSPs), basándose en las contribuciones normalizadas (x_j).
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de las
-            SSPs.
-            Debe incluir las columnas "x_j" (contribuciones normalizadas) y "Z_j"
-            (metalicidades de las SSPs).
-
-    Retorna:
-        dict: Un diccionario con los valores máximos y mínimos de metalicidad:
-            - `z_ssp_max` (float): Valor máximo de metalicidad.
-            - `z_ssp_min` (float): Valor mínimo de metalicidad.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Retrieves the maximum and minimum metallicity (Z) values of stellar populations
-    (SSPs), based on the normalized contributions (x_j).
+    Retrieves the maximum and minimum metallicity (Z) values of stellar
+    populations (SSPs), based on the normalized contributions (x_j).
 
     Arguments:
         ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
@@ -632,31 +450,13 @@ def _get_z_values(ssps_vector):
 
 def _get_vel_values(header_info):
     """
-    Descripción en castellano:
-    Extrae los valores de velocidad mínima (v0_min) y dispersión mínima de velocidad
-    (vd_min) desde la información del encabezado.
-
-    Argumentos:
-        header_info (dict): Diccionario que contiene la información del encabezado del
-            archivo Starlight.
-            Debe incluir las claves "v0_min" (velocidad mínima) y "vd_min"
-            (dispersión mínima de velocidad).
-
-    Retorna:
-        dict: Un diccionario con los valores de velocidad extraídos:
-            - `v0_min` (float): Velocidad mínima.
-            - `vd_min` (float): Dispersión mínima de velocidad.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Extracts the minimum velocity (v0_min) and minimum velocity dispersion (vd_min)
-    from the header information.
+    Extracts the minimum velocity (v0_min) and minimum velocity dispersion
+    (vd_min) from the header information.
 
     Arguments:
-        header_info (dict): Dictionary containing the Starlight file header information.
-            Must include the keys "v0_min" (minimum velocity) and "vd_min"
-            (minimum velocity dispersion).
+        header_info (dict): Dictionary containing the Starlight file header
+            information. Must include the keys "v0_min" (minimum velocity)
+            and "vd_min" (minimum velocity dispersion).
 
     Returns:
         dict: A dictionary with the extracted velocity values:
@@ -673,32 +473,14 @@ def _get_vel_values(header_info):
 
 def _get_quality_fit_values(header_info):
     """
-    Descripción en castellano:
-    Extrae los valores relacionados con la calidad del ajuste del modelo,
-    como el chi-cuadrado efectivo (chi2_Nl_eff) y el ajuste absoluto promedio (adev),
-    desde la información del encabezado.
-
-    Argumentos:
-        header_info (dict): Diccionario que contiene la información del encabezado del
-            archivo Starlight.
-            Debe incluir las claves "chi2_Nl_eff" (chi-cuadrado efectivo) y "adev"
-            (ajuste absoluto promedio).
-
-    Retorna:
-        dict: Un diccionario con los valores de calidad del ajuste:
-            - `chi2_nl_eff` (float): Valor del chi-cuadrado efectivo.
-            - `adev` (float): Ajuste absoluto promedio.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Extracts values related to the model's fit quality, such as the effective chi-square
-    (chi2_Nl_eff) and the average absolute deviation (adev), from the header information.
+    Extracts values related to the model's fit quality, such as the effective
+    chi-square (chi2_Nl_eff) and the average absolute deviation (adev), from
+    the header information.
 
     Arguments:
-        header_info (dict): Dictionary containing the Starlight file header information.
-            Must include the keys "chi2_Nl_eff" (effective chi-square) and "adev"
-            (average absolute deviation).
+        header_info (dict): Dictionary containing the Starlight file header
+            information. Must include the keys "chi2_Nl_eff" (effective
+            chi-square) and "adev" (average absolute deviation).
 
     Returns:
         dict: A dictionary with the fit quality values:
@@ -715,53 +497,28 @@ def _get_quality_fit_values(header_info):
 
 def _get_starlight_extra_info(ssps_vector, header_info):
     """
-    Descripción en castellano:
-    Recopila información adicional específica de Starlight, como los valores de
-    metalicidad (Z), velocidades y calidad del ajuste del modelo, y la organiza en un
-    DataFrame.
-
-    Argumentos:
-        ssps_vector (pandas.DataFrame): DataFrame que contiene las contribuciones de las
-            SSPs.
-            Incluye columnas como "x_j" (contribuciones normalizadas) y "Z_j"
-            (metalicidades).
-        header_info (dict): Diccionario que contiene la información del encabezado del
-            archivo Starlight.
-            Debe incluir claves como "v0_min", "vd_min", "chi2_Nl_eff", y "adev".
-
-    Retorna:
-        pandas.DataFrame: Un DataFrame que contiene la información adicional de
-            Starlight.
-        Las filas incluyen valores como:
-            - `z_ssp_max`: Valor máximo de metalicidad.
-            - `z_ssp_min`: Valor mínimo de metalicidad.
-            - `v0_min`: Velocidad mínima.
-            - `vd_min`: Dispersión mínima de velocidad.
-            - `chi2_nl_eff`: Valor del chi-cuadrado efectivo.
-            - `adev`: Ajuste absoluto promedio.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Gathers additional Starlight-specific information, such as metallicity (Z) values,
-    velocities, and model fit quality, and organizes it into a DataFrame.
+    Gathers additional Starlight-specific information, such as metallicity
+    (Z) values, velocities, and model fit quality, and organizes it into
+    a DataFrame.
 
     Arguments:
         ssps_vector (pandas.DataFrame): DataFrame containing SSP contributions.
             Includes columns like "x_j" (normalized contributions) and "Z_j"
             (metallicities).
-        header_info (dict): Dictionary containing the Starlight file header information.
-            Must include keys such as "v0_min", "vd_min", "chi2_Nl_eff", and "adev".
+        header_info (dict): Dictionary containing the Starlight file header
+            information. Must include keys such as "v0_min", "vd_min",
+            "chi2_Nl_eff", and "adev".
 
     Returns:
-        pandas.DataFrame: A DataFrame containing Starlight-specific information.
-        Rows include values such as:
-            - `z_ssp_max`: Maximum metallicity value.
-            - `z_ssp_min`: Minimum metallicity value.
-            - `v0_min`: Minimum velocity.
-            - `vd_min`: Minimum velocity dispersion.
-            - `chi2_nl_eff`: Effective chi-square value.
-            - `adev`: Average absolute deviation.
+        pandas.DataFrame: A DataFrame containing Starlight-specific
+            information.
+            Rows include values such as:
+                - `z_ssp_max`: Maximum metallicity value.
+                - `z_ssp_min`: Minimum metallicity value.
+                - `v0_min`: Minimum velocity.
+                - `vd_min`: Minimum velocity dispersion.
+                - `chi2_nl_eff`: Effective chi-square value.
+                - `adev`: Average absolute deviation.
     """
     z_values = _get_z_values(ssps_vector)
     vel_values = _get_vel_values(header_info)
@@ -785,30 +542,8 @@ def _get_starlight_extra_info(ssps_vector, header_info):
 
 def _make_spectrum1d_from_qtable(qtable):
     """
-    Descripción en castellano:
-    Crea objetos `Spectrum1D` a partir de una tabla (`QTable`) que contiene
-    datos del espectro sintético, observado y residual.
-
-    Argumentos:
-        qtable (QTable): Tabla que contiene las columnas:
-            - "l_obs": Longitud de onda observada.
-            - "f_obs": Flujo observado.
-            - "f_syn": Flujo sintético.
-            - "weights": Pesos utilizados en el cálculo.
-
-    Retorna:
-        dict: Un diccionario con los objetos `Spectrum1D` creados a partir de los datos
-            de la tabla:
-            - `synthetic_spectrum`: Espectro sintético.
-            - `observed_spectrum`: Espectro observado.
-            - `residual_spectrum`: Espectro residual calculado como
-                (f_obs - f_syn) / f_obs.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Creates `Spectrum1D` objects from a `QTable` containing data for synthetic, observed,
-    and residual spectra.
+    Creates `Spectrum1D` objects from a `QTable` containing data for
+    synthetic, observed, and residual spectra.
 
     Arguments:
         qtable (QTable): Table containing the columns:
@@ -818,18 +553,18 @@ def _make_spectrum1d_from_qtable(qtable):
             - "weights": Weights used in the calculation.
 
     Returns:
-        dict: A dictionary with the `Spectrum1D` objects created from the table data:
-            - `synthetic_spectrum`: Synthetic spectrum.
-            - `observed_spectrum`: Observed spectrum.
-            - `residual_spectrum`: Residual spectrum calculated as
-                (f_obs - f_syn) / f_obs.
+        dict: A dictionary with the `Spectrum1D` objects created from
+            the table data:
+                - `synthetic_spectrum`: Synthetic spectrum.
+                - `observed_spectrum`: Observed spectrum.
+                - `residual_spectrum`: Residual spectrum calculated as
+                    (f_obs - f_syn) / f_obs.
     """
 
     # Extract the necessary columns
     wavelength = qtable["l_obs"]
     flux_obs = qtable["f_obs"].data  # Extract data without units
     flux_syn = qtable["f_syn"].data  # Extract data without units
-    # weights = qtable["weights"].data
 
     # Calculate the residual flux
     residual_flux = (flux_obs - flux_syn) / flux_obs
@@ -853,39 +588,21 @@ def _make_spectrum1d_from_qtable(qtable):
 
 def _get_spectra(data):
     """
-    Descripción en castellano:
-    Genera espectros en formato `Spectrum1D` a partir de los datos tabulares
-    proporcionados.
-    Si el diccionario contiene una tabla "synthetic_spectrum" con las columnas
-    necesarias, utiliza `_make_spectrum1d_from_qtable` para crear los espectros.
-
-    Argumentos:
-        data (dict): Diccionario que contiene las tablas de datos. Las claves
-        representan los nombres de las tablas y los valores son objetos `QTable`.
-
-    Retorna:
-        dict: Un diccionario que contiene los objetos `Spectrum1D` generados. Las claves
-            incluyen:
-            - `synthetic_spectrum`: Espectro sintético.
-            - `observed_spectrum`: Espectro observado.
-            - `residual_spectrum`: Espectro residual.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     Generates `Spectrum1D` spectra from the provided tabular data.
-    If the dictionary contains a "synthetic_spectrum" table with the necessary columns,
-    it uses `_make_spectrum1d_from_qtable` to create the spectra.
+    If the dictionary contains a "synthetic_spectrum" table with the
+    necessary columns, it uses `_make_spectrum1d_from_qtable` to create
+    the spectra.
 
     Arguments:
-        data (dict): Dictionary containing tabular data. Keys represent table names,
-        and values are `QTable` objects.
+        data (dict): Dictionary containing tabular data. Keys represent
+            table names, and values are `QTable` objects.
 
     Returns:
-        dict: A dictionary containing the generated `Spectrum1D` objects. Keys include:
-            - `synthetic_spectrum`: Synthetic spectrum.
-            - `observed_spectrum`: Observed spectrum.
-            - `residual_spectrum`: Residual spectrum.
+        dict: A dictionary containing the generated `Spectrum1D` objects.
+            Keys include:
+                - `synthetic_spectrum`: Synthetic spectrum.
+                - `observed_spectrum`: Observed spectrum.
+                - `residual_spectrum`: Residual spectrum.
     """
     spectra = {}
     for key, value in data.items():
@@ -905,56 +622,29 @@ def read_starlight(
     object_name="object_1",
 ):
     """
-    Descripción en castellano:
-    Procesa un archivo Starlight, extrayendo el encabezado, las tablas de datos
-    y valores clave como edad, metalicidad y enrojecimiento. Devuelve un resumen
-    espectral con toda la información procesada.
-
-    Argumentos:
-        path (str): Ruta al archivo Starlight a procesar.
-        xj_percent (float, opcional): Porcentaje mínimo de contribución de las SSPs
-            para incluir en el cálculo. Valor por defecto: 5.
-        age_decimals (int, opcional): Número de decimales para redondear los cálculos
-            de edad.
-            Valor por defecto: 2.
-        rv (float, opcional): Parámetro de enrojecimiento (R_v). Valor por defecto: 3.1.
-        z_decimals (int, opcional): Número de decimales para redondear los cálculos de
-            metalicidad.
-            Valor por defecto: 3.
-        object_name (str, opcional): Nombre del objeto analizado. Valor por defecto:
-            "object_1".
-
-    Retorna:
-        core.SpectralSummary: Un objeto que encapsula el resumen espectral, incluyendo:
-            - Encabezado procesado.
-            - Espectros generados en `Spectrum1D`.
-            - Valores clave como edad, metalicidad y enrojecimiento.
-            - Tablas procesadas con resultados.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
-    Processes a Starlight file, extracting the header, data tables, and key values
-    such as age, metallicity, and reddening. Returns a spectral summary with all
-    processed information.
+    Processes a Starlight file, extracting the header, data tables, and
+    key values such as age, metallicity, and reddening. Returns a spectral
+    summary with all processed information.
 
     Arguments:
         path (str): Path to the Starlight file to process.
-        xj_percent (float, optional): Minimum SSP contribution percentage to include
-            in the calculation. Default: 5.
-        age_decimals (int, optional): Number of decimals to round age calculations.
-            Default: 2.
+        xj_percent (float, optional): Minimum SSP contribution percentage to
+            include in the calculation. Default: 5.
+        age_decimals (int, optional): Number of decimals to round age
+            calculations. Default: 2.
         rv (float, optional): Reddening parameter (R_v). Default: 3.1.
-        z_decimals (int, optional): Number of decimals to round metallicity calculations.
-            Default: 3.
-        object_name (str, optional): Name of the analyzed object. Default: "object_1".
+        z_decimals (int, optional): Number of decimals to round metallicity
+            calculations. Default: 3.
+        object_name (str, optional): Name of the analyzed object.
+            Default: "object_1".
 
     Returns:
-        core.SpectralSummary: An object encapsulating the spectral summary, including:
-            - Processed header.
-            - Generated `Spectrum1D` spectra.
-            - Key values like age, metallicity, and reddening.
-            - Processed tables with results.
+        core.SpectralSummary: An object encapsulating the spectral summary,
+            including:
+                - Processed header.
+                - Generated `Spectrum1D` spectra.
+                - Key values like age, metallicity, and reddening.
+                - Processed tables with results.
     """
 
     obj_name = object_name

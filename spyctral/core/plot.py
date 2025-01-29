@@ -25,21 +25,9 @@ import numpy as np
 @attr.s(repr=False)
 class SpectralPlotter:
     """
-    Descripción en castellano:
-    Esta clase está diseñada para generar gráficos a partir de los datos espectrales
-    proporcionados por un objeto `SpectralSummary`. Ofrece métodos para visualizar
-    uno o varios espectros de manera personalizada.
-
-    Atributos:
-        _summary (SpectralSummary): Objeto que contiene los datos espectrales
-        y la información adicional asociada al objeto observado.
-
-    *************************************************************************************
-    *************************************************************************************
-    Description in English:
     This class is designed to generate plots from spectral data provided by a
-    `SpectralSummary` object. It provides methods for visualizing one or multiple
-    spectra in a customizable manner.
+    `SpectralSummary` object. It provides methods for visualizing one or
+    multiple spectra in a customizable manner.
 
     Attributes:
         _summary (SpectralSummary): Object containing the spectral data and
@@ -50,37 +38,18 @@ class SpectralPlotter:
 
     def __call__(self, plot_kind="all_spectra", **kwargs):
         """
-        Descripción en castellano:
-        Permite utilizar la clase como una función para generar gráficos de diferentes
-        tipos.
-        Dependiendo del valor de `plot_kind`, se invoca un método específico para
-        realizar el gráfico correspondiente.
-
-        Argumentos:
-            plot_kind (str, opcional): Tipo de gráfico que se desea generar.
-            Los valores posibles son:
-                - "all_spectra": Para graficar todos los espectros.
-                - "single": Para graficar un espectro específico.
-                - "split": Para graficar espectros con desplazamientos.
-                - "subplots": Para graficar espectros en subgráficos.
-         **kwargs: Argumentos adicionales que serán pasados al método de graficado.
-
-        Retorna:
-            object: Retorna el gráfico generado por el método correspondiente.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Enables the class to be used as a function to generate different types of plots.
-        Depending on the value of `plot_kind`, a specific method is invoked to generate
-        the corresponding plot.
+        Enables the class to be used as a function to generate different
+        types of plots.
+        Depending on the value of `plot_kind`, a specific method is invoked
+        to generate the corresponding plot.
 
         Arguments:
-            plot_kind (str, optional): Type of plot to generate. Possible values are:
-                - "all_spectra": To plot all spectra.
-                - "single": To plot a specific spectrum.
-                - "split": To plot spectra with offsets.
-                - "subplots": To plot spectra in subplots.
+            plot_kind (str, optional): Type of plot to generate. Possible
+                values are:
+                    - "all_spectra": To plot all spectra.
+                    - "single": To plot a specific spectrum.
+                    - "split": To plot spectra with offsets.
+                    - "subplots": To plot spectra in subplots.
             **kwargs: Additional arguments to pass to the plotting method.
 
         Returns:
@@ -91,26 +60,12 @@ class SpectralPlotter:
 
     def _set_common_labels(self, ax, title, obj_name):
         """
-        Descripción en castellano:
-        Establece etiquetas comunes y el título para los gráficos.
-        Este método se utiliza para asegurar la consistencia en los gráficos generados.
-
-        Argumentos:
-            ax (matplotlib.axes.Axes): Eje del gráfico donde se aplicarán las etiquetas.
-            title (str): Título del gráfico.
-            obj_name (str): Nombre del objeto observado, que se incluye en el título.
-
-        Retorna:
-            None: El método modifica directamente los ejes proporcionados.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
         Sets common labels and the title for plots.
         This method ensures consistency in the generated plots.
 
         Arguments:
-            ax (matplotlib.axes.Axes): Axis of the plot where the labels will be applied.
+            ax (matplotlib.axes.Axes): Axis of the plot where the labels
+                will be applied.
             title (str): Title of the plot.
             obj_name (str): Name of the observed object, included in the title.
 
@@ -125,27 +80,12 @@ class SpectralPlotter:
 
     def _resolve_axis(self, ax, n_spectra):
         """
-        Descripción en castellano:
-        Resuelve y ajusta los ejes para los gráficos. Si no se proporciona un eje,
-        el método crea nuevos subgráficos para el número de espectros especificado.
-
-        Argumentos:
-            ax (matplotlib.axes.Axes o None): Eje(s) existente(s) para los gráficos.
-                Si es None, se crearán nuevos subgráficos.
-            n_spectra (int): Número de espectros que se graficarán.
-
-        Retorna:
-            numpy.ndarray: Arreglo de ejes (axes) para los gráficos.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Resolves and adjusts the axes for plots. If no axis is provided, the method
-        creates new subplots for the specified number of spectra.
+        Resolves and adjusts the axes for plots. If no axis is provided,
+        the method creates new subplots for the specified number of spectra.
 
         Arguments:
-            ax (matplotlib.axes.Axes or None): Existing axis (or axes) for the plots.
-                If None, new subplots will be created.
+            ax (matplotlib.axes.Axes or None): Existing axis (or axes) for the
+                plots. If None, new subplots will be created.
             n_spectra (int): Number of spectra to be plotted.
 
         Returns:
@@ -161,34 +101,12 @@ class SpectralPlotter:
 
     def all_spectra(self, ax=None, **kwargs):
         """
-        Descripción en castellano:
-        Grafica todos los espectros almacenados en el atributo `spectra` del objeto
-        asociado. Cada espectro se representa en el mismo gráfico con una leyenda
-
-        Argumentos:
-            ax (matplotlib.axes.Axes o None): Eje donde se graficarán los espectros.
-                Si es None, se utiliza el eje actual (`plt.gca()`).
-            **kwargs: Argumentos adicionales para personalizar el estilo del gráfico
-                (por ejemplo, color, línea, etc.).
-
-        Retorna:
-            matplotlib.axes.Axes: El eje con el gráfico de todos los espectros.
-        Métodos principales:
-            - `__call__`: Llama a un método de ploteo según el tipo especificado.
-            - `all_spectra`: Plotea todos los espectros juntos.
-            - `single`: Plotea un espectro específico.
-            - `split`: Plotea los espectros con un desplazamiento.
-            - `subplots`: Divide los espectros en subgráficos individuales.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Plots all spectra stored in the `spectra` attribute of the associated object.
-        Each spectrum is represented on the same plot with a legend.
+        Plots all spectra stored in the `spectra` attribute of the associated
+        object. Each spectrum is represented on the same plot with a legend.
 
         Arguments:
-            ax (matplotlib.axes.Axes or None): Axis where the spectra will be plotted.
-                If None, the current axis (`plt.gca()`) is used.
+            ax (matplotlib.axes.Axes or None): Axis where the spectra will
+                be plotted. If None, the current axis (`plt.gca()`) is used.
             **kwargs: Additional arguments to customize the plot style
                 (e.g., color, line, etc.).
 
@@ -217,35 +135,20 @@ class SpectralPlotter:
 
     def single(self, spectrum_name, ax=None, **kwargs):
         """
-        Descripción en castellano:
-        Grafica un único espectro identificado por su nombre. Este espectro se
-        obtiene del atributo `spectra` y se representa en el eje especificado.
-
-        Argumentos:
-            spectrum_name (str): Nombre del espectro que se desea graficar.
-            ax (matplotlib.axes.Axes o None): Eje donde se graficará el espectro.
-                Si es None, se utiliza el eje actual (`plt.gca()`).
-            **kwargs: Argumentos adicionales para personalizar el estilo del gráfico
-                (por ejemplo, color, línea, etc.).
-
-        Retorna:
-            matplotlib.axes.Axes: El eje con el gráfico del espectro solicitado.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Plots a single spectrum identified by its name. This spectrum is retrieved
-        from the `spectra` attribute and displayed on the specified axis.
+        Plots a single spectrum identified by its name. This spectrum is
+        retrieved from the `spectra` attribute and displayed on the
+        specified axis.
 
         Arguments:
             spectrum_name (str): Name of the spectrum to be plotted.
-            ax (matplotlib.axes.Axes or None): Axis where the spectrum will be plotted.
-            If None, the current axis (`plt.gca()`) is used.
+            ax (matplotlib.axes.Axes or None): Axis where the spectrum will be
+                plotted. If None, the current axis (`plt.gca()`) is used.
             **kwargs: Additional arguments to customize the plot style
                 (e.g., color, line, etc.).
 
         Returns:
-            matplotlib.axes.Axes: The axis with the plot of the requested spectrum.
+            matplotlib.axes.Axes: The axis with the plot of the requested
+                spectrum.
         """
         spectra = self._summary.spectra
 
@@ -259,36 +162,15 @@ class SpectralPlotter:
 
     def split(self, offset=0.1, ax=None, **kwargs):
         """
-        Descripción en castellano:
-        Grafica múltiples espectros, aplicando un desplazamiento vertical incremental
-        a cada espectro (excepto para los espectros residuales) para facilitar la
-        visualización comparativa.
-
-        Argumentos:
-            offset (float): Desplazamiento vertical aplicado entre espectros. Por
-                defecto, 0.1.
-            ax (matplotlib.axes.Axes o None): Eje donde se graficarán los espectros.
-                Si es None, se utiliza el eje actual (`plt.gca()`).
-            **kwargs: Argumentos adicionales para personalizar el estilo del gráfico
-                (por ejemplo, color, línea, etc.).
-
-        Retorna:
-            matplotlib.axes.Axes: El eje con los gráficos de los espectros desplazados.
-
-        Utilidad:
-            Este método es útil para resaltar diferencias entre espectros, al evitar
-            que las curvas se solapen.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Plots multiple spectra, applying an incremental vertical offset to each
-        spectrum (except for residual spectra) to facilitate comparative visualization.
+        Plots multiple spectra, applying an incremental vertical offset to
+        each spectrum (except for residual spectra) to facilitate comparative
+        visualization.
 
         Arguments:
-            offset (float): Vertical offset applied between spectra. Default is 0.1.
-            ax (matplotlib.axes.Axes or None): Axis where the spectra will be plotted.
-                If None, the current axis (`plt.gca()`) is used.
+            offset (float): Vertical offset applied between spectra.
+                Default is 0.1.
+            ax (matplotlib.axes.Axes or None): Axis where the spectra will
+                be plotted. If None, the current axis (`plt.gca()`) is used.
             **kwargs: Additional arguments to customize the plot style
                 (e.g., color, line, etc.).
 
@@ -296,8 +178,8 @@ class SpectralPlotter:
             matplotlib.axes.Axes: The axis with the plotted offset spectra.
 
         Utility:
-            This method is useful for highlighting differences between spectra by
-            avoiding overlapping curves.
+            This method is useful for highlighting differences between
+            spectra by avoiding overlapping curves.
         """
         spectra = self._summary.spectra
 
@@ -324,47 +206,25 @@ class SpectralPlotter:
 
     def subplots(self, ax=None, **kwargs):
         """
-        Descripción en castellano:
-        Crea subgráficos individuales para cada espectro, permitiendo una visualización
-        separada de cada uno. Todos los subgráficos comparten el mismo eje x (longitud
-        de onda).
-
-        Argumentos:
-            ax (matplotlib.axes.Axes o None): Conjunto de ejes donde se graficarán los
-                espectros.
-                Si es None, se crean nuevos subgráficos automáticamente.
-            **kwargs: Argumentos adicionales para personalizar el estilo de los gráficos
-            (por ejemplo, color, línea, etc.).
-
-        Retorna:
-            numpy.ndarray: Arreglo con los ejes (`Axes`) correspondientes a los
-                subgráficos.
-
-        Utilidad:
-            Este método permite analizar cada espectro de manera individual en gráficos
-            separados, lo que es útil cuando se necesita observar detalles específicos
-            de cada uno sin que se superpongan con otros.
-
-        *********************************************************************************
-        *********************************************************************************
-        Description in English:
-        Creates individual subplots for each spectrum, allowing separate visualization
-        for each one. All subplots share the same x-axis (wavelength).
+        Creates individual subplots for each spectrum, allowing separate
+        visualization for each one. All subplots share the same x-axis
+        (wavelength).
 
         Arguments:
-            ax (matplotlib.axes.Axes or None): Set of axes where the spectra will be
-                plotted.
-                If None, new subplots are automatically created.
+            ax (matplotlib.axes.Axes or None): Set of axes where the spectra
+                will be plotted. If None, new subplots are automatically
+                created.
             **kwargs: Additional arguments to customize the plot style
-            (e.g., color, line, etc.).
+                (e.g., color, line, etc.).
 
         Returns:
-            numpy.ndarray: Array with the axes (`Axes`) corresponding to the subplots.
+            numpy.ndarray: Array with the axes (`Axes`) corresponding to
+                the subplots.
 
         Utility:
-            This method enables analyzing each spectrum individually in separate plots,
-            which is useful for examining specific details of each spectrum without
-            overlapping others.
+            This method enables analyzing each spectrum individually in
+            separate plots, which is useful for examining specific details
+            of each spectrum without overlapping others.
         """
         spectra = self._summary.spectra
         n_spectra = len(spectra)

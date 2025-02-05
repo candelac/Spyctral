@@ -28,6 +28,17 @@ Spyctral needs a minimum of one text file and you need to know the source code o
 You will need Python 3.8 or higher to run Sypctral.
 
 ## Basic install
+You could find Spyctral at PyPI. The standar instalation via pip:
+``` bash
+$ pip install spyctral
+```
+## Development install
+Clone this repo and then inside the local directory execute
+``` bash
+$ git clone https://github.com/candelac/Spyctral.git
+$ cd Spyctral
+$ pip install -e .
+```
 ## Tutorial
 ## Future upgrades 
 This is the first version of Spyctral code and we hope to add functionality so that the package will support output files from other synthesis codes, the next one to be included is A.S.A.D. 

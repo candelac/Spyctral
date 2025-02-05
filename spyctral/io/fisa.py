@@ -5,10 +5,14 @@
 # Tapia-Reina Martina
 # All rights reserved.
 
+# =============================================================================
+# This file process
+# =============================================================================
 
 # =============================================================================
 # IMPORTS
 # =============================================================================
+
 
 import re
 
@@ -26,25 +30,69 @@ from spyctral.core import core
 # FUNCTIONS
 # =============================================================================
 
+"""
+FISA_RX_VERSION.
+This regular expression extracts the FISA version from the file header.
+Captures a line like: SPECTRUM ANALYZED WITH FISA v. 0.92.
+"""
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"
 )
 
+
+"""
+FISA_RX_DATE_AND_TIME
+This regular expression extracts the date and time of the analysis.
+Captures a line like: Date 07/09/2022; time 10:11:03.
+"""
 FISA_RX_DATE_AND_TIME = re.compile(
     r"Date (?P<date>\d{2}/\d{2}/\d{4}); time (?P<time>\d{2}:\d{2}:\d{2})"
 )
 
+
+"""
+FISA_RX_REDDENING
+Extracts the reddening value from the file header.
+Captures a line like: Reddening: 0.14.
+"""
 FISA_RX_REDDENING = re.compile(r"Reddening:\s+(?P<value>[\d.][^\n]+)")
 
+
+"""
+FISA_RX_TEMPLATE
+Extracts the path of the adopted template from the file header.
+Captures a line like: Adopted Templated: /path/to/template.dat.
+"""
 FISA_RX_TEMPLATE = re.compile(r"Adopted Templated:\s*(?P<ruta>[\S]+)")
 
+
+"""
+FISA_RX_NORMALIZATION_POINT
+Extracts the normalization point from the file header.
+Captures a line like: Normalization Point: 5535.87988."""
 FISA_RX_NORMALIZATION_POINT = re.compile(
     r"Normalization Point:\s+(?P<value>[\d.][^\n]+)"
 )
 
+
+"""
+FISA_RX_SPECTRA_NAMES
+Extracts the spectrum names and their indices from the file header.
+Captures a line like: Index 0 = Unreddened spectrum.
+"""
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 
 
+# =============================================================================
+# DEFAULT MAPS
+# =============================================================================
+
+"""
+FISA_DEFAULT_AGE_MAP
+Defines age values (in years) for each spectral template. For example:
+    "G1": 13e9 → 13 billion years.
+    "ya_lmc": 3e6 → 3 million years.
+"""
 FISA_DEFAULT_AGE_MAP = {
     "G1": 13e9,
     "G2": 13e9,
@@ -56,6 +104,13 @@ FISA_DEFAULT_AGE_MAP = {
     "Ya1": 2e6,
 }
 
+
+"""
+FISA_DEFAULT_ERROR_AGE_MAP
+Defines errors in age values (in years) for each spectral template.
+ For example:
+    "G1": 1e9 → Error of 1 billion years.
+"""
 FISA_DEFAULT_ERROR_AGE_MAP = {
     "G1": 1e9,
     "G2": 1e9,
@@ -67,21 +122,43 @@ FISA_DEFAULT_ERROR_AGE_MAP = {
     "Ya1": 1e6,
 }
 
+
+"""
+FISA_DEFAULT_Z_MAP
+Defines metallicity values for each spectral template. For example:
+    "G1": 1.00 → Solar metallicity.
+    "G5": -1.9 → Low metallicity.
+"""
 FISA_DEFAULT_Z_MAP = {
-    "G1": 1.00,
-    "G2": -0.4,
-    "G3": -1.0,
-    "G4": -1.5,
-    "G5": -1.9,
-    "ya_lmc": 0.42,
-    "yba_be": 0.42,
-    "Ya1": 1.0,
+    "G1": 0.19,
+    "G2": 0.00756403,
+    "G3": 0.0019,
+    "G4": 0.00060083,
+    "G5": 0.00023919,
+    "ya_lmc": 0.04997509,
+    "yba_be": 0.04997509,
+    "Ya1": 0.19,
 }
 
 
 def _process_header(lines):
     """
-    This function processes header lines.
+    This function processes the header lines of a FISA file and extracts
+    key information, such as the FISA version, date, reddening value, adopted
+    template, normalization point, and spectrum names.
+
+    Arguments:
+        lines (list): List of strings representing the header lines of the FISA
+        file.
+
+    Returns:
+        dict: Dictionary containing the following information:
+            - 'fisa_version' (str): Version of FISA used.
+            - 'date_time' (datetime): Date and time of the analysis.
+            - 'reddening' (float): Reddening value.
+            - 'adopted_template' (str): Path of the adopted template.
+            - 'normalization_point' (float): Normalization point.
+            - 'spectra_names' (tuple): Spectrum names indexed by position.
     """
     src = "\n".join(lines)
 
@@ -116,6 +193,19 @@ def _process_header(lines):
 
 
 def _fisa_spectra_names(spectra, table_names):
+    """
+    Renames the spectral tables by associating each spectrum with its
+    corresponding name, based on a list of table names.
+
+    Arguments:
+        spectra (list): List of spectral tables (`QTable` objects) processed.
+        table_names (tuple): Tuple of strings representing the names associated
+            with each spectrum.
+
+    Returns:
+        dict: A dictionary where the keys are table names and the values
+            are the corresponding spectral tables.
+    """
     renamed_spectra = {
         table_name: table for table_name, table in zip(table_names, spectra)
     }
@@ -123,6 +213,23 @@ def _fisa_spectra_names(spectra, table_names):
 
 
 def _process_blocks(spectra_blocks, tab_names):
+    """
+    Processes spectral data blocks extracted from a FISA file and converts them
+    into structured tables with columns for wavelength and normalized flux.
+
+    Arguments:
+        spectra_blocks (list): List of spectral blocks, where each block
+            contains lines of text-formatted data.
+        tab_names (tuple): Tuple of strings representing the names associated
+            with each spectrum.
+
+    Returns:
+        dict: A dictionary where keys are table names (tab_names) and values
+            are spectral tables (`QTable`) with the following columns:
+                - "Wavelength" (with unit of wavelength in Angstroms).
+                - "Normalizated_flux" (normalized flux).
+    """
+
     spectra = []
 
     for block in spectra_blocks:
@@ -146,6 +253,17 @@ def _process_blocks(spectra_blocks, tab_names):
 
 
 def _get_str_template(header):
+    """
+    Extracts the filename of the adopted template from the header.
+
+    Arguments:
+        header (dict): Dictionary containing the header information of the
+            FISA file, including the full path of the adopted template in the
+            'adopted_template' key.
+
+    Returns:
+        str: The filename of the adopted template (including its extension).
+    """
     template = header["adopted_template"]
     str_template = template.split("/")[-1]
 
@@ -153,6 +271,18 @@ def _get_str_template(header):
 
 
 def _get_name_template(header):
+    """
+    Retrieves the base name of the adopted template from the header of the
+    FISA file. The base name is the filename without the extension.
+
+    Arguments:
+        header (dict): Dictionary containing the header information of the
+            FISA file, including the full path of the adopted template in the
+            'adopted_template' key.
+
+    Returns:
+        str: The base name of the adopted template (without extension).
+    """
     template = header["adopted_template"]
     name_template = (template.split("/")[-1]).split(".")[0]
 
@@ -161,8 +291,24 @@ def _get_name_template(header):
 
 def _get_reddening(header, rv):
     """
-    This function get reddening value from input file.
+    Calculates the reddening value and its equivalent extinction magnitude
+    (A_v), based on the value provided in the FISA file header and the
+    reddening parameter (R_v).
+
+    Arguments:
+        header (dict): Dictionary containing the header information of the
+            FISA file.
+        rv (float): Reddening parameter (R_v), typically 3.1 for the
+            interstellar medium.
+
+    Returns:
+        tuple:
+            - reddening_value (float): Reddening value extracted from the
+                header.
+            - av_value (float): Extinction magnitude (A_v) calculated as
+                reddening_value * R_v.
     """
+
     reddening_value = header["reddening"]
     av_value = reddening_value * rv
 
@@ -170,7 +316,20 @@ def _get_reddening(header, rv):
 
 
 def _get_spectra(data):
-    """Make spectra from data"""
+    """
+    Converts the processed spectral data into a dictionary of `Spectrum1D`
+    objects, representing spectra with wavelength and flux.
+
+    Arguments:
+        data (dict): Dictionary where keys are spectrum names and values are
+            spectral tables (`QTable`) with columns for wavelength and
+            normalized flux.
+
+    Returns:
+        dict: A dictionary where keys are spectrum names and values are
+            `Spectrum1D` objects containing the flux and wavelength data.
+    """
+
     spectra = {}
     for key, value in data.items():
         wavelength = value[value.colnames[0]]
@@ -192,44 +351,45 @@ def read_fisa(
     object_name="object_1",
 ):
     """
-    Reads a FISA file and extracts relevant
-    information to create a SpectralSummary object.
+    Reads a FISA file and extracts the spectral data, including the header and
+    data columns.
 
-    Parameters
-    ----------
-    path_or_buffer : str or file-like object
-        File path or buffer containing the FISA file data.
+    Arguments:
+        path_or_buffer (str): Path and name of the FISA file to read.
 
-    age_map : dict or None, optional
-        Mapping dictionary for age values.
-        If None, defaults to FISA_DEFAULT_AGE_MAP.
-        (default is None)
+        age_map : dict or None, optional
+            Mapping dictionary for age values.
+            If None, defaults to FISA_DEFAULT_AGE_MAP.
+            (default is None)
 
-    rv : float, optional
-        Reddening value to use for calculations.
-        (default is 3.1)
+        rv : float, optional
+            Reddening value to use for calculations.
+            (default is 3.1)
 
-    z_map : dict or None, optional
-        Mapping dictionary for metallicity values.
-        If None, defaults to FISA_DEFAULT_Z_MAP.
-        (default is None)
+        z_map : dict or None, optional
+            Mapping dictionary for metallicity values.
+            If None, defaults to FISA_DEFAULT_Z_MAP.
+            (default is None)
 
-    Returns
-    -------
-    SpectralSummary
-        Object containing encapsulated data
-        extracted from the FISA file.
+    Returns:
+        SpectralSummary:
+            Object containing encapsulated data extracted from the FISA file.
+        dict: A dictionary with the following keys:
+            - 'header' (list): Lines of the file's header.
+            - 'data' (ndarray): Spectral data in NumPy array format.
+            - 'reddening' (float): Reddening value extracted from the header.
+            - 'template' (str): Path of the template used, extracted from the
+                header.
+            - 'norm_point' (float): Normalization point extracted from the
+                header.
 
-    Notes
-    -----
-    This function processes a FISA file, extracting header
-    information and spectra blocks.
-    It computes age, reddening, AV value, normalization point,
-    and metallicity values based on the
-    provided or default mappings.
-
+    Notes:
+        This function processes a FISA file, extracting header information
+        and spectra blocks.
+        It computes age, reddening, AV value, normalization point, and
+        metallicity values based on the provided or default mappings.
     """
-    # Use default mappings if None provided
+
     age_map = FISA_DEFAULT_AGE_MAP if age_map is None else age_map
     error_age_map = (
         FISA_DEFAULT_ERROR_AGE_MAP if error_age_map is None else error_age_map

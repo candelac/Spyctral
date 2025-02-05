@@ -32,7 +32,16 @@ Z_SUN = 0.019
 
 
 def _header_to_dataframe(header):
-    """Convert the header into a ``pandas.DataFrame``."""
+    """
+    Converts a given header (in dictionary form) into a pandas DataFrame.
+
+    Arguments:
+        header (dict): Dictionary containing the header keys and values.
+
+    Returns:
+        pd.DataFrame: DataFrame with header keys as the index and values in
+            a column named "value".
+    """
     keys = list(header.keys())
     values = list(header.values())
     df = pd.DataFrame(values, index=keys)
@@ -47,30 +56,21 @@ def _header_to_dataframe(header):
 
 @attrs.define
 class SpectralSummary:
-    """This object encapsulates all the data getted from inputfile.
+    """
+    This class encapsulates all the data obtained from an input file.
 
-    Attributes
-    ----------
-    header : dict-like
-        Header info from inputfile.
-    data : dict-like
-        Spectra information in Qtables.
-    age : float
-        Age information.
-    reddening : float
-        Reddening information.
-    av_value : float
-        Av value.
-    normalization_point : float
-        Normalization point value.
-    z_value : float
-        Metallicity value.
-
-    spectra: dict-like
-        Spectrum set from data
-
-    extra_info : dict-like
-        Additional info.
+    Attributes:
+        obj_name (str): Object name.
+        header (dict): Header information from the input file.
+        data (dict): Spectra information in Qtables format.
+        age (float): Object's age.
+        err_age (float): Error associated with the age.
+        reddening (float): Value of reddening.
+        av_value (float): Extinction value.
+        normalization_point (float): Value of the normalization point.
+        z_value (float): Metallicity value.
+        spectra (dict): Set of spectra extracted from the imput file.
+        extra_info (dict): Additional information.
     """
 
     obj_name: str = attrs.field(converter=str)
@@ -87,47 +87,42 @@ class SpectralSummary:
 
     @property
     def header_info_df(self) -> pd.DataFrame:
-        """Convert header info to a pandas DataFrame.
+        """
+        Converts the information stored in the `header` attribute into a pandas
+        DataFrame.
 
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing header information.
+        Returns:
+            pd.DataFrame: DataFrame containing the header information, where
+            the header keys are the index, and the values are stored in a
+            column named "value".
         """
         return _header_to_dataframe(self.header)
 
     def get_spectrum(self, name: str):
-        """Get the spectrum by name.
+        """
+        Retrieves a specific spectrum from the set of spectra stored in the
+        `spectra` attribute.
 
-        Parameters
-        ----------
-        name : str
-            Name of the spectrum.
+        Arguments:
+            name (str): Name of the spectrum to retrieve.
 
-        Returns
-        -------
-        Spectrum
-            The spectrum corresponding to the given name.
+        Returns:
+            Spectrum: The spectrum corresponding to the given name.
         """
         return self.spectra[name]
 
     def __getitem__(self, k: str):
-        """Allow attribute access using dictionary-like syntax.
+        """
+        Allows access to the class attributes using dictionary-like syntax.
 
-        Parameters
-        ----------
-        k : str
-            Attribute name.
+        Arguments:
+            k (str): Name of the attribute to retrieve.
 
-        Returns
-        -------
-        Any
-            Value of the attribute.
+        Returns:
+            Any: Value of the requested attribute.
 
-        Raises
-        ------
-        KeyError
-            If the attribute does not exist.
+        Raises:
+            KeyError: If the attribute does not exist.
         """
         try:
             return getattr(self, k)
@@ -135,24 +130,24 @@ class SpectralSummary:
             raise KeyError(k)
 
     def __len__(self) -> int:
-        """Return the number of attributes defined in the class.
-
-        Returns
-        -------
-        int
-            Number of attributes.
         """
+        Returns the number of attributes defined in the class.
+
+        Returns:
+            int: Total number of attributes in the class.
+        """
+
         return len(attrs.fields(SpectralSummary))
 
     def __repr__(self) -> str:
-        """Return a string representation of the instance.
-
-        Returns
-        -------
-        str
-            String representation.
         """
+        Returns a string representation of the class instance.
+        Includes a summary of the main attributes: header, data, spectra,
+        and additional info.
 
+        Returns:
+            str: String representation of the instance.
+        """
         header_keys = ", ".join(self.header.keys())
         data_keys = ", ".join(self.data.keys())
         spectra_keys = ", ".join(self.spectra.keys())
@@ -169,34 +164,40 @@ class SpectralSummary:
 
     @property
     def feh_ratio(self):
-        """Calculate metallicity value from Z value.
-
-        Returns
-        -------
-        Class
-            Metallicity with z_value and [Fe/H] ratio.
         """
+        Calculates the metallicity ratio [Fe/H] using the Z value
+        of the instance and a solar constant (`Z_SUN`).
 
+        Returns:
+            float: Metallicity ratio [Fe/H].
+        """
         feh_ratio = np.log10(self.z_value / Z_SUN)
 
         return feh_ratio
 
     @property
     def plot(self):
-        """Generate plots from spectra."""
+        """
+        Generates an object for plotting the spectra stored in the instance.
+        Uses the `SpectralPlotter` class to handle plotting functionalities.
 
+        Returns:
+            SpectralPlotter: Object that enables generating plots of the
+                spectra.
+        """
         from .plot import SpectralPlotter
 
         return SpectralPlotter(self)
 
     @property
     def get_all_properties(self) -> pd.DataFrame:
-        """Make a dataframe with all the parameter values.
+        """
+        Creates a DataFrame containing all relevant parameters of the
+        instance. Numerical values are formatted to display scientific
+        notation where necessary.
 
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing all the parameters values.
+        Returns:
+            pd.DataFrame: DataFrame with two columns: "Property" and "Value".
         """
         age = f"{self.age:.2e}"
         err_age = f"{self.err_age:.2e}"

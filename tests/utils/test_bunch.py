@@ -12,8 +12,8 @@
 # DOCS
 # =============================================================================
 
-"""Test for spyctral.utils.bunch
-
+"""
+Test for spyctral.utils.bunch
 """
 
 

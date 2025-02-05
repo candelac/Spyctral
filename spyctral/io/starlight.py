@@ -172,7 +172,6 @@ def _proces_tables(block_lines):
                 block_titles.append(sl)
             # Filters the empty spaces
             elif len(sl) > 1:
-                # print(sl)
                 sl = re.sub(r"\s{2,}", " ", sl.strip())
                 tab.append(sl.split(" "))
 
@@ -208,25 +207,18 @@ def _proces_tables(block_lines):
         else:
             unities.append("")
 
-    # Verificar que los elementos sean números
+    # Verificar que los elementos sean numeros
     for ibl, lin in enumerate(blocks):
         for i, row in enumerate(blocks[ibl]):
             converted_row = []
             for item in row:
-                try:
-                    # Intentar convertir el elemento en un número
-                    if _is_float(item):
-                        converted_item = float(item)
-
-                except ValueError:
-                    # Si no se puede convertir a número, levantar una excepción
-                    raise ValueError(
-                        f"Element at position ({i})"
-                        " in 'synthetic_spectrum' table cannot "
-                        "  be converted to a number."
-                    )
-                converted_row.append(converted_item)
+                if _is_float(item):  # Solo convierte si es un número flotante
+                    converted_item = float(item)
+                    converted_row.append(converted_item)
+                else:
+                    converted_row.append(item)  # Si no se puede convertir, deja el valor original
             blocks[ibl][i] = converted_row
+
 
     # Crear la tabla synthetic_spectrum con unidades
     synthetic_spectrum_table = QTable(

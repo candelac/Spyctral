@@ -4,13 +4,20 @@
    contain the root `toctree` directive.
 
 
-Welcome to Spyctral documentation!
-===================================
+
+.. title:: Spyctral Documentation
+
+.. Here we render the README.md of the repository as a main page
+.. include:: _dynamic/README.rst
+
+
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
 
 Indices and tables 
 ==================
@@ -18,3 +25,7 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+

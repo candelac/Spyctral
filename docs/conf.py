@@ -10,9 +10,11 @@ import datetime as dt
 
 # add the skcriteria source to the build path
 CURRENT_PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
-SPYCTRAL_PATH = CURRENT_PATH.parent.parent
+SPYCTRAL_PATH = CURRENT_PATH.parent
 
 sys.path.insert(0, str(SPYCTRAL_PATH))
+
+UTC_NOW = dt.datetime.utcnow()
 
 
 # -- Project information -----------------------------------------------------
@@ -29,8 +31,11 @@ release = '0.1.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'nbsphinx',
+    'sphinx_mdinclude'
 ]
+
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -42,21 +47,3 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
-import m2r2
-
-DYNAMIC_RST = {
-    "README.md": "README.rst"
-}
-
-for md_name, rst_name in DYNAMIC_RST.items():
-    md_path = SPYCTRAL_PATH / md_name
-    with open(md_path) as fp:
-        readme_md = fp.read().split("<!-- BODY -->", 1)[-1]
-
-    rst_path = CURRENT_PATH / "_dynamic" / rst_name
-
-    with open(rst_path, "w") as fp:
-        fp.write(".. FILE AUTO GENERATED !! \n")
-        fp.write(m2r2.convert(readme_md))
-        print(f"{md_path} -> {rst_path} regenerated!")

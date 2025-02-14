@@ -8,15 +8,26 @@
 .. title:: Spyctral Documentation
 
 .. Here we render the README.md of the repository as a main page
-.. include:: _dynamic/README.rst
+.. mdinclude:: _dynamic/README.rst
 
+modules
 
 Contents
 --------
 
+
+.. toctree::
+   :maxdepth: 1
+   :caption: References
+
+   modules
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Tutorials
+
+   notebook/Quick installation.rst
+   notebook/Tutorial_new.ipynb
 
 
 Indices and tables 

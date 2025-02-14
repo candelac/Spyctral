@@ -6,6 +6,7 @@ recursive-include spyctral *.py
 exclude tox.ini
 exclude pyproject.toml
 exclude .header-template
+exclude .readthedocs.yml
 
 recursive-exclude docs *
 recursive-exclude tests *

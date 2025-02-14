@@ -10,7 +10,7 @@ import datetime as dt
 
 # add the skcriteria source to the build path
 CURRENT_PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
-SPYCTRAL_PATH = CURRENT_PATH.parent
+SPYCTRAL_PATH = CURRENT_PATH.parent.parent
 
 sys.path.insert(0, str(SPYCTRAL_PATH))
 

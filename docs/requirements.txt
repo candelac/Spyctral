@@ -6,7 +6,8 @@ sphinx_copybutton
 
 ipykernel
 ipython
-pandoc  
+pandoc
+sphinx_mdinclude
 
 sphinx-nested-apidoc
 

@@ -34,6 +34,7 @@ jobs:
         run: | 
           cd docs/
           python -m pip install --upgrade pip
+          sudo apt-get install pandoc
           pip install -r requirements.txt
       - name: Build HTML
         run: | 

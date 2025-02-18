@@ -48,5 +48,5 @@ This is the first version of Spyctral code and we hope to add functionality so t
 * Tapia-Reina Martina (martina.tapia@mi.unc.edu.ar)
 * Cerdosino Candela (candelacerdosino@mi.unc.edu.ar)
 * Fiore J.Manuel (juanmfiore@mi.unc.edu.ar)
-* Martinez J.Luis (martinez.joseco@gmail.com)
+* Martinez J.Luis (jmartinez@frc.utn.edu.ar)
 * Cabral Juan (jbcabral@unc.edu.ar)

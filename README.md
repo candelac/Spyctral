@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/_static/Spyctral_B.svg" alt="Spyctral Logo" width="200">
+  <img src="docs/_static/Spyctral_B.svg" alt="Spyctral Logo" width="600">
 </p>
 
 # Spyctral: Astronomical spectral data analyser

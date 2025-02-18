@@ -1,9 +1,8 @@
+# Spyctral: Astronomical spectral data analyser
+
 <p align="center">
   <img src="docs/_static/Spyctral_B.svg" alt="Spyctral Logo" width="600">
 </p>
-
-# Spyctral: Astronomical spectral data analyser
-
 ![Tests](https://github.com/candelac/Spyctral/actions/workflows/Testing.yml/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/spyctral/badge/?version=latest)](https://spyctral.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

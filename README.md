@@ -44,7 +44,7 @@ $ cd Spyctral
 $ pip install -e .
 ```
 ## Tutorial
-
+The following link leads to Spyctral's tutorial, which shows step by step how to get started and the main available options.
 [📖 Link to the tutorial on GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
 
 

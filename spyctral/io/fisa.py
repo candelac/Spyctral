@@ -29,81 +29,77 @@ from spyctral.core import core
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
-"""
-FISA_RX_VERSION
-Extracts the FISA version from the file header.
 
-Examples
---------
-Captures a line like:
-    SPECTRUM ANALYZED WITH FISA v. 0.92
-"""
+# FISA_RX_VERSION
+# Extracts the FISA version from the file header.
+
+# Examples
+# --------
+# Captures a line like:
+#    SPECTRUM ANALYZED WITH FISA v. 0.92
+
 FISA_RX_VERSION = re.compile(
     r"SPECTRUM ANALYZED WITH FISA v\.\s+(?P<value>[\d.][^\n]+)"
 )
 
 
-"""
-FISA_RX_DATE_AND_TIME
-Extracts the date and time of the analysis.
 
-Examples
---------
-Captures a line like:
-    Date 07/09/2022; time 10:11:03
-"""
+# FISA_RX_DATE_AND_TIME
+# Extracts the date and time of the analysis.
+
+# Examples
+# --------
+#Captures a line like:
+#    Date 07/09/2022; time 10:11:03
+
 FISA_RX_DATE_AND_TIME = re.compile(
     r"Date (?P<date>\d{2}/\d{2}/\d{4}); time (?P<time>\d{2}:\d{2}:\d{2})"
 )
 
 
-"""
-FISA_RX_REDDENING
-Extracts the reddening value from the file header.
 
-Examples
---------
-Captures a line like:
-    Reddening: 0.14
-"""
+# FISA_RX_REDDENING
+# Extracts the reddening value from the file header.
+
+# Examples
+# --------
+# Captures a line like:
+#    Reddening: 0.14
+
 FISA_RX_REDDENING = re.compile(r"Reddening:\s+(?P<value>[\d.][^\n]+)")
 
 
-"""
-FISA_RX_TEMPLATE
-Extracts the path of the adopted template from the file header.
+# FISA_RX_TEMPLATE
+# Extracts the path of the adopted template from the file header.
 
-Examples
---------
-Captures a line like:
-    Adopted Template: /path/to/template.dat
-"""
+# Examples
+# --------
+# Captures a line like:
+#    Adopted Template: /path/to/template.dat
+
 FISA_RX_TEMPLATE = re.compile(r"Adopted Templated:\s*(?P<ruta>[\S]+)")
 
 
-"""
-FISA_RX_NORMALIZATION_POINT
-Extracts the normalization point from the file header.
+# FISA_RX_NORMALIZATION_POINT
+# Extracts the normalization point from the file header.
 
-Examples
---------
-Captures a line like:
-    Normalization Point: 5535.87988
-"""
+# Examples
+# --------
+# Captures a line like:
+#     Normalization Point: 5535.87988
+
 FISA_RX_NORMALIZATION_POINT = re.compile(
     r"Normalization Point:\s+(?P<value>[\d.][^\n]+)"
 )
 
 
-"""
-FISA_RX_SPECTRA_NAMES
-Extracts the spectrum names and their indices from the file header.
+# FISA_RX_SPECTRA_NAMES
+# Extracts the spectrum names and their indices from the file header.
 
-Examples
---------
-Captures a line like:
-    Index 0 = Unreddened spectrum
-"""
+# Examples
+# --------
+# Captures a line like:
+#    Index 0 = Unreddened spectrum
 
 FISA_RX_SPECTRA_NAMES = re.compile(r"Index (?P<index>\d) = (?P<value>[^\n]+)")
 

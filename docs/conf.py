@@ -8,7 +8,7 @@ import sys
 import datetime as dt
 
 
-# add the skcriteria source to the build path
+# add the spyctral source to the build path
 CURRENT_PATH = pathlib.Path(os.path.abspath(os.path.dirname(__file__)))
 SPYCTRAL_PATH = CURRENT_PATH.parent
 

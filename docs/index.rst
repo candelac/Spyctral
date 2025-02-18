@@ -8,9 +8,8 @@
 .. title:: Spyctral Documentation
 
 .. Here we render the README.md of the repository as a main page
-.. mdinclude:: _dynamic/README.rst
+.. mdinclude:: ../README.md
 
-modules
 
 Contents
 --------

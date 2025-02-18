@@ -44,8 +44,7 @@ $ cd Spyctral
 $ pip install -e .
 ```
 ## Tutorial
-[📖 Tutorial](https://nbviewer.jupyter.org/github/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
-[📖 Tutorial en GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
+[📖 Enlace al tutorial en GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
 
 
 ## Future upgrades 

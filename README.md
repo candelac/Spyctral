@@ -1,3 +1,6 @@
+# Welcome to **Spyctral**
+![Spyctral Logo](https://raw.githubusercontent.com/candelac/Spyctral/Rama_Jose/docs/_static/Spyctral_B.svg)
+
 # Spyctral: Astronomical spectral data analyser
 
 ![Tests](https://github.com/candelac/Spyctral/actions/workflows/Testing.yml/badge.svg)

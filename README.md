@@ -5,6 +5,7 @@
 # Spyctral: Astronomical spectral data analyser
 
 ![Tests](https://github.com/candelac/Spyctral/actions/workflows/Testing.yml/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/spyctral/badge/?version=latest)](https://spyctral.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)
 

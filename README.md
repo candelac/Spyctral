@@ -45,6 +45,8 @@ $ pip install -e .
 ```
 ## Tutorial
 [📖 Tutorial](https://nbviewer.jupyter.org/github/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
+[📖 Tutorial en GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
+
 
 ## Future upgrades 
 This is the first version of Spyctral code and we hope to add functionality so that the package will support output files from other synthesis codes, the next one to be included is A.S.A.D. 

@@ -1,5 +1,5 @@
 <p align="center">
-![Spyctral Logo](https://raw.githubusercontent.com/candelac/Spyctral/Rama_Jose/docs/_static/Spyctral_B.svg)
+  <img src=![Spyctral Logo](https://raw.githubusercontent.com/candelac/Spyctral/Rama_Jose/docs/_static/Spyctral_B.svg)>
 </p>
 
 # Spyctral: Astronomical spectral data analyser

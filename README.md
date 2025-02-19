@@ -1,7 +1,7 @@
 # Spyctral: Astronomical spectral data analyser
 
 <p align="center">
-  <img src="docs/_static/Spyctral_logo.svg" alt="Spyctral Logo" width="600">
+  <img src="https://raw.githubusercontent.com/candelac/Spyctral/main/docs/_static/Spyctral_logo.svg" alt="Spyctral Logo" width="600">
 </p>
 
 

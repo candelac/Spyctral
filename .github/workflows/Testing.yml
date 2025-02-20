@@ -28,12 +28,25 @@ jobs:
           - tox_env: coverage
             pandoc: true
 
-    # The operative sistem
+     # The operative sistem
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
 
     # the steps of the CI
     steps:
       - uses: actions/checkout@master
+
+      # optionals
+      - name: Install pandoc
+        if: ${{ matrix.pandoc }}
+        run: sudo apt-get install pandoc
+
+      - name: Determine Python version
+        id: pyversion
+        if: ${{ startsWith( matrix.tox_env, 'py3' ) }}
+        uses: bluwy/substitute-string-action@v1
+        with:
+          _input-text: ${{ matrix.tox_env }}
+          py3: "3."
 
       # tox steps
       - name: Set up Python ${{ steps.pyversion.outputs.result || env.default-python }}

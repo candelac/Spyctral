@@ -17,7 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        tox_env: [py310]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        tox_env: [py39, py310, py311, py312, py313]
         include:
           - tox_env: style
           - tox_env: docstyle
@@ -36,10 +37,10 @@ jobs:
       - uses: actions/checkout@master
 
       # tox steps
-      - name: Set up Python ${{ steps.pyversion.outputs.result || env.default-python }}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ steps.pyversion.outputs.result || env.default-python }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install tox
         run: pip install tox

@@ -224,19 +224,27 @@ def _proces_tables(block_lines):
         for i, row in enumerate(blocks[ibl]):
             converted_row = []
             for item in row:
-                if _is_float(item):  # Convert if the numbers are floats.
-                    converted_item = float(item)
-                    converted_row.append(converted_item)
-                else:
-                    converted_row.append(item)  # If it cannot be converted,
-                    # keep the original value.
+                try:
+                    # Convert if the numbers are floats.
+                    if _is_float(item): 
+                        converted_item = float(item)
+
+                except ValueError:
+                     # If it cannot be converted,
+                     # keep the original value.
+                    raise ValueError(
+                        f"Element at position ({i})"
+                        " in 'synthetic_spectrum' table cannot "
+                        "  be converted to a number."
+                    )
+                converted_row.append(converted_item)
             blocks[ibl][i] = converted_row
 
     # Create the 'synthetic_spectrum' table with dimensional units.
     synthetic_spectrum_table = QTable(
         rows=blocks[4], names=["l_obs", "f_obs", "f_syn", "weights"]
     )
-
+    
     # Change: Add units to the 'l_obs' column.
     synthetic_spectrum_table["l_obs"].unit = u.AA
 

@@ -1,8 +1,7 @@
 # Spyctral: Astronomical spectral data analyser
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/candelac/Spyctral/main/docs/_static/Spyctral_logo.svg" alt="Spyctral Logo" width="600">
-</p>
+![logo](https://raw.githubusercontent.com/candelac/Spyctral/master/docs/_static/Spyctral_logo.svg)
+
 
 
 ![Tests](https://github.com/candelac/Spyctral/actions/workflows/Testing.yml/badge.svg)
@@ -32,7 +31,7 @@ The Spyctral code receives files (text files with all the spectroscopic info) re
 Spyctral needs a minimum of one text file and you need to know the source code of the file to be analysed to use the library correctly. 
 
 ## Requeriments
-You will need Python 3.8 or higher to run Sypctral.
+You will need Python 3.9 or higher to run Sypctral.
 
 ## Basic install
 You could find Spyctral at PyPI. The standar instalation via pip:

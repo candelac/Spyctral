@@ -1,9 +1,9 @@
-Insatallation
+Installation
 =============
 Requeriments
 ------------
 
-You will need Python 3.8 or higher to run Sypctral.
+You will need Python 3.9 or higher to run Sypctral.
 
 Basic install
 -------------

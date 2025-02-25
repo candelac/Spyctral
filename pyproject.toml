@@ -7,7 +7,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Spyctral"
+name = "spyctral-tools"
 version = "0.0.1rc0"
 authors = [{name = "Tapia Reina et al.", email = "martina.tapia@mi.unc.edu.ar"}]
 license = {text = "The MIT License"}

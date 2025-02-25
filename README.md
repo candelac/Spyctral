@@ -36,7 +36,7 @@ You will need Python 3.9 or higher to run Sypctral.
 ## Basic install
 You could find Spyctral at PyPI. The standar instalation via pip:
 ``` bash
-$ pip install spyctral
+$ pip install spyctral-tools
 ```
 ## Development install
 Clone this repo and then inside the local directory execute
@@ -48,7 +48,7 @@ $ pip install -e .
 ## Tutorial
 The following link leads to Spyctral's tutorial, which shows step by step how to get started and the main available options.
 
-[📖 Link to the tutorial on GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial_new.ipynb)
+[📖 Link to the tutorial on GitHub](https://github.com/candelac/Spyctral/blob/main/docs/notebook/Tutorial.ipynb)
 
 
 ## Future upgrades 

@@ -1,7 +1,5 @@
 spyctral
 ========
 
-.. toctree::
-   :maxdepth: 4
-
-   spyctral
+.. automodule:: spyctral
+   :members:

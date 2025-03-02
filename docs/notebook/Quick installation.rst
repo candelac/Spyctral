@@ -12,7 +12,7 @@ You could find Spyctral at PyPI. The standar instalation via pip:
 
 .. code-block:: bash
 
-   $ pip install spyctral
+   $ pip install spyctral-tools
 
 Development install
 -------------------
